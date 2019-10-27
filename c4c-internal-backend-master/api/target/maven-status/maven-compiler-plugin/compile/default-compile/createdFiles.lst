@@ -1,5 +1,0 @@
-com\codeforcommunity\ApiMain.class
-com\codeforcommunity\rest\ApiRouter.class
-com\codeforcommunity\dto\MemberReturn.class
-com\codeforcommunity\api\IProcessor.class
-com\codeforcommunity\JacksonMapper.class

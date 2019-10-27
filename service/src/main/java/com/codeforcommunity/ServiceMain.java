@@ -34,8 +34,8 @@ public class ServiceMain {
     }
 
     //TODO: These arguments should be read out of a properties file
-    DSLContext db = DSL.using("jdbc:postgresql://localhost:5432/checkin",
-        "root", "apple");
+    DSLContext db = DSL.using("jdbc:postgresql://localhost:5434/checkin",
+        "postgres", "root");
     this.db = db;
   }
 
@@ -54,6 +54,7 @@ public class ServiceMain {
    */
   private void startApiServer(ApiRouter router) {
     ApiMain apiMain = new ApiMain(router);
+    apiMain.startHTTP();
     apiMain.startApi();
   }
 }

@@ -14,9 +14,9 @@
   <properties>
     <flyway.version>6.0.3</flyway.version>
     <database.driver>org.postgresql.Driver</database.driver>
-    <database.url>jdbc:postgresql://localhost:5432/checkin?autoreconnect=true</database.url>
-    <database.username>liam</database.username>
-    <database.password>apple</database.password>
+    <database.url>jdbc:postgresql://localhost:5434/c4c?autoreconnect=true</database.url>
+    <database.username>postgres</database.username>
+    <database.password>root</database.password>
   </properties>
 
   <build>
@@ -104,9 +104,9 @@
           <user>${database.username}</user>
           <password>${database.password}</password>
 
-          <schemas>
+       <!--   <schemas>
             <schema>scaffold</schema>
-          </schemas>
+          </schemas> -->
           <encoding>ISO-8859-1</encoding>
           <cleanOnValidationError>true</cleanOnValidationError>
         </configuration>

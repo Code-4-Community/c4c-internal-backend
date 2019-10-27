@@ -3,7 +3,11 @@ package com.codeforcommunity;
 import com.codeforcommunity.rest.ApiRouter;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
+
+import io.vertx.core.net.NetServerOptions;
 
 /**
  * The main point for the API.
@@ -20,10 +24,37 @@ public class ApiMain {
    */
   public void startApi() {
     Vertx vertx = Vertx.vertx();
-    HttpServer server = vertx.createHttpServer();
+    HttpServerOptions options = new HttpServerOptions()
+        .addEnabledSecureTransportProtocol("TLSv1.2")
+        .setSsl(true)
+        .setKeyStoreOptions(new JksOptions()
+            .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
+            .setPassword("password"));
+    HttpServer server = vertx.createHttpServer(options);
 
     Router router = apiRouter.initializeRouter(vertx);
 
-    server.requestHandler(router).listen(8081);
+    server.requestHandler(router).listen(8443);
+  }
+
+  public void startHTTP() {
+    Vertx vertx = Vertx.vertx();
+    HttpServer server =
+        vertx.createHttpServer(new HttpServerOptions().setSsl(true).setKeyStoreOptions(
+          new JksOptions().setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
+          .setPassword("password")
+        ));
+    Router router = Router.router(vertx);
+
+
+    //Start
+    server
+        .requestHandler(r -> {
+          r.response()
+              .setStatusCode(301)
+              .putHeader("Location", r.absoluteURI().replace("http", "https").replace("8090", "8443"))
+              .end();
+        }).listen(8090);
+    
   }
 }
