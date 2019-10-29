@@ -6,3 +6,13 @@
 pom.properties
 *.html
 *.jar
+.project
+.settings
+persist/.settings
+persist/.project
+persist/.classpath
+persist/.gitignore
+api/.settings
+api/.project
+api/.classpath
+api/.gitignore
