@@ -56,11 +56,6 @@ public class ApiRouter {
     Route getMemberRoute = router.route().path("/api/v1/members");
     getMemberRoute.handler(this::handleGetMemberRoute);
 
-    // Routes to a protected /protected/ that acts as a gateway to protected API
-    // calls by checking if there is a valid session
-    Route protectedRoute = router.route("/protected");
-    protectedRoute.handler(this::handleProtected);
-
     Route createMeetingRoute = router.route("/protected/createmeeting");
     createMeetingRoute.handler(this::handleCreateMeeting);
 
@@ -192,17 +187,18 @@ public class ApiRouter {
     }
   }
 
-  private void handleProtected(RoutingContext ctx) {
+  private void checkAuthentication(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
 
-    if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
-      ctx.next();
-    } else {
+    if (ctx.session().isEmpty() || !ctx.session().get("auth").equals(1)) {
       response.putHeader("location", "/").setStatusCode(403).end();
+      return;
     }
   }
 
   private void handleCreateMeeting(RoutingContext ctx) {
+    checkAuthentication(ctx);
+
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     String id = "";
@@ -229,6 +225,8 @@ public class ApiRouter {
   }
 
   private void handleAttendMeeting(RoutingContext ctx) {
+    checkAuthentication(ctx);
+
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     String meetingid = "";
