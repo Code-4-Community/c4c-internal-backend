@@ -17,6 +17,10 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 import io.vertx.ext.web.sstore.LocalSessionStore;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import java.util.List;
 
 public class ApiRouter {
@@ -203,18 +207,20 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     String id = "";
     String name = "";
-    String date = "";
+    LocalDateTime date = null;
     Boolean open = null;
+    // for now, the input date is to the minute
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     if (request.query() != null && !(request.query().isEmpty())) {
       MultiMap params = request.params();
       id = params.get("id");
       name = params.get("name");
-      date = params.get("date");
+      date = LocalDateTime.parse(params.get("date"), formatter);
       open = Boolean.parseBoolean(params.get("open"));
     }
     boolean success = false;
-    if (!id.equals("") && !name.equals("") && !date.equals("") && !open.equals(null))
+    if (!id.equals("") && !name.equals("") && !date.equals(null) && !open.equals(null))
       success = processor.createMeeting(id, name, date, open);
 
     if (success)

@@ -3,6 +3,7 @@ package com.codeforcommunity.api;
 import com.codeforcommunity.dto.MemberReturn;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 public interface IProcessor {
   /**
@@ -11,7 +12,7 @@ public interface IProcessor {
   List<MemberReturn> getAllMembers();
 
   boolean attendMeeting(String meetingid, String username);
-  boolean createMeeting(String id, String name, String date, boolean open);
+  boolean createMeeting(String id, String name, LocalDateTime date, boolean open);
   boolean addMember(String first, String last);
   boolean validate(String first, String last);
 }
