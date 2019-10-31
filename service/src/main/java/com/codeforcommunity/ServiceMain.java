@@ -26,16 +26,15 @@ public class ServiceMain {
    * Connect to the database and create a DSLContext so jOOQ can interact with it.
    */
   private void connectDb() {
-    //This block ensures that the MySQL driver is loaded in the classpath
+    // This block ensures that the MySQL driver is loaded in the classpath
     try {
       Class.forName("org.postgresql.Driver");
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
 
-    //TODO: These arguments should be read out of a properties file
-    DSLContext db = DSL.using("jdbc:postgresql://localhost:5434/checkin",
-        "postgres", "root");
+    // TODO: These arguments should be read out of a properties file
+    DSLContext db = DSL.using("jdbc:postgresql://localhost:5432/checkin", "postgres", "root");
     this.db = db;
   }
 
