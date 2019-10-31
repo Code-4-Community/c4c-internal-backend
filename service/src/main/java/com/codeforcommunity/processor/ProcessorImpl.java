@@ -31,7 +31,7 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean attendMeeting(String meetingid, String username) {
-    Result meetingResult = db.fetch("select date from meeting where id=?;", meetingid);
+    Result meetingResult = db.fetch("select * from meeting where id=?;", meetingid);
     // for now assume username is just the first name
     Result memberResult = db.fetch("select id from member where first_name=?;", username);
 
@@ -39,12 +39,13 @@ public class ProcessorImpl implements IProcessor {
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
     LocalDateTime date = LocalDateTime.parse(meetingResult.getValue(0, "date").toString(), formatter);
+    boolean open = Boolean.parseBoolean(meetingResult.getValue(0, "open").toString());
 
     System.out.println("conversion completed... comparison begins" + LocalDateTime.now() + date);
 
     System.out.println(LocalDateTime.now().compareTo(date));
 
-    if (meetingResult.isEmpty() || memberResult.isEmpty() || LocalDateTime.now().compareTo(date) >= 0)
+    if (meetingResult.isEmpty() || memberResult.isEmpty() || !open || LocalDateTime.now().compareTo(date) >= 0)
       return false;
 
     System.out.println("comparison completed");
