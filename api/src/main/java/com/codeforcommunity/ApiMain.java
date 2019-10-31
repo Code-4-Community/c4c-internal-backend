@@ -33,8 +33,6 @@ public class ApiMain {
     Router router = apiRouter.initializeRouter(vertx);
 
     server.requestHandler(router).listen(8443);
-
-    System.out.println("running api");
   }
 
   public void startHTTP() {
@@ -50,8 +48,5 @@ public class ApiMain {
       r.response().setStatusCode(301)
           .putHeader("Location", r.absoluteURI().replace("http", "https").replace("8090", "8443")).end();
     }).listen(8090);
-
-    System.out.println("running http");
-
   }
 }

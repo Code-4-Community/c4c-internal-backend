@@ -35,24 +35,15 @@ public class ProcessorImpl implements IProcessor {
     // for now assume username is just the first name
     Result memberResult = db.fetch("select id from member where first_name=?;", username);
 
-    System.out.println("conversion begins");
-
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
     LocalDateTime date = LocalDateTime.parse(meetingResult.getValue(0, "date").toString(), formatter);
     boolean open = Boolean.parseBoolean(meetingResult.getValue(0, "open").toString());
 
-    System.out.println("conversion completed... comparison begins" + LocalDateTime.now() + date);
-
-    System.out.println(LocalDateTime.now().compareTo(date));
-
     if (meetingResult.isEmpty() || memberResult.isEmpty() || !open || LocalDateTime.now().compareTo(date) >= 0)
       return false;
 
-    System.out.println("comparison completed");
-
     try {
       String memberid = memberResult.getValue(0, "id").toString();
-      System.out.println(memberid);
       db.execute("insert into member_attended_meeting\n" + "  (id, member_id, meeting_id)\n" + "  values (?, ?, ?);",
           (memberid + meetingid).hashCode(), memberid, meetingid);
 
@@ -65,14 +56,9 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean createMeeting(String meetingid, String name, LocalDateTime date, boolean open) {
     try {
-      System.out.println(meetingid);
-      System.out.println(name);
-      System.out.println(date);
-      System.out.println(open);
       db.execute("insert into meeting\n" + "  (id, name, date, open)\n" + "  values (?, ?, ?, ?);", meetingid, name,
           date, open);
     } catch (Exception e) {
-      System.out.println(e);
       return false;
     }
     return true;

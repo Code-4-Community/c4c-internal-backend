@@ -100,8 +100,6 @@ public class ApiRouter {
 
     response.putHeader("content-type", "application/json");
     response.end("<h1>go to /login with query string</h1>");
-
-    System.out.println("handleHome called");
   }
 
   private void handleLogin(RoutingContext ctx) {
