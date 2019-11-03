@@ -12,4 +12,5 @@ public interface IProcessor {
 
   boolean addMember(String first, String last);
   boolean validate(String first, String last);
+  boolean attendedMeeting(String username);
 }
