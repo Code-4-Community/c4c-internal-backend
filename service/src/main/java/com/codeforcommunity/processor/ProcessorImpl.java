@@ -79,13 +79,28 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean validate(String first, String last) {
-    Result result = db.fetch(
-        "select first_name, last_name\n" + "   from member\n" + "   where first_name = ? and last_name = ?;", first,
-        last);
 
+  public boolean validate(String first, String last){
+    Result result = db.fetch("select first_name, last_name\n"
+        + "   from member\n"
+        + "   where first_name = ? and last_name = ?;", first, last);
     if (result.isEmpty())
       return false;
+    return true;
+  }
+  
+  public boolean attendedMeeting(String username /*,String meeting*/) { //will need to use meeting
+    try {
+    Result result = db.fetch("select id from member\n where first_name = '" + username + "'");
+    String memberid = (String) result.getValue(0, 0);    
+    Result result1 = db.fetch("select id from meeting"); // figure out which meeting
+    String meetingid = (String) result.getValue(0, 0);     
+    db.execute("insert into member_attended_meeting values "
+        + "('1'," + memberid + "," + meetingid + ");");
+    } catch(Exception e) {
+      e.printStackTrace();
+    return false;
+    }
     return true;
   }
 }
