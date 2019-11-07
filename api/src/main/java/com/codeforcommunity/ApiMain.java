@@ -24,11 +24,9 @@ public class ApiMain {
    */
   public void startApi() {
     Vertx vertx = Vertx.vertx();
-    HttpServerOptions options = new HttpServerOptions()
-        .addEnabledSecureTransportProtocol("TLSv1.2")
-        .setSsl(true)
-        .setKeyStoreOptions(new JksOptions()
-            .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
+    HttpServerOptions options = new HttpServerOptions().addEnabledSecureTransportProtocol("TLSv1.2").setSsl(true)
+        .setKeyStoreOptions(new JksOptions().setPath(
+            "C:\\Users\\forry\\Documents\\Computer_Science\\C4C\\c4c-internal-backend\\api\\src\\main\\resources\\keystore.jks")
             .setPassword("password"));
     HttpServer server = vertx.createHttpServer(options);
 
@@ -39,22 +37,16 @@ public class ApiMain {
 
   public void startHTTP() {
     Vertx vertx = Vertx.vertx();
-    HttpServer server =
-        vertx.createHttpServer(new HttpServerOptions().setSsl(true).setKeyStoreOptions(
-          new JksOptions().setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
-          .setPassword("password")
-        ));
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setSsl(true)
+        .setKeyStoreOptions(new JksOptions().setPath(
+            "C:\\Users\\forry\\Documents\\Computer_Science\\C4C\\c4c-internal-backend\\service\\src\\main\\resources\\keystore.jks")
+            .setPassword("password")));
     Router router = Router.router(vertx);
 
-
-    //Start
-    server
-        .requestHandler(r -> {
-          r.response()
-              .setStatusCode(301)
-              .putHeader("Location", r.absoluteURI().replace("http", "https").replace("8090", "8443"))
-              .end();
-        }).listen(8090);
-    
+    // Start
+    server.requestHandler(r -> {
+      r.response().setStatusCode(301)
+          .putHeader("Location", r.absoluteURI().replace("http", "https").replace("8090", "8443")).end();
+    }).listen(8090);
   }
 }
