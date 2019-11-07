@@ -17,6 +17,10 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 import io.vertx.ext.web.sstore.LocalSessionStore;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import java.util.List;
 
 public class ApiRouter {
@@ -56,6 +60,12 @@ public class ApiRouter {
     Route getMemberRoute = router.route().path("/api/v1/members");
     getMemberRoute.handler(this::handleGetMemberRoute);
 
+    Route createMeetingRoute = router.route("/protected/createmeeting");
+    createMeetingRoute.handler(this::handleCreateMeeting);
+
+    Route attendMeetingRoute = router.route("/protected/attendmeeting");
+    attendMeetingRoute.handler(this::handleAttendMeeting);
+
     return router;
   }
 
@@ -80,7 +90,7 @@ public class ApiRouter {
   /**
    * login handler
    */
-  private void handleHome(RoutingContext ctx){
+  private void handleHome(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     Session session = ctx.session();
     if (session.isEmpty()) {
@@ -92,14 +102,13 @@ public class ApiRouter {
     response.end("<h1>go to /login with query string</h1>");
   }
 
-  private void handleLogin(RoutingContext ctx){
+  private void handleLogin(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     Session session = ctx.session();
     if (session.isEmpty()) {
       session.put("count", 0);
       session.put("auth", 0);
-    }
-    else if (session.get("auth").equals(1)) {
+    } else if (session.get("auth").equals(1)) {
       response.putHeader("location", "/").setStatusCode(302).end();
       return;
     }
@@ -113,27 +122,26 @@ public class ApiRouter {
     }
     if (processor.validate(username, password)) {
       ctx.session().put("auth", 1);
+      ctx.session().put("username", username);
       response.putHeader("location", "/after").setStatusCode(302).end();
-    }
-    else {
+    } else {
       response.putHeader("content-type", "text/html");
       response.end("try again without " + username + " and " + password);
     }
   }
 
-  private void handleAfter(RoutingContext ctx){
+  private void handleAfter(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
       response.putHeader("content-type", "text/html");
       response.end("<h1>logged in</h1>");
-    }
-    else {
+    } else {
       response.putHeader("content-type", "text/html");
       response.end("<h1>You need to log in to access this page</h1>");
     }
   }
 
-  private void handleSignUp(RoutingContext ctx){
+  private void handleSignUp(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     String username = "";
@@ -150,7 +158,7 @@ public class ApiRouter {
 
     if (success)
       response.putHeader("location", "/login").setStatusCode(302).end();
-    else{
+    else {
       response.putHeader("content-type", "text/html");
       response.end("<h1>failed adding user, try again bitch</h1>");
     }
@@ -165,8 +173,7 @@ public class ApiRouter {
       ctx.session().put("count", count);
       response.putHeader("content-type", "text/html");
       response.end("<h1>Session Count: " + ctx.session().get("count") + "</h1>");
-    }
-    else {
+    } else {
       response.putHeader("content-type", "text/html").end("<h1>Log In First</h1>");
     }
   }
@@ -177,10 +184,70 @@ public class ApiRouter {
     if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
       ctx.session().destroy();
       ctx.reroute(ctx.request().path());
-    }
-    else {
+    } else {
       response.putHeader("content-type", "text/html").end("<h1>Not Logged In</h1>");
     }
   }
 
+  private void checkAuthentication(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+
+    if (ctx.session().isEmpty() || !ctx.session().get("auth").equals(1)) {
+      response.putHeader("location", "/").setStatusCode(403).end();
+      return;
+    }
+  }
+
+  private void handleCreateMeeting(RoutingContext ctx) {
+    checkAuthentication(ctx);
+
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String id = "";
+    String name = "";
+    LocalDateTime date = null;
+    Boolean open = null;
+    // for now, the input date is to the minute
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    if (request.query() != null && !(request.query().isEmpty())) {
+      MultiMap params = request.params();
+      id = params.get("id");
+      name = params.get("name");
+      date = LocalDateTime.parse(params.get("date"), formatter);
+      open = Boolean.parseBoolean(params.get("open"));
+    }
+    boolean success = false;
+    if (!id.equals("") && !name.equals("") && !date.equals(null) && !open.equals(null))
+      success = processor.createMeeting(id, name, date, open);
+
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleAttendMeeting(RoutingContext ctx) {
+    checkAuthentication(ctx);
+
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String meetingid = "";
+    String username = ctx.session().get("username");
+
+    if (request.query() != null && !(request.query().isEmpty())) {
+      MultiMap params = request.params();
+      meetingid = params.get("id");
+    }
+    boolean success = false;
+    if (!meetingid.equals("") && !username.equals(""))
+      success = processor.attendMeeting(meetingid, username);
+
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+  }
 }
