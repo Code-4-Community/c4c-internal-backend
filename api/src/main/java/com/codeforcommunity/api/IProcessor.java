@@ -15,5 +15,7 @@ public interface IProcessor {
   boolean createMeeting(String id, String name, LocalDateTime date, boolean open);
   boolean addMember(String first, String last);
   boolean validate(String first, String last);
-  boolean attendedMeeting(String username);
+  boolean isBlacklistedToken(String jwt);
+  boolean addBlacklistedToken(String jwt);
+  boolean clearBlacklistedTokens(long tokenDuration);
 }

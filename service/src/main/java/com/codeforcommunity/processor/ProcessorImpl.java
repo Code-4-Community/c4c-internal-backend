@@ -10,6 +10,7 @@ import org.jooq.generated.Tables;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.io.Console;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -79,28 +80,61 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-
-  public boolean validate(String first, String last){
-    Result result = db.fetch("select first_name, last_name\n"
-        + "   from member\n"
-        + "   where first_name = ? and last_name = ?;", first, last);
+  public boolean validate(String first, String last) {
+    Result result = db.fetch(
+        "select first_name, last_name\n" + "   from member\n" + "   where first_name = ? and last_name = ?;", first,
+        last);
     if (result.isEmpty())
       return false;
     return true;
   }
-  
-  public boolean attendedMeeting(String username /*,String meeting*/) { //will need to use meeting
+
+  @Override
+  public boolean isBlacklistedToken(String jwt) {
+    System.out.println("query db for blacklisted token for id = " + jwt);
+
+    Result result = db.fetch("select * \n" + "   from blacklisted_token\n" + "   where id = ?;", jwt);
+    if (result.isEmpty())
+      return false;
+    return true;
+  }
+
+  @Override
+  public boolean addBlacklistedToken(String jwt) {
+    System.out.println(jwt);
+    System.out.println(System.currentTimeMillis());
     try {
-    Result result = db.fetch("select id from member\n where first_name = '" + username + "'");
-    String memberid = (String) result.getValue(0, 0);    
-    Result result1 = db.fetch("select id from meeting"); // figure out which meeting
-    String meetingid = (String) result.getValue(0, 0);     
-    db.execute("insert into member_attended_meeting values "
-        + "('1'," + memberid + "," + meetingid + ");");
-    } catch(Exception e) {
-      e.printStackTrace();
-    return false;
+      db.execute(
+          "insert into blacklisted_token\n" + "  (id, time_milliseconds)\n"
+              + "  values (?, ?);",
+          jwt, System.currentTimeMillis());
+    } catch (Exception e) {
+      // If this fails this is a security risk as there exists a token that is still technically "valid" even though the user logged out
+      System.out.println(e);
+      return false;
     }
     return true;
   }
+  
+  @Override
+  public boolean clearBlacklistedTokens(long tokenDuration) {
+    try {
+      db.execute("delete from blacklisted_token\n" + " where time_millisecond < ?;", System.currentTimeMillis() - tokenDuration);
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  /*
+   * public boolean attendedMeeting(String username ) { // will need to use
+   * meeting try { Result result =
+   * db.fetch("select id from member\n where first_name = '" + username + "'");
+   * String memberid = (String) result.getValue(0, 0); Result result1 =
+   * db.fetch("select id from meeting"); // figure out which meeting String
+   * meetingid = (String) result1.getValue(0, 0);
+   * db.execute("insert into member_attended_meeting values " + "('1'," + memberid
+   * + "," + meetingid + ");"); } catch (Exception e) { e.printStackTrace();
+   * return false; } return true; }
+   */
 }

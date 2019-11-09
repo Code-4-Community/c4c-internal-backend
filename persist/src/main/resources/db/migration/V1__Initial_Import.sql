@@ -23,3 +23,8 @@ CREATE TABLE IF NOT EXISTS member_attended_meeting (
   CONSTRAINT fk_attended_member FOREIGN KEY (member_id) REFERENCES member (id),
   CONSTRAINT fk_attended_meeting FOREIGN KEY (meeting_id) REFERENCES meeting (id)
 );
+
+CREATE TABLE IF NOT EXISTS blacklisted_token (
+  id VARCHAR(256) NOT NULL PRIMARY KEY,
+  time_milliseconds BIGINT
+);
