@@ -68,7 +68,6 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean addMember(String first, String last) {
-    System.out.println("adding member");
     try {
       db.execute(
           "insert into member\n" + "  (id, email, first_name, last_name, graduation_year, major, privilege_level)\n"
