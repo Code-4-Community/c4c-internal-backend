@@ -91,8 +91,6 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean isBlacklistedToken(String jwt) {
-    System.out.println("query db for blacklisted token for id = " + jwt);
-
     Result result = db.fetch("select * \n" + "   from blacklisted_token\n" + "   where id = ?;", jwt);
     if (result.isEmpty())
       return false;
@@ -101,25 +99,22 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean addBlacklistedToken(String jwt) {
-    System.out.println(jwt);
-    System.out.println(System.currentTimeMillis());
     try {
-      db.execute(
-          "insert into blacklisted_token\n" + "  (id, time_milliseconds)\n"
-              + "  values (?, ?);",
-          jwt, System.currentTimeMillis());
+      db.execute("insert into blacklisted_token\n" + "  (id, time_milliseconds)\n" + "  values (?, ?);", jwt,
+          System.currentTimeMillis());
     } catch (Exception e) {
-      // If this fails this is a security risk as there exists a token that is still technically "valid" even though the user logged out
-      System.out.println(e);
+      // If this fails this is a security risk as there exists a token that is still
+      // technically "valid" even though the user logged out
       return false;
     }
     return true;
   }
-  
+
   @Override
   public boolean clearBlacklistedTokens(long tokenDuration) {
     try {
-      db.execute("delete from blacklisted_token\n" + " where time_millisecond < ?;", System.currentTimeMillis() - tokenDuration);
+      db.execute("delete from blacklisted_token\n" + " where time_millisecond < ?;",
+          System.currentTimeMillis() - tokenDuration);
     } catch (Exception e) {
       return false;
     }

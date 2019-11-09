@@ -66,7 +66,6 @@ public class ApiRouter {
 
     Router router = Router.router(vertx);
     v = vertx;
-    try {
       router.route().handler(CookieHandler.create());
       router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
@@ -100,10 +99,7 @@ public class ApiRouter {
 
       Route attendMeetingRoute = router.route("/protected/attendmeeting");
       attendMeetingRoute.handler(this::handleAttendMeeting);
-    } catch (Exception e) {
-      System.out.println(e);
-
-    }
+    
     return router;
   }
 
@@ -131,7 +127,6 @@ public class ApiRouter {
   private void handleHome(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
 
-    System.out.print(getClaims(ctx.request()));
 
     response.putHeader("content-type", "application/json");
     response.end("<h1>go to /login with query string</h1>");
@@ -142,10 +137,8 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
 
     if (isAuthorizedUser(request)) {
-      System.out.println("authorized -> redirect");
       response.putHeader("location", "/").setStatusCode(302).end();
     }
-    System.out.println("not authorized");
     String username = "";
     String password = "";
 
@@ -154,10 +147,7 @@ public class ApiRouter {
       password = request.getParam("password");
     }
 
-    System.out.println("validating username and password");
     if (processor.validate(username, password)) {
-      // ctx.session().put("auth", 1);
-
       // users should not automatically attend a meeting when they login, they need to
       // call a seperate endpoint for that
       // processor.attendedMeeting(username);
@@ -178,20 +168,12 @@ public class ApiRouter {
       // Authorization: Bearer <token>
 
       // how long does this token last?
-      System.out.println("creating JWT");
 
       String token = createJWT("login", username, "subject", TOKEN_DURATION);
-
-      System.out.println("Created JWT");
-
-      response.putHeader("Authorization", "Bearer " + token);
-
-      System.out.println("put header");
-
-      System.out.println("send response");
-      response.putHeader("context-type", "text/json").setStatusCode(200).end();
-
       // JWT given back in header
+      response.putHeader("Authorization", "Bearer " + token);
+      response.putHeader("context-type", "text/json").setStatusCode(200).end();
+      
     } else {
       response.putHeader("content-type", "text/json").setStatusCode(400).end();
 
@@ -203,8 +185,6 @@ public class ApiRouter {
    * returns a JWT private void handleAfter(RoutingContext ctx) {
    * HttpServerRequest request = ctx.request(); HttpServerResponse response =
    * ctx.response();
-   * 
-   * System.out.println(request.headers());
    * 
    * if (isAuthorizedUser(request)) { response.putHeader("content-type",
    * "text/html"); response.end("<h1>logged in</h1>"); } else {
@@ -249,17 +229,12 @@ public class ApiRouter {
   private void handleLogout(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
-    System.out.println("logout attempt");
     if (isAuthorizedUser(request)) {
-
-      System.out.println("logout authorized");
+      //onLogout clear expired tokens to periodically "trim" the blacklsited tokens (should probably instead daily)
       boolean cleared = processor.clearBlacklistedTokens(TOKEN_DURATION);
       boolean success = processor.addBlacklistedToken(request.headers().get("Authorization"));
-      if (cleared)
-        System.out.println("cleared expired tokens from blacklist");
 
       if (success) {
-        System.out.println("added token to blacklist");
         ctx.reroute(ctx.request().path());
       } else {
         response.setStatusCode(500).end();
@@ -272,7 +247,6 @@ public class ApiRouter {
 
   private void handleCreateMeeting(RoutingContext ctx) {
     checkAuthentication(ctx);
-    System.out.println("passed authentication");
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     String id = "";
@@ -309,7 +283,7 @@ public class ApiRouter {
     String username = "";
 
     try {
-      username = response.headers().get("Authorization");
+      username = getClaims(request).getIssuer();
     } catch (Exception e) {
       username = "";
     }
@@ -324,9 +298,9 @@ public class ApiRouter {
     if (!meetingid.equals("") && !username.equals(""))
       success = processor.attendMeeting(meetingid, username);
 
-    if (success)
+    if (success) {
       response.setStatusCode(201).end();
-    else {
+    } else {
       response.setStatusCode(400).end();
     }
   }
@@ -359,54 +333,39 @@ public class ApiRouter {
   private void checkAuthentication(RoutingContext ctx) {
     HttpServerRequest request = ctx.request();
     HttpServerResponse response = ctx.response();
-    System.out.println("Got to checkAuthentication");
     if (!isAuthorizedUser(request)) {
       response.putHeader("location", "/").setStatusCode(403).end();
       return;
     }
-    System.out.println("Passed checkAuthentication");
   }
 
   public boolean isAuthorizedUser(HttpServerRequest request) {
-    System.out.println("authorizing user");
     try {
       return getClaims(request) != null;
     } catch (Exception e) {
-      System.out.println(e);
       return false;
     }
   }
 
   public Claims getClaims(HttpServerRequest request) {
-    System.out.println("get jwt from headers");
     String jwt = request.headers().get("Authorization");
-    System.out.println("got jwt from headers");
-
-    System.out.println("checking if null");
     boolean isNullOrEmpty = jwt == null || jwt.isEmpty();
-    System.out.println("check if blacklisted");
     boolean isBlacklisted = isBlacklistedToken(jwt);
     if (isNullOrEmpty || isBlacklisted)
       return null;
-    System.out.println("decoding jwt");
-
-    System.out.println(jwt.split(" ")[1]);
+  
     Claims c = decodeJWT(jwt.split(" ")[1]);
-    System.out.println(c);
     return c;
   }
 
   public boolean isBlacklistedToken(String jwt) {
-    System.out.println("checking if blacklisted");
     return processor.isBlacklistedToken(jwt);
   }
 
   public Claims decodeJWT(String jwt) {
     try {
-      System.out.println("parsing jwt");
       return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(JWT_KEY)).parseClaimsJws(jwt).getBody();
     } catch (Exception e) {
-      System.out.println(e);
       return null;
     }
   }
