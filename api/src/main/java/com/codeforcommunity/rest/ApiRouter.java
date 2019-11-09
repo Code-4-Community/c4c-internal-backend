@@ -149,10 +149,9 @@ public class ApiRouter {
       success = processor.addMember(username, password);
 
     if (success)
-      response.putHeader("location", "/login").setStatusCode(302).end();
+      response.setStatusCode(201).end();
     else {
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>failed adding user, try again</h1>");
+      response.setStatusCode(400).end();
     }
   }
 
@@ -213,13 +212,15 @@ public class ApiRouter {
       boolean success = processor.addBlacklistedToken(request.headers().get("Authorization"));
 
       if (success) {
-        ctx.reroute(ctx.request().path());
+        // ctx.reroute(ctx.request().path());
+        response.setStatusCode(201).end();
       } else {
+        // what do we do when logout fails? (secuirty risk)
         response.setStatusCode(500).end();
       }
-      // what do we do when logout fails?
+
     } else {
-      response.putHeader("content-type", "text/html").end("<h1>Not Logged In</h1>");
+      response.setStatusCode(400).end();
     }
   }
 

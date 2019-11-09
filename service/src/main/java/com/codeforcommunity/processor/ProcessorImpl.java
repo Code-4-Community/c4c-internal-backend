@@ -17,7 +17,8 @@ import java.time.format.DateTimeFormatter;
 public class ProcessorImpl implements IProcessor {
 
   private final DSLContext db;
-  private int id = 10;
+  // id should really not be a static number! see down below for dynamic id, hash of username
+  //private int id = 10;
 
   public ProcessorImpl(DSLContext db) {
     this.db = db;
@@ -67,13 +68,14 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean addMember(String first, String last) {
-
+    System.out.println("adding member");
     try {
       db.execute(
           "insert into member\n" + "  (id, email, first_name, last_name, graduation_year, major, privilege_level)\n"
-              + "  values (?, 'N/A', '" + first + "', '" + last + "', \n" + "          2020, 'CS Probably', 0);",
-          this.id);
+              + "  values (?, 'N/A', ?, ?, \n" + "2020, 'CS Probably', 0);",
+          first.hashCode(), first, last);
     } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
     return true;
