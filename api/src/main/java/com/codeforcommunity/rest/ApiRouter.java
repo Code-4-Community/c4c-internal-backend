@@ -50,6 +50,8 @@ public class ApiRouter {
   private final IProcessor processor;
   private Vertx v;
 
+  // should really be saved as somewhere safer so that the secret isnt just laying
+  // around on github
   private static final String JWT_KEY = "SECRET_KEY";
 
   // token duration is 60 minutes in milliseconds
@@ -66,40 +68,42 @@ public class ApiRouter {
 
     Router router = Router.router(vertx);
     v = vertx;
-      router.route().handler(CookieHandler.create());
-      router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+    router.route().handler(CookieHandler.create());
+    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
-      Route homeRoute = router.route("/");
-      homeRoute.handler(this::handleHome);
+    Route homeRoute = router.route("/");
+    homeRoute.handler(this::handleHome);
 
-      Route loginRoute = router.route("/login");
-      loginRoute.handler(this::handleLogin);
+    Route loginRoute = router.route("/login");
+    loginRoute.handler(this::handleLogin);
 
-      /*
-       * Route afterRoute = router.route("/after");
-       * afterRoute.handler(this::handleAfter);
-       */
+    /*
+     * after route is not needed as the only purpose of login is now to return the
+     * JWT Route afterRoute = router.route("/after");
+     * afterRoute.handler(this::handleAfter);
+     */
 
-      Route signUpRoute = router.route("/signup");
-      signUpRoute.handler(this::handleSignUp);
+    Route signUpRoute = router.route("/signup");
+    signUpRoute.handler(this::handleSignUp);
 
-      Route logoutRoute = router.route("/logout");
-      logoutRoute.handler(this::handleLogout);
+    Route logoutRoute = router.route("/logout");
+    logoutRoute.handler(this::handleLogout);
 
-      /*
-       * Route sessionRoute = router.route("/session");
-       * sessionRoute.handler(this::handleSession);
-       */
+    /*
+     * Session counter is no longer needed as we dont use sessions. Route
+     * sessionRoute = router.route("/session");
+     * sessionRoute.handler(this::handleSession);
+     */
 
-      Route getMemberRoute = router.route().path("/api/v1/members");
-      getMemberRoute.handler(this::handleGetMemberRoute);
+    Route getMemberRoute = router.route().path("/api/v1/members");
+    getMemberRoute.handler(this::handleGetMemberRoute);
 
-      Route createMeetingRoute = router.route("/protected/createmeeting");
-      createMeetingRoute.handler(this::handleCreateMeeting);
+    Route createMeetingRoute = router.route("/protected/createmeeting");
+    createMeetingRoute.handler(this::handleCreateMeeting);
 
-      Route attendMeetingRoute = router.route("/protected/attendmeeting");
-      attendMeetingRoute.handler(this::handleAttendMeeting);
-    
+    Route attendMeetingRoute = router.route("/protected/attendmeeting");
+    attendMeetingRoute.handler(this::handleAttendMeeting);
+
     return router;
   }
 
@@ -117,7 +121,6 @@ public class ApiRouter {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-
     response.end(memberJson);
   }
 
@@ -126,83 +129,10 @@ public class ApiRouter {
    */
   private void handleHome(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
-
-
     response.putHeader("content-type", "application/json");
     response.end("<h1>go to /login with query string</h1>");
   }
 
-  private void handleLogin(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-    HttpServerRequest request = ctx.request();
-
-    if (isAuthorizedUser(request)) {
-      response.putHeader("location", "/").setStatusCode(302).end();
-    }
-    String username = "";
-    String password = "";
-
-    if (request.query() != null && !(request.query().isEmpty())) {
-      username = request.getParam("username");
-      password = request.getParam("password");
-    }
-
-    if (processor.validate(username, password)) {
-      // users should not automatically attend a meeting when they login, they need to
-      // call a seperate endpoint for that
-      // processor.attendedMeeting(username);
-
-      // JWTAuthOptions config = new JWTAuthOptions()
-      // .setKeyStore(new KeyStoreOptions()
-      // .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
-      // .setPassword("password"));
-      //
-      // JWTAuth provider = JWTAuth.create(v, config);
-
-      // on the verify endpoint once you verify the identity of the user by its
-      // username/password
-      // String token = provider.generateToken(new JsonObject().put("User", username),
-      // new JWTOptions());
-      // now for any request to protected resources you should pass this string in the
-      // HTTP header Authorization as:
-      // Authorization: Bearer <token>
-
-      // how long does this token last?
-
-      String token = createJWT("login", username, "subject", TOKEN_DURATION);
-      // JWT given back in header
-      response.putHeader("Authorization", "Bearer " + token);
-      response.putHeader("context-type", "text/json").setStatusCode(200).end();
-      
-    } else {
-      response.putHeader("content-type", "text/json").setStatusCode(400).end();
-
-    }
-  }
-
-  /*
-   * This route is no longer needed as logging in does not redirect, now it just
-   * returns a JWT private void handleAfter(RoutingContext ctx) {
-   * HttpServerRequest request = ctx.request(); HttpServerResponse response =
-   * ctx.response();
-   * 
-   * if (isAuthorizedUser(request)) { response.putHeader("content-type",
-   * "text/html"); response.end("<h1>logged in</h1>"); } else {
-   * response.putHeader("content-type", "text/html");
-   * response.end("<h1>You need to log in to access this page</h1>"); } } .
-   * 
-   * 
-   * 
-   * private void handleSession(RoutingContext ctx) { HttpServerResponse response
-   * = ctx.response();
-   * 
-   * if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) { int
-   * count = ctx.session().get("count"); count++; ctx.session().put("count",
-   * count); response.putHeader("content-type", "text/html");
-   * response.end("<h1>Session Count: " + ctx.session().get("count") + "</h1>"); }
-   * else { response.putHeader("content-type",
-   * "text/html").end("<h1>Log In First</h1>"); } }
-   */
   private void handleSignUp(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
@@ -226,11 +156,59 @@ public class ApiRouter {
     }
   }
 
+  private void handleLogin(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+
+    if (isAuthorizedUser(request)) {
+      response.putHeader("location", "/").setStatusCode(302).end();
+    }
+    String username = "";
+    String password = "";
+
+    if (request.query() != null && !(request.query().isEmpty())) {
+      username = request.getParam("username");
+      password = request.getParam("password");
+    }
+
+    if (processor.validate(username, password)) {
+
+      // JWTAuthOptions config = new JWTAuthOptions()
+      // .setKeyStore(new KeyStoreOptions()
+      // .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
+      // .setPassword("password"));
+      //
+      // JWTAuth provider = JWTAuth.create(v, config);
+
+      // on the verify endpoint once you verify the identity of the user by its
+      // username/password
+      // String token = provider.generateToken(new JsonObject().put("User", username),
+      // new JWTOptions());
+      // now for any request to protected resources you should pass this string in the
+      // HTTP header Authorization as:
+      // Authorization: Bearer <token>
+
+      String token = createJWT("login", username, "subject", TOKEN_DURATION);
+      // JWT given back in header
+      response.putHeader("Authorization", "Bearer " + token);
+      // could respond with the token in body, but for now Authorization is passed
+      // back in header
+      response.setStatusCode(200).end();
+
+    } else {
+      response.putHeader("content-type", "text/json").setStatusCode(400).end();
+
+    }
+  }
+
+  // handling logouts requires that we save state for some JWT, if we need to keep
+  // track of state, why use stateless JWT? Wouldn't sessions be more appropriate?
   private void handleLogout(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     if (isAuthorizedUser(request)) {
-      //onLogout clear expired tokens to periodically "trim" the blacklsited tokens (should probably instead daily)
+      // onLogout clear expired tokens to periodically "trim" the blacklsited tokens
+      // (should probably instead daily)
       boolean cleared = processor.clearBlacklistedTokens(TOKEN_DURATION);
       boolean success = processor.addBlacklistedToken(request.headers().get("Authorization"));
 
@@ -353,7 +331,7 @@ public class ApiRouter {
     boolean isBlacklisted = isBlacklistedToken(jwt);
     if (isNullOrEmpty || isBlacklisted)
       return null;
-  
+
     Claims c = decodeJWT(jwt.split(" ")[1]);
     return c;
   }
@@ -369,5 +347,4 @@ public class ApiRouter {
       return null;
     }
   }
-
 }
