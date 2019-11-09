@@ -225,9 +225,14 @@ public class ApiRouter {
   }
 
   private void handleCreateMeeting(RoutingContext ctx) {
-    checkAuthentication(ctx);
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
+
+    if (!checkAuthentication(ctx)) {
+      response.setStatusCode(403).end();
+      return;
+    }
+
     String id = "";
     String name = "";
     LocalDateTime date = null;
@@ -254,10 +259,14 @@ public class ApiRouter {
   }
 
   private void handleAttendMeeting(RoutingContext ctx) {
-    checkAuthentication(ctx);
-
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
+
+    if (!checkAuthentication(ctx)) {
+      response.setStatusCode(403).end();
+      return;
+    }
+
     String meetingid = "";
     String username = "";
 
@@ -309,13 +318,14 @@ public class ApiRouter {
     return builder.compact();
   }
 
-  private void checkAuthentication(RoutingContext ctx) {
+  private boolean checkAuthentication(RoutingContext ctx) {
     HttpServerRequest request = ctx.request();
     HttpServerResponse response = ctx.response();
     if (!isAuthorizedUser(request)) {
       response.putHeader("location", "/").setStatusCode(403).end();
-      return;
+      return false;
     }
+    return true;
   }
 
   public boolean isAuthorizedUser(HttpServerRequest request) {
