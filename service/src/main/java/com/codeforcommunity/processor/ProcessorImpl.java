@@ -120,16 +120,4 @@ public class ProcessorImpl implements IProcessor {
     }
     return true;
   }
-
-  /*
-   * public boolean attendedMeeting(String username ) { // will need to use
-   * meeting try { Result result =
-   * db.fetch("select id from member\n where first_name = '" + username + "'");
-   * String memberid = (String) result.getValue(0, 0); Result result1 =
-   * db.fetch("select id from meeting"); // figure out which meeting String
-   * meetingid = (String) result1.getValue(0, 0);
-   * db.execute("insert into member_attended_meeting values " + "('1'," + memberid
-   * + "," + meetingid + ");"); } catch (Exception e) { e.printStackTrace();
-   * return false; } return true; }
-   */
 }
