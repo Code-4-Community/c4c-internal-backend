@@ -2,14 +2,17 @@ package com.codeforcommunity.rest;
 
 //import java.awt.RenderingHints.Key;
 import java.sql.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.login.LoginContext;
 import javax.xml.bind.DatatypeConverter;
 
 import com.codeforcommunity.JacksonMapper;
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.MemberReturn;
+import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.vertx.core.MultiMap;
@@ -48,8 +51,10 @@ import java.util.List;
 
 
 public class ApiRouter {
+  private HashMap<String, Integer> loginmap = new HashMap<String, Integer>();
   private final IProcessor processor;
   private Vertx v;
+  boolean flag = false;
 
   public ApiRouter(IProcessor processor) {
     this.processor = processor;
@@ -140,31 +145,61 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     String username = "";
     String password = "";
+    String encryptedPassword = "";
 
     if (request.query() != null && !(request.query().isEmpty())) {
       username = request.getParam("username");
       password = request.getParam("password");
+      encryptedPassword = UpdatableBCrypt.hash(password);
     }
-    if (processor.validate(username, password)) {
+    if (!flag && processor.validate(username, encryptedPassword)) {
       ctx.session().put("auth", 1);
 
       processor.attendedMeeting(username);
-//      JWTAuthOptions config = new JWTAuthOptions()
-//          .setKeyStore(new KeyStoreOptions()
-//              .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
-//              .setPassword("password"));
-//
-//      JWTAuth provider = JWTAuth.create(v, config);
+      //      JWTAuthOptions config = new JWTAuthOptions()
+      //          .setKeyStore(new KeyStoreOptions()
+      //              .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
+      //              .setPassword("password"));
+      //
+      //      JWTAuth provider = JWTAuth.create(v, config);
 
       // on the verify endpoint once you verify the identity of the user by its username/password
-//      String token = provider.generateToken(new JsonObject().put("User", username), new JWTOptions());
+      //      String token = provider.generateToken(new JsonObject().put("User", username), new JWTOptions());
       // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
       // Authorization: Bearer <token>
       String token = createJWT("login", username, "subject", 50000);
       response.putHeader("Authorization", "Bearer " + token);      
       ctx.session().put("username", username);
       response.putHeader("location", "/after").setStatusCode(302).end();
-    } else {
+    } 
+    /* 
+     * Need to fix, because this will cause a timeout if login failure occurs 5 times in 
+     * any period of time which could be with 1 minute or 2 weeks 
+     */
+    else { //if user fails to input correct password
+      if (loginmap.get(username) == null) { // first failure creates entry in cache
+        loginmap.put(username, 0); //initializes to 0th failure
+      }
+      else
+        loginmap.put(username, loginmap.get(username) + 1); //increments failure counter by 1
+        if (loginmap.get(username) > 4) { // if they have failed 5 times
+          //Block the user from logging in for 5 minutes
+          flag = true;
+          final String username1 = username;
+          new Thread() {
+            public void run() {
+              try {
+                Thread.sleep(300000);
+              }
+              catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+              flag = false;
+              loginmap.put(username1, null); //initializes to 0th failure again after the 5 minutes is over
+            }
+          }.start();
+        }
+    
       response.putHeader("content-type", "text/html");
       response.end("try again without " + username + " and " + password);
     }
@@ -186,15 +221,19 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     String username = "";
     String password = "";
+    String encryptedPassword = "";
 
     if (request.query() != null && !(request.query().isEmpty())) {
       MultiMap params = request.params();
       username = params.get("username");
       password = params.get("password");
+      encryptedPassword = UpdatableBCrypt.hash(password);
+
     }
     boolean success = false;
     if (!username.equals("") && !password.equals(""))
-      success = processor.addMember(username, password);
+      success = processor.addMember(username, encryptedPassword);
+
 
     if (success)
       response.putHeader("location", "/login").setStatusCode(302).end();
@@ -269,7 +308,7 @@ public class ApiRouter {
   }
 
   public static String createJWT(String id, String issuer, String subject, long ttlMillis) {
-    
+
     //The JWT signature algorithm we will be using to sign the token
     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -282,21 +321,21 @@ public class ApiRouter {
 
     //Let's set the JWT Claims
     JwtBuilder builder = Jwts.builder().setId(id)
-            .setIssuedAt(now)
-            .setSubject(subject)
-            .setIssuer(issuer)
-            .signWith(signatureAlgorithm, signingKey);
-  
+        .setIssuedAt(now)
+        .setSubject(subject)
+        .setIssuer(issuer)
+        .signWith(signatureAlgorithm, signingKey);
+
     //if it has been specified, let's add the expiration
     if (ttlMillis > 0) {
-        long expMillis = nowMillis + ttlMillis;
-        Date exp = new Date(expMillis);
-        builder.setExpiration(exp);
+      long expMillis = nowMillis + ttlMillis;
+      Date exp = new Date(expMillis);
+      builder.setExpiration(exp);
     }  
-  
+
     //Builds the JWT and serializes it to a compact, URL-safe string
     return builder.compact();
-}
+  }
 
 
   private void handleAttendMeeting(RoutingContext ctx) {
