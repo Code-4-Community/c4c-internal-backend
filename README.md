@@ -11,6 +11,7 @@ For any request to protected resources you should pass the JWT in the format of 
 
 
 ### Endpoints
+Note that routes that should modify data ought to be POST requests, this is being changed soon.
 
 ```sh
 GET https://localhost:8443/signup?username=<username>&password=<password>
@@ -39,7 +40,11 @@ GET https://localhost:8443/api/v1/members/
 ```sh
 GET https://localhost:8443/protected/createmeeting?id=<id>&name=<name>&date=<yyyy-MM-dd HH-mm>&open=<open>
 ```
-- Given a valid JWT through the request header, will create a meeting with a unique id, name, date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05), and a boolean open. 
+- Given a valid JWT through the request header, will create a meeting with:
+- a unique id, 
+- name, 
+- date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05), 
+- and a boolean representing if the meetting is still open. 
 
 ```sh
 GET https://localhost:8443/https://localhost:8443/protected/attendmeeting?id=<id>
