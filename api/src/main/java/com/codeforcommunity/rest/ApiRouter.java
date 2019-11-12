@@ -38,18 +38,24 @@ import io.jsonwebtoken.*;
 //import java.util.Date;
 
 import io.jsonwebtoken.Jwts;
+import io.netty.handler.codec.http.HttpResponse;
 import io.jsonwebtoken.Claims;
-
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import java.util.List;
 
-
 public class ApiRouter {
   private final IProcessor processor;
   private Vertx v;
+
+  // should really be saved as somewhere safer so that the secret isnt just laying
+  // around on github
+  private static final String JWT_KEY = "SECRET_KEY";
+
+  // token duration is 60 minutes in milliseconds
+  private static final long TOKEN_DURATION = 3600000;
 
   public ApiRouter(IProcessor processor) {
     this.processor = processor;
@@ -59,6 +65,7 @@ public class ApiRouter {
    * Initialize a router and register all route handlers on it.
    */
   public Router initializeRouter(Vertx vertx) {
+
     Router router = Router.router(vertx);
     v = vertx;
     router.route().handler(CookieHandler.create());
@@ -70,8 +77,11 @@ public class ApiRouter {
     Route loginRoute = router.route("/login");
     loginRoute.handler(this::handleLogin);
 
-    Route afterRoute = router.route("/after");
-    afterRoute.handler(this::handleAfter);
+    /*
+     * after route is not needed as the only purpose of login is now to return the
+     * JWT Route afterRoute = router.route("/after");
+     * afterRoute.handler(this::handleAfter);
+     */
 
     Route signUpRoute = router.route("/signup");
     signUpRoute.handler(this::handleSignUp);
@@ -79,8 +89,11 @@ public class ApiRouter {
     Route logoutRoute = router.route("/logout");
     logoutRoute.handler(this::handleLogout);
 
-    Route sessionRoute = router.route("/session");
-    sessionRoute.handler(this::handleSession);
+    /*
+     * Session counter is no longer needed as we dont use sessions. Route
+     * sessionRoute = router.route("/session");
+     * sessionRoute.handler(this::handleSession);
+     */
 
     Route getMemberRoute = router.route().path("/api/v1/members");
     getMemberRoute.handler(this::handleGetMemberRoute);
@@ -108,7 +121,6 @@ public class ApiRouter {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-
     response.end(memberJson);
   }
 
@@ -117,68 +129,8 @@ public class ApiRouter {
    */
   private void handleHome(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
-    Session session = ctx.session();
-    if (session.isEmpty()) {
-      session.put("count", 0);
-      session.put("auth", 0);
-    }
-
     response.putHeader("content-type", "application/json");
     response.end("<h1>go to /login with query string</h1>");
-  }
-
-  private void handleLogin(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-    Session session = ctx.session();
-    if (session.isEmpty()) {
-      session.put("count", 0);
-      session.put("auth", 0);
-    } else if (session.get("auth").equals(1)) {
-      response.putHeader("location", "/").setStatusCode(302).end();
-      return;
-    }
-    HttpServerRequest request = ctx.request();
-    String username = "";
-    String password = "";
-
-    if (request.query() != null && !(request.query().isEmpty())) {
-      username = request.getParam("username");
-      password = request.getParam("password");
-    }
-    if (processor.validate(username, password)) {
-      ctx.session().put("auth", 1);
-
-      processor.attendedMeeting(username);
-//      JWTAuthOptions config = new JWTAuthOptions()
-//          .setKeyStore(new KeyStoreOptions()
-//              .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
-//              .setPassword("password"));
-//
-//      JWTAuth provider = JWTAuth.create(v, config);
-
-      // on the verify endpoint once you verify the identity of the user by its username/password
-//      String token = provider.generateToken(new JsonObject().put("User", username), new JWTOptions());
-      // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
-      // Authorization: Bearer <token>
-      String token = createJWT("login", username, "subject", 50000);
-      response.putHeader("Authorization", "Bearer " + token);      
-      ctx.session().put("username", username);
-      response.putHeader("location", "/after").setStatusCode(302).end();
-    } else {
-      response.putHeader("content-type", "text/html");
-      response.end("try again without " + username + " and " + password);
-    }
-  }
-
-  private void handleAfter(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-    if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>logged in</h1>");
-    } else {
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>You need to log in to access this page</h1>");
-    }
   }
 
   private void handleSignUp(RoutingContext ctx) {
@@ -197,52 +149,90 @@ public class ApiRouter {
       success = processor.addMember(username, password);
 
     if (success)
-      response.putHeader("location", "/login").setStatusCode(302).end();
+      response.setStatusCode(201).end();
     else {
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>failed adding user, try again</h1>");
+      response.setStatusCode(400).end();
     }
   }
 
-  private void handleSession(RoutingContext ctx) {
+  private void handleLogin(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
 
-    if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
-      int count = ctx.session().get("count");
-      count++;
-      ctx.session().put("count", count);
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>Session Count: " + ctx.session().get("count") + "</h1>");
+    if (isAuthorizedUser(request)) {
+      response.putHeader("location", "/").setStatusCode(302).end();
+    }
+    String username = "";
+    String password = "";
+
+    if (request.query() != null && !(request.query().isEmpty())) {
+      username = request.getParam("username");
+      password = request.getParam("password");
+    }
+
+    if (processor.validate(username, password)) {
+
+      // JWTAuthOptions config = new JWTAuthOptions()
+      // .setKeyStore(new KeyStoreOptions()
+      // .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
+      // .setPassword("password"));
+      //
+      // JWTAuth provider = JWTAuth.create(v, config);
+
+      // on the verify endpoint once you verify the identity of the user by its
+      // username/password
+      // String token = provider.generateToken(new JsonObject().put("User", username),
+      // new JWTOptions());
+      // now for any request to protected resources you should pass this string in the
+      // HTTP header Authorization as:
+      // Authorization: Bearer <token>
+
+      String token = createJWT("login", username, "subject", TOKEN_DURATION);
+      // JWT given back in header
+      response.putHeader("Authorization", "Bearer " + token);
+      // could respond with the token in body, but for now Authorization is passed
+      // back in header
+      response.setStatusCode(200).end();
+
     } else {
-      response.putHeader("content-type", "text/html").end("<h1>Log In First</h1>");
+      response.putHeader("content-type", "text/json").setStatusCode(400).end();
+
     }
   }
 
+  // handling logouts requires that we save state for some JWT, if we need to keep
+  // track of state, why use stateless JWT? Wouldn't sessions be more appropriate?
   private void handleLogout(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    if (isAuthorizedUser(request)) {
+      // onLogout clear expired tokens to periodically "trim" the blacklsited tokens
+      // (should probably instead daily)
+      boolean cleared = processor.clearBlacklistedTokens(TOKEN_DURATION);
+      boolean success = processor.addBlacklistedToken(request.headers().get("Authorization"));
 
-    if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
-      ctx.session().destroy();
-      ctx.reroute(ctx.request().path());
+      if (success) {
+        // ctx.reroute(ctx.request().path());
+        response.setStatusCode(201).end();
+      } else {
+        // what do we do when logout fails? (secuirty risk)
+        response.setStatusCode(500).end();
+      }
+
     } else {
-      response.putHeader("content-type", "text/html").end("<h1>Not Logged In</h1>");
-    }
-  }
-
-  private void checkAuthentication(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-
-    if (ctx.session().isEmpty() || !ctx.session().get("auth").equals(1)) {
-      response.putHeader("location", "/").setStatusCode(403).end();
-      return;
+      response.setStatusCode(400).end();
     }
   }
 
   private void handleCreateMeeting(RoutingContext ctx) {
-    checkAuthentication(ctx);
-
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
+
+    if (!checkAuthentication(ctx)) {
+      response.setStatusCode(403).end();
+      return;
+    }
+
     String id = "";
     String name = "";
     LocalDateTime date = null;
@@ -268,58 +258,104 @@ public class ApiRouter {
     }
   }
 
-  public static String createJWT(String id, String issuer, String subject, long ttlMillis) {
-    
-    //The JWT signature algorithm we will be using to sign the token
-    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
-    long nowMillis = System.currentTimeMillis();
-    Date now = new Date(nowMillis);
-
-    //We will sign our JWT with our ApiKey secret
-    byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("SECRET_KEY");
-    Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
-
-    //Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder().setId(id)
-            .setIssuedAt(now)
-            .setSubject(subject)
-            .setIssuer(issuer)
-            .signWith(signatureAlgorithm, signingKey);
-  
-    //if it has been specified, let's add the expiration
-    if (ttlMillis > 0) {
-        long expMillis = nowMillis + ttlMillis;
-        Date exp = new Date(expMillis);
-        builder.setExpiration(exp);
-    }  
-  
-    //Builds the JWT and serializes it to a compact, URL-safe string
-    return builder.compact();
-}
-
-
   private void handleAttendMeeting(RoutingContext ctx) {
-    checkAuthentication(ctx);
-
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
+
+    if (!checkAuthentication(ctx)) {
+      response.setStatusCode(403).end();
+      return;
+    }
+
     String meetingid = "";
-    String username = ctx.session().get("username");
+    String username = "";
+
+    try {
+      username = getClaims(request).getIssuer();
+    } catch (Exception e) {
+      username = "";
+    }
 
     if (request.query() != null && !(request.query().isEmpty())) {
       MultiMap params = request.params();
       meetingid = params.get("id");
     }
+
     boolean success = false;
+
     if (!meetingid.equals("") && !username.equals(""))
       success = processor.attendMeeting(meetingid, username);
 
-    if (success)
+    if (success) {
       response.setStatusCode(201).end();
-    else {
+    } else {
       response.setStatusCode(400).end();
     }
   }
 
+  public static String createJWT(String id, String issuer, String subject, long ttlMillis) {
+    // The JWT signature algorithm we will be using to sign the token
+    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+
+    long nowMillis = System.currentTimeMillis();
+    Date now = new Date(nowMillis);
+
+    // We will sign our JWT with our ApiKey secret
+    byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(JWT_KEY);
+    Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+
+    // Let's set the JWT Claims
+    JwtBuilder builder = Jwts.builder().setId(id).setIssuedAt(now).setSubject(subject).setIssuer(issuer)
+        .signWith(signatureAlgorithm, signingKey);
+
+    // if it has been specified, let's add the expiration
+    if (ttlMillis > 0) {
+      long expMillis = nowMillis + ttlMillis;
+      Date exp = new Date(expMillis);
+      builder.setExpiration(exp);
+    }
+    // Builds the JWT and serializes it to a compact, URL-safe string
+    return builder.compact();
+  }
+
+  private boolean checkAuthentication(RoutingContext ctx) {
+    HttpServerRequest request = ctx.request();
+    HttpServerResponse response = ctx.response();
+    if (!isAuthorizedUser(request)) {
+      response.putHeader("location", "/").setStatusCode(403).end();
+      return false;
+    }
+    return true;
+  }
+
+  public boolean isAuthorizedUser(HttpServerRequest request) {
+    try {
+      return getClaims(request) != null;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  public Claims getClaims(HttpServerRequest request) {
+    String jwt = request.headers().get("Authorization");
+    boolean isNullOrEmpty = jwt == null || jwt.isEmpty();
+    boolean isBlacklisted = isBlacklistedToken(jwt);
+    if (isNullOrEmpty || isBlacklisted)
+      return null;
+
+    Claims c = decodeJWT(jwt.split(" ")[1]);
+    return c;
+  }
+
+  public boolean isBlacklistedToken(String jwt) {
+    return processor.isBlacklistedToken(jwt);
+  }
+
+  public Claims decodeJWT(String jwt) {
+    try {
+      return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(JWT_KEY)).parseClaimsJws(jwt).getBody();
+    } catch (Exception e) {
+      return null;
+    }
+  }
 }
