@@ -140,130 +140,23 @@ public class ApiRouter {
 
   private void handleLogin(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
-    Session session = ctx.session();
-    if (session.isEmpty()) {
-      session.put("count", 0);
-      session.put("auth", 0);
-    } else if (session.get("auth").equals(1)) {
-      response.putHeader("location", "/").setStatusCode(302).end();
-      return;
-    }
-    HttpServerRequest request = ctx.request();
-    String username = "";
-    String password = "";
-    String encryptedPassword = "";
-
-    if (request.query() != null && !(request.query().isEmpty())) {
-      username = request.getParam("username");
-      password = request.getParam("password");
-      encryptedPassword = UpdatableBCrypt.hash(password);
-    }
-    if (!flag && processor.validate(username, encryptedPassword)) {
-      ctx.session().put("auth", 1);
-
-      processor.attendedMeeting(username);
-      //      JWTAuthOptions config = new JWTAuthOptions()
-      //          .setKeyStore(new KeyStoreOptions()
-      //              .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
-      //              .setPassword("password"));
-      //
-      //      JWTAuth provider = JWTAuth.create(v, config);
-
-      // on the verify endpoint once you verify the identity of the user by its username/password
-      //      String token = provider.generateToken(new JsonObject().put("User", username), new JWTOptions());
-      // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
-      // Authorization: Bearer <token>
-      String token = createJWT("login", username, "subject", 50000);
-      response.putHeader("Authorization", "Bearer " + token);      
-      ctx.session().put("username", username);
-      response.putHeader("location", "/after").setStatusCode(302).end();
-    } 
-    /* 
-     * Need to fix, because this will cause a timeout if login failure occurs 5 times in 
-     * any period of time which could be with 1 minute or 2 weeks 
-     */
-    else { //if user fails to input correct password
-      if (loginmap.get(username) == null) { // first failure creates entry in cache
-        loginmap.put(username, 0); //initializes to 0th failure
-      }
-      else
-        loginmap.put(username, loginmap.get(username) + 1); //increments failure counter by 1
-        if (loginmap.get(username) > 4) { // if they have failed 5 times
-          //Block the user from logging in for 5 minutes
-          flag = true;
-          final String username1 = username;
-          new Thread() {
-            public void run() {
-              try {
-                Thread.sleep(300000);
-              }
-              catch (InterruptedException e) {
-                e.printStackTrace();
-              }
-              flag = false;
-              loginmap.put(username1, null); //initializes to 0th failure again after the 5 minutes is over
-            }
-          }.start();
-        }
-    
-      response.putHeader("content-type", "text/html");
-      response.end("try again without " + username + " and " + password);
-    }
-  }
-
-  private void handleAfter(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-    if (!(ctx.session().isEmpty()) && ctx.session().get("auth").equals(1)) {
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>logged in</h1>");
-    } else {
-      response.putHeader("content-type", "text/html");
-      response.end("<h1>You need to log in to access this page</h1>");
-    }
-  }
-
-  private void handleSignUp(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-    HttpServerRequest request = ctx.request();
-    String username = "";
-    String password = "";
-    String encryptedPassword = "";
-
-    if (request.query() != null && !(request.query().isEmpty())) {
-      MultiMap params = request.params();
-      username = params.get("username");
-      password = params.get("password");
-      encryptedPassword = UpdatableBCrypt.hash(password);
-
-    }
-    boolean success = false;
-    if (!username.equals("") && !password.equals(""))
-      success = processor.addMember(username, encryptedPassword);
-
-
-    if (success)
-      response.setStatusCode(201).end();
-    else {
-      response.setStatusCode(400).end();
-    }
-  }
-
-  private void handleLogin(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
 
     if (isAuthorizedUser(request)) {
       response.putHeader("location", "/").setStatusCode(302).end();
     }
+
     String username = "";
     String password = "";
+    String encryptedPassword = "";
 
     if (request.query() != null && !(request.query().isEmpty())) {
       username = request.getParam("username");
       password = request.getParam("password");
+      encryptedPassword = UpdatableBCrypt.hash(password);
     }
 
-    if (processor.validate(username, password)) {
+    if (!flag && processor.validate(username, encryptedPassword)) {
 
       // JWTAuthOptions config = new JWTAuthOptions()
       // .setKeyStore(new KeyStoreOptions()
@@ -286,10 +179,61 @@ public class ApiRouter {
       // could respond with the token in body, but for now Authorization is passed
       // back in header
       response.setStatusCode(200).end();
+      // we COULD store misc info about the user in the session but
+      // ctx.session().put("username", username);
+    }
+    /*
+     * Need to fix, because this will cause a timeout if login failure occurs 5
+     * times in any period of time which could be with 1 minute or 2 weeks
+     */
+    else { // if user fails to input correct password
+      if (loginmap.get(username) == null) { // first failure creates entry in cache
+        loginmap.put(username, 0); // initializes to 0th failure
+      } else
+        loginmap.put(username, loginmap.get(username) + 1); // increments failure counter by 1
+      if (loginmap.get(username) > 4) { // if they have failed 5 times
+        // Block the user from logging in for 5 minutes
+        flag = true;
+        final String username1 = username;
+        new Thread() {
+          public void run() {
+            try {
+              Thread.sleep(300000);
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+            flag = false;
+            loginmap.put(username1, null); // initializes to 0th failure again after the 5 minutes is over
+          }
+        }.start();
+      }
 
-    } else {
       response.putHeader("content-type", "text/json").setStatusCode(400).end();
+    }
+  }
 
+  private void handleSignUp(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String username = "";
+    String password = "";
+    String encryptedPassword = "";
+
+    if (request.query() != null && !(request.query().isEmpty())) {
+      MultiMap params = request.params();
+      username = params.get("username");
+      password = params.get("password");
+      encryptedPassword = UpdatableBCrypt.hash(password);
+
+    }
+    boolean success = false;
+    if (!username.equals("") && !password.equals(""))
+      success = processor.addMember(username, encryptedPassword);
+
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
     }
   }
 
@@ -350,37 +294,6 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
   }
-
-  public static String createJWT(String id, String issuer, String subject, long ttlMillis) {
-
-    //The JWT signature algorithm we will be using to sign the token
-    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
-    long nowMillis = System.currentTimeMillis();
-    Date now = new Date(nowMillis);
-
-    //We will sign our JWT with our ApiKey secret
-    byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("SECRET_KEY");
-    Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
-
-    //Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder().setId(id)
-        .setIssuedAt(now)
-        .setSubject(subject)
-        .setIssuer(issuer)
-        .signWith(signatureAlgorithm, signingKey);
-
-    //if it has been specified, let's add the expiration
-    if (ttlMillis > 0) {
-      long expMillis = nowMillis + ttlMillis;
-      Date exp = new Date(expMillis);
-      builder.setExpiration(exp);
-    }  
-
-    //Builds the JWT and serializes it to a compact, URL-safe string
-    return builder.compact();
-  }
-
 
   private void handleAttendMeeting(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
