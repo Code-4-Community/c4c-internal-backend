@@ -10,13 +10,15 @@ import org.jooq.generated.Tables;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.io.Console;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class ProcessorImpl implements IProcessor {
 
   private final DSLContext db;
-  private int id = 10;
+  // id should really not be a static number! see down below for dynamic id, hash of username
+  //private int id = 10;
 
   public ProcessorImpl(DSLContext db) {
     this.db = db;
@@ -66,40 +68,56 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean addMember(String first, String last) {
-
     try {
       db.execute(
           "insert into member\n" + "  (id, email, first_name, last_name, graduation_year, major, privilege_level)\n"
-              + "  values (?, 'N/A', '" + first + "', '" + last + "', \n" + "          2020, 'CS Probably', 0);",
-          this.id);
+              + "  values (?, 'N/A', ?, ?, \n" + "2020, 'CS Probably', 0);",
+          first.hashCode(), first, last);
     } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
     return true;
   }
 
   @Override
-
-  public boolean validate(String first, String last){
-    Result result = db.fetch("select first_name, last_name\n"
-        + "   from member\n"
-        + "   where first_name = ? and last_name = ?;", first, last);
+  public boolean validate(String first, String last) {
+    Result result = db.fetch(
+        "select first_name, last_name\n" + "   from member\n" + "   where first_name = ? and last_name = ?;", first,
+        last);
     if (result.isEmpty())
       return false;
     return true;
   }
-  
-  public boolean attendedMeeting(String username /*,String meeting*/) { //will need to use meeting
+
+  @Override
+  public boolean isBlacklistedToken(String jwt) {
+    Result result = db.fetch("select * \n" + "   from blacklisted_token\n" + "   where id = ?;", jwt);
+    if (result.isEmpty())
+      return false;
+    return true;
+  }
+
+  @Override
+  public boolean addBlacklistedToken(String jwt) {
     try {
-    Result result = db.fetch("select id from member\n where first_name = '" + username + "'");
-    String memberid = (String) result.getValue(0, 0);    
-    Result result1 = db.fetch("select id from meeting"); // figure out which meeting
-    String meetingid = (String) result.getValue(0, 0);     
-    db.execute("insert into member_attended_meeting values "
-        + "('1'," + memberid + "," + meetingid + ");");
-    } catch(Exception e) {
-      e.printStackTrace();
-    return false;
+      db.execute("insert into blacklisted_token\n" + "  (id, time_milliseconds)\n" + "  values (?, ?);", jwt,
+          System.currentTimeMillis());
+    } catch (Exception e) {
+      // If this fails this is a security risk as there exists a token that is still
+      // technically "valid" even though the user logged out
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean clearBlacklistedTokens(long tokenDuration) {
+    try {
+      db.execute("delete from blacklisted_token\n" + " where time_millisecond < ?;",
+          System.currentTimeMillis() - tokenDuration);
+    } catch (Exception e) {
+      return false;
     }
     return true;
   }
