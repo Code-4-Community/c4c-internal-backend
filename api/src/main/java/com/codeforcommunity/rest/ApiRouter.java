@@ -11,7 +11,8 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.codeforcommunity.JacksonMapper;
 import com.codeforcommunity.api.IProcessor;
-import com.codeforcommunity.dto.MemberReturn;
+import com.codeforcommunity.dto.EventReturn;
+import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -46,7 +47,10 @@ import io.jsonwebtoken.Claims;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.core.json.Json;
+import java.util.UUID;
+import io.vertx.core.json.JsonObject;
 import java.util.List;
 
 public class ApiRouter {
@@ -54,6 +58,8 @@ public class ApiRouter {
   private final IProcessor processor;
   private Vertx v;
   boolean flag = false;
+
+  private static final UpdatableBCrypt bcrypt = new UpdatableBCrypt(12);
 
   // should really be saved as somewhere safer so that the secret isnt just laying
   // around on github
@@ -70,7 +76,7 @@ public class ApiRouter {
    * Initialize a router and register all route handlers on it.
    */
   public Router initializeRouter(Vertx vertx) {
-
+    System.out.println("got to router");
     Router router = Router.router(vertx);
     v = vertx;
     router.route().handler(CookieHandler.create());
@@ -79,7 +85,13 @@ public class ApiRouter {
     Route homeRoute = router.route("/");
     homeRoute.handler(this::handleHome);
 
-    Route loginRoute = router.route("/login");
+    // allows handling of POST and DELETE routes.
+    router.route("/*").handler(BodyHandler.create());
+
+    router.route("/protected/*").handler(this::checkAuthentication);
+    router.route("/admin/*").handler(this::checkAdmin);
+
+    Route loginRoute = router.post("/login");
     loginRoute.handler(this::handleLogin);
 
     /*
@@ -88,45 +100,74 @@ public class ApiRouter {
      * afterRoute.handler(this::handleAfter);
      */
 
-    Route signUpRoute = router.route("/signup");
+    // USER CRUD
+
+    // Create User : Non-Protected POST method
+    Route signUpRoute = router.post("/signup");
     signUpRoute.handler(this::handleSignUp);
 
+    // Should any authorized user be able to see the information of another user?
+    // For now, yes.
+    // Get User : Protected POST method
+    // Route getUserRoute = router.route("/protected/user/:id");
+    // getUserRoute.handler(this::handleGetUser);
+
+    // Route editUserRoute = router.post("/protected/user/:id");
+    // editUserRoute.handler(this::handleEditUser);
+
+    // Route deleteUserRoute = router.delete("/protected/user/:id");
+    // deleteUserRoute.handler(this::handleDeleteUser);
+
+    // should logout be a POST or GET? we dont supply information but it is
+    // modifying a resource...
+    // 200 or 201
     Route logoutRoute = router.route("/logout");
     logoutRoute.handler(this::handleLogout);
 
-    /*
-     * Session counter is no longer needed as we dont use sessions. Route
-     * sessionRoute = router.route("/session");
-     * sessionRoute.handler(this::handleSession);
-     */
+    // Route sessionRoute = router.route("/session");
+    // sessionRoute.handler(this::handleSession);
 
-    Route getMemberRoute = router.route().path("/api/v1/members");
-    getMemberRoute.handler(this::handleGetMemberRoute);
+    Route getUserRoute = router.route().path("/protected/users");
+    getUserRoute.handler(this::handleGetUserRoute);
 
-    Route createMeetingRoute = router.route("/protected/createmeeting");
-    createMeetingRoute.handler(this::handleCreateMeeting);
+    Route getEventsRoute = router.route().path("/protected/events");
+    getEventsRoute.handler(this::handleGetEvents);
 
-    Route attendMeetingRoute = router.route("/protected/attendmeeting");
-    attendMeetingRoute.handler(this::handleAttendMeeting);
+    Route createEventRoute = router.post("/admin/event");
+    createEventRoute.handler(this::handleCreateEvent);
+
+    Route getEventRoute = router.get("/protected/event/:id");
+    getEventRoute.handler(this::handleGetEvent);
+
+    Route updateEventRoute = router.put("/admin/event/:id");
+    updateEventRoute.handler(this::handleUpdateEvent);
+
+    Route deleteEventRoute = router.delete("/admin/event/:id");
+    deleteEventRoute.handler(this::handleDeleteEvent);
+
+    // asd asdsad
+
+    Route attendEventRoute = router.post("/protected/eventcheckin/:id");
+    attendEventRoute.handler(this::handleAttendEvent);
 
     return router;
   }
 
   /**
-   * Add a handler for getting all members.
+   * Add a handler for getting all users.
    */
-  private void handleGetMemberRoute(RoutingContext ctx) {
+  private void handleGetUserRoute(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     response.putHeader("content-type", "application/json");
-    List<MemberReturn> members = processor.getAllMembers();
+    List<UserReturn> users = processor.getAllUsers();
 
-    String memberJson = null;
+    String userJson = null;
     try {
-      memberJson = JacksonMapper.getMapper().writeValueAsString(members);
+      userJson = JacksonMapper.getMapper().writeValueAsString(users);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    response.end(memberJson);
+    response.end(userJson);
   }
 
   /**
@@ -145,18 +186,22 @@ public class ApiRouter {
     if (isAuthorizedUser(request)) {
       response.putHeader("location", "/").setStatusCode(302).end();
     }
-
-    String username = "";
+    JsonObject body = ctx.getBodyAsJson();
+    String email = "";
     String password = "";
-    String encryptedPassword = "";
 
-    if (request.query() != null && !(request.query().isEmpty())) {
-      username = request.getParam("username");
-      password = request.getParam("password");
-      encryptedPassword = UpdatableBCrypt.hash(password);
+    try {
+      email = body.getString("email");
+      password = body.getString("password");
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
     }
 
-    if (!flag && processor.validate(username, encryptedPassword)) {
+    System.out.println("got here");
+
+    if (!flag && processor.validate(email, password)) {
+      System.out.println("got past validation");
 
       // JWTAuthOptions config = new JWTAuthOptions()
       // .setKeyStore(new KeyStoreOptions()
@@ -173,7 +218,11 @@ public class ApiRouter {
       // HTTP header Authorization as:
       // Authorization: Bearer <token>
 
-      String token = createJWT("login", username, "subject", TOKEN_DURATION);
+      UserReturn user = processor.getUserByEmail(email);
+      System.out.println(user);
+
+      // something is terribly wrong with this JWT, the fields arent right
+      String token = createJWT("c4c", "auth-token", TOKEN_DURATION, user.id, user.privilegeLevel > 0);
       // JWT given back in header
       response.putHeader("Authorization", "Bearer " + token);
       // could respond with the token in body, but for now Authorization is passed
@@ -187,14 +236,14 @@ public class ApiRouter {
      * times in any period of time which could be with 1 minute or 2 weeks
      */
     else { // if user fails to input correct password
-      if (loginmap.get(username) == null) { // first failure creates entry in cache
-        loginmap.put(username, 0); // initializes to 0th failure
+      if (loginmap.get(email) == null) { // first failure creates entry in cache
+        loginmap.put(email, 0); // initializes to 0th failure
       } else
-        loginmap.put(username, loginmap.get(username) + 1); // increments failure counter by 1
-      if (loginmap.get(username) > 4) { // if they have failed 5 times
+        loginmap.put(email, loginmap.get(email) + 1); // increments failure counter by 1
+      if (loginmap.get(email) > 4) { // if they have failed 5 times
         // Block the user from logging in for 5 minutes
         flag = true;
-        final String username1 = username;
+        final String username1 = email;
         new Thread() {
           public void run() {
             try {
@@ -213,27 +262,39 @@ public class ApiRouter {
   }
 
   private void handleSignUp(RoutingContext ctx) {
-    HttpServerResponse response = ctx.response();
-    HttpServerRequest request = ctx.request();
-    String username = "";
-    String password = "";
-    String encryptedPassword = "";
+    try {
 
-    if (request.query() != null && !(request.query().isEmpty())) {
-      MultiMap params = request.params();
-      username = params.get("username");
-      password = params.get("password");
-      encryptedPassword = UpdatableBCrypt.hash(password);
+      HttpServerResponse response = ctx.response();
+      HttpServerRequest request = ctx.request();
 
-    }
-    boolean success = false;
-    if (!username.equals("") && !password.equals(""))
-      success = processor.addMember(username, encryptedPassword);
+      JsonObject body = ctx.getBodyAsJson();
 
-    if (success)
-      response.setStatusCode(201).end();
-    else {
-      response.setStatusCode(400).end();
+      String email = "";
+      String encryptedPassword = "";
+      String firstName = "";
+      String lastName = "";
+      try {
+        email = body.getString("email");
+        firstName = body.getString("firstName");
+        lastName = body.getString("lastName");
+        encryptedPassword = bcrypt.hash(body.getString("password"));
+      } catch (Exception e) {
+        e.printStackTrace();
+        response.setStatusCode(400).end();
+      }
+      System.out.println("got past variable setting");
+
+      boolean success = false;
+      if (!email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
+        success = processor.addUser(email, firstName, lastName, encryptedPassword);
+      System.out.println("got past database addition");
+      if (success)
+        response.setStatusCode(201).end();
+      else {
+        response.setStatusCode(400).end();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -261,67 +322,161 @@ public class ApiRouter {
     }
   }
 
-  private void handleCreateMeeting(RoutingContext ctx) {
+  // Event Route Handlers
+  private void handleGetEvents(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    response.putHeader("content-type", "application/json");
+    List<EventReturn> events = processor.getAllEvents();
+
+    String eventsJson = null;
+    try {
+      eventsJson = JacksonMapper.getMapper().writeValueAsString(events);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    response.end(eventsJson);
+  }
+
+  private void handleCreateEvent(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
-
-    if (!checkAuthentication(ctx)) {
-      response.setStatusCode(403).end();
-      return;
-    }
-
-    String id = "";
+    JsonObject body = ctx.getBodyAsJson();
     String name = "";
     LocalDateTime date = null;
     Boolean open = null;
+    String code = "";
     // for now, the input date is to the minute
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    if (request.query() != null && !(request.query().isEmpty())) {
-      MultiMap params = request.params();
-      id = params.get("id");
-      name = params.get("name");
-      date = LocalDateTime.parse(params.get("date"), formatter);
-      open = Boolean.parseBoolean(params.get("open"));
+    try {
+      name = body.getString("name");
+      date = LocalDateTime.parse(body.getString("date"), formatter);
+      open = body.getBoolean("open");
+      code = body.getString("code");
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
     }
     boolean success = false;
-    if (!id.equals("") && !name.equals("") && !date.equals(null) && !open.equals(null))
-      success = processor.createMeeting(id, name, date, open);
+    if (!name.equals("") && !date.equals(null) && !open.equals(null))
+      success = processor.createEvent(name, date, open, code);
 
     if (success)
       response.setStatusCode(201).end();
     else {
       response.setStatusCode(400).end();
     }
+
+    response.setStatusCode(201);
   }
 
-  private void handleAttendMeeting(RoutingContext ctx) {
+  private void handleGetEvent(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
+    int id = -1;
 
-    if (!checkAuthentication(ctx)) {
-      response.setStatusCode(403).end();
-      return;
+    try{
+    id = Integer.parseInt(request.params().get("id"));
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    EventReturn result = null;
+    if (id > 0)
+      result = processor.getEvent(id);
+
+    System.out.println(result);
+
+    String json = "";
+    try {
+      json = JacksonMapper.getMapper().writeValueAsString(result);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    String meetingid = "";
-    String username = "";
+    if (result != null && !json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+
+    } else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleUpdateEvent(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    JsonObject body = ctx.getBodyAsJson();
+    String name = "";
+    LocalDateTime date = null;
+    Boolean open = null;
+    String code = "";
+    // for now, the input date is to the minute
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    int id = -1;
 
     try {
-      username = getClaims(request).getIssuer();
+      id = Integer.parseInt(request.getParam("id"));
+      name = body.getString("name");
+      date = LocalDateTime.parse(body.getString("date"), formatter);
+      open = body.getBoolean("open");
+      code = body.getString("code");
     } catch (Exception e) {
-      username = "";
+      e.printStackTrace();
+      response.setStatusCode(400).end();
     }
+    boolean success = false;
+    if (!name.equals("") && !date.equals(null) && !open.equals(null))
+      success = processor.updateEvent(id, name, date, open, code);
+
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+
+    response.setStatusCode(201);
+  }
+
+  private void handleDeleteEvent(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
 
     if (request.query() != null && !(request.query().isEmpty())) {
       MultiMap params = request.params();
-      meetingid = params.get("id");
+      id = Integer.parseInt(params.get("id"));
     }
 
+    try {
+      processor.deleteEvent(id);
+      response.setStatusCode(200).end();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleAttendEvent(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+
+    String eventCode = "";
+    int userId = -1;
     boolean success = false;
 
-    if (!meetingid.equals("") && !username.equals(""))
-      success = processor.attendMeeting(meetingid, username);
+    try {
+      userId = getUserId(request);
+      eventCode = request.params().get("id");
+      System.out.println("parsed the event id successfully");
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    
+
+    if (!eventCode.isEmpty() && userId != -1)
+      success = processor.attendEvent(eventCode, userId);
 
     if (success) {
       response.setStatusCode(201).end();
@@ -330,7 +485,7 @@ public class ApiRouter {
     }
   }
 
-  public static String createJWT(String id, String issuer, String subject, long ttlMillis) {
+  public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {
     // The JWT signature algorithm we will be using to sign the token
     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -342,8 +497,8 @@ public class ApiRouter {
     Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
     // Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder().setId(id).setIssuedAt(now).setSubject(subject).setIssuer(issuer)
-        .signWith(signatureAlgorithm, signingKey);
+    JwtBuilder builder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(now).setSubject(subject)
+        .setIssuer(issuer).claim("userId", userId).claim("isAdmin", isAdmin).signWith(signatureAlgorithm, signingKey);
 
     // if it has been specified, let's add the expiration
     if (ttlMillis > 0) {
@@ -355,14 +510,31 @@ public class ApiRouter {
     return builder.compact();
   }
 
-  private boolean checkAuthentication(RoutingContext ctx) {
+  private void checkAdmin(RoutingContext ctx) {
+    HttpServerRequest request = ctx.request();
+    HttpServerResponse response = ctx.response();
+    if (!isAdmin(request)) {
+      response.putHeader("location", "/").setStatusCode(401).end();
+    }
+    ctx.next();
+  }
+
+  public boolean isAdmin(HttpServerRequest request) {
+    try {
+      return (boolean) getClaims(request).get("isAdmin");
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  private void checkAuthentication(RoutingContext ctx) {
     HttpServerRequest request = ctx.request();
     HttpServerResponse response = ctx.response();
     if (!isAuthorizedUser(request)) {
-      response.putHeader("location", "/").setStatusCode(403).end();
-      return false;
+      response.putHeader("location", "/").setStatusCode(401).end();
     }
-    return true;
+    ctx.next();
   }
 
   public boolean isAuthorizedUser(HttpServerRequest request) {
@@ -370,6 +542,15 @@ public class ApiRouter {
       return getClaims(request) != null;
     } catch (Exception e) {
       return false;
+    }
+  }
+
+  public int getUserId(HttpServerRequest request) {
+    try {
+      return (int) getClaims(request).get("userId");
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
     }
   }
 

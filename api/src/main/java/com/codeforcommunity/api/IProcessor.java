@@ -1,21 +1,38 @@
 package com.codeforcommunity.api;
 
-import com.codeforcommunity.dto.MemberReturn;
+import com.codeforcommunity.dto.UserReturn;
+import com.codeforcommunity.dto.EventReturn;
 
 import java.util.List;
 import java.time.LocalDateTime;
 
 public interface IProcessor {
   /**
-   * Get all the members first and last names.
+   * Get all the users first and last names.
    */
-  List<MemberReturn> getAllMembers();
+  List<UserReturn> getAllUsers();
 
-  boolean attendMeeting(String meetingid, String username);
-  boolean createMeeting(String id, String name, LocalDateTime date, boolean open);
-  boolean addMember(String first, String last);
-  boolean validate(String first, String last);
+  boolean attendEvent(String eventCode, int userId);
+
+  List<EventReturn> getAllEvents();
+
+  boolean createEvent(String name, LocalDateTime date, boolean open, String code);
+  
+  EventReturn getEvent(int id);
+  
+  boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code);
+  
+  boolean deleteEvent(int id);
+
+  boolean addUser(String email, String first, String last, String hashedPassword);
+
+  UserReturn getUserByEmail(String email);
+
+  boolean validate(String email, String password);
+
   boolean isBlacklistedToken(String jwt);
+
   boolean addBlacklistedToken(String jwt);
+
   boolean clearBlacklistedTokens(long tokenDuration);
 }

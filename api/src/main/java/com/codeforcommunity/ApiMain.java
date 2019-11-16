@@ -23,6 +23,7 @@ public class ApiMain {
    * Start the API to start listening on a port.
    */
   public void startApi() {
+    System.out.println("starting api");
     Vertx vertx = Vertx.vertx();
     HttpServerOptions options = new HttpServerOptions().addEnabledSecureTransportProtocol("TLSv1.2").setSsl(true)
         .setKeyStoreOptions(new JksOptions().setPath(

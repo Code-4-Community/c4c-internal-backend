@@ -1,30 +1,53 @@
-CREATE TABLE IF NOT EXISTS member (
-  id VARCHAR(36) NOT NULL PRIMARY KEY,
-  email VARCHAR(36),
-  first_name VARCHAR(36),
-  last_name VARCHAR(36),
+CREATE TABLE
+IF NOT EXISTS users
+(
+  id SERIAL
+PRIMARY KEY,
+  email VARCHAR
+(255),
+  first_name VARCHAR
+(255),
+  last_name VARCHAR
+(255),
+  hashed_password VARCHAR
+(255),
   graduation_year INT,
-  major VARCHAR(36),
+  major VARCHAR
+(255),
   privilege_level INT
 );
 
-CREATE TABLE IF NOT EXISTS meeting (
-  id VARCHAR(36) NOT NULL PRIMARY KEY,
-  name VARCHAR(36),
+CREATE TABLE
+IF NOT EXISTS events
+(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR
+(255),
   date TIMESTAMP,
-  open BOOLEAN
+  open BOOLEAN,
+  code VARCHAR
+(255)
 );
 
-CREATE TABLE IF NOT EXISTS member_attended_meeting (
-  id VARCHAR(36) NOT NULL PRIMARY KEY,
-  member_id VARCHAR(36),
-  meeting_id VARCHAR(36),
+CREATE TABLE
+IF NOT EXISTS event_check_ins
+(
+  id SERIAL PRIMARY KEY,
+  user_id INT,
+  event_id INT,
 
-  CONSTRAINT fk_attended_member FOREIGN KEY (member_id) REFERENCES member (id),
-  CONSTRAINT fk_attended_meeting FOREIGN KEY (meeting_id) REFERENCES meeting (id)
+  CONSTRAINT fk_attended_user FOREIGN KEY
+(user_id) REFERENCES users
+(id),
+  CONSTRAINT fk_attended_event FOREIGN KEY
+(event_id) REFERENCES events
+(id)
 );
 
-CREATE TABLE IF NOT EXISTS blacklisted_token (
-  id VARCHAR(256) NOT NULL PRIMARY KEY,
+CREATE TABLE
+IF NOT EXISTS blacklisted_tokens
+(
+  id VARCHAR
+(256) NOT NULL PRIMARY KEY,
   time_milliseconds BIGINT
 );
