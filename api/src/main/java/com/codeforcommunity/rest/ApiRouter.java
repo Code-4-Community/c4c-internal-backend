@@ -107,16 +107,21 @@ public class ApiRouter {
     signUpRoute.handler(this::handleSignUp);
 
     // Should any authorized user be able to see the information of another user?
-    // For now, yes.
+    // No! Maybe? Probably should be able to view your own, but admins should defnitely be able to see everyone
+    
+    //maybe, two seperate sets of routes, protected and admin. protected takes id from JWT, admin takes from params
+    //or should admins have access at all? 
+
     // Get User : Protected POST method
-    // Route getUserRoute = router.route("/protected/user/:id");
-    // getUserRoute.handler(this::handleGetUser);
+    Route getUserRoute = router.route("/protected/user/:id");
+    getUserRoute.handler(this::handleGetUser);
 
-    // Route editUserRoute = router.post("/protected/user/:id");
-    // editUserRoute.handler(this::handleEditUser);
+    Route updateUserRoute = router.post("/protected/user");
+    updateUserRoute.handler(this::handleUpdateUser);
 
-    // Route deleteUserRoute = router.delete("/protected/user/:id");
-    // deleteUserRoute.handler(this::handleDeleteUser);
+    // what happens when a user deletes their account, its fine, but what about when an admin does it?
+    Route deleteUserRoute = router.delete("/protected/user");
+    deleteUserRoute.handler(this::handleDeleteUser);
 
     // should logout be a POST or GET? we dont supply information but it is
     // modifying a resource...
@@ -149,6 +154,9 @@ public class ApiRouter {
 
     Route attendEventRoute = router.post("/protected/eventcheckin/:id");
     attendEventRoute.handler(this::handleAttendEvent);
+
+    Route getEventUsersRoute = router.get("/protected/eventcheckin/:id");
+    getEventUsersRoute.handler(this::handleGetEventUsers);
 
     return router;
   }
@@ -298,6 +306,92 @@ public class ApiRouter {
     }
   }
 
+  private void handleGetUser(RoutingContext ctx){
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
+
+    try {
+      id = Integer.parseInt(request.params().get("id"));
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    UserReturn result = null;
+    if (id > 0)
+      result = processor.getUser(id);
+
+    System.out.println(result);
+
+    String json = "";
+    try {
+      json = JacksonMapper.getMapper().writeValueAsString(result);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    if (result != null && !json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+
+    } else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleUpdateUser(RoutingContext ctx) {
+    try {
+
+      HttpServerResponse response = ctx.response();
+      HttpServerRequest request = ctx.request();
+
+      JsonObject body = ctx.getBodyAsJson();
+
+      int id = -1;
+      String email = "";
+      String encryptedPassword = "";
+      String firstName = "";
+      String lastName = "";
+      try {
+        id = getUserId(request);
+        email = body.getString("email");
+        firstName = body.getString("firstName");
+        lastName = body.getString("lastName");
+        encryptedPassword = bcrypt.hash(body.getString("password"));
+      } catch (Exception e) {
+        e.printStackTrace();
+        response.setStatusCode(400).end();
+      }
+      System.out.println("got past variable setting");
+
+      boolean success = false;
+      if (id != 0 && !email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
+        success = processor.updateUser(id, email, firstName, lastName, encryptedPassword);
+      System.out.println("got past database addition");
+      if (success)
+        response.setStatusCode(201).end();
+      else {
+        response.setStatusCode(400).end();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void handleDeleteUser(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
+    try {
+      id = getUserId(request);
+      processor.deleteEvent(id);
+      response.setStatusCode(200).end();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+  }
+
   // handling logouts requires that we save state for some JWT, if we need to keep
   // track of state, why use stateless JWT? Wouldn't sessions be more appropriate?
   private void handleLogout(RoutingContext ctx) {
@@ -441,13 +535,8 @@ public class ApiRouter {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     int id = -1;
-
-    if (request.query() != null && !(request.query().isEmpty())) {
-      MultiMap params = request.params();
-      id = Integer.parseInt(params.get("id"));
-    }
-
     try {
+      id = Integer.parseInt(request.params().get("id"));
       processor.deleteEvent(id);
       response.setStatusCode(200).end();
 
@@ -483,6 +572,33 @@ public class ApiRouter {
     } else {
       response.setStatusCode(400).end();
     }
+  }
+
+  private void handleGetEventUsers(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+
+    String eventCode = "";
+    List<UserReturn> users; ;
+
+    try {
+    
+      eventCode = request.params().get("id");
+      System.out.println("parsed the event id successfully");
+
+      users = processor.getEventUsers(eventCode);
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    String userJson = null;
+    try {
+      userJson = JacksonMapper.getMapper().writeValueAsString(users);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    response.end(userJson);
   }
 
   public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {

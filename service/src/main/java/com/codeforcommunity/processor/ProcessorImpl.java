@@ -40,6 +40,16 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
+  public List<UserReturn> getEventUsers(int eventCode) {
+    //List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
+    List<Users> users = db.fetch("SELECT * FROM users CROSS JOIN (SELECT * FROM event_check_ins where id = 1) AS x;")
+        .into(Users.class);
+    return users.stream()
+        .map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
+            user.getGraduationYear().toString(), user.getMajor(), user.getPrivilegeLevel()))
+        .collect(Collectors.toList());
+  }
+  @Override
   public boolean attendEvent(String eventCode, int userid) {
     try{
     Result eventResult = db.fetch("select * from events where code = ?;", eventCode);
@@ -142,18 +152,6 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean validate(String email, String password) {
-    Result result = db.fetch("select hashed_password \n" + "   from users\n" + "   where email = ?;", email);
-
-    try {
-      return UpdatableBCrypt.verifyHash(password, result.getValue(0, "hashed_password").toString());
-    } catch (Exception e) {
-      e.printStackTrace();
-      return false;
-    }
-  }
-
-  @Override
   public UserReturn getUserByEmail(String email) {
 
     try {
@@ -177,6 +175,69 @@ public class ProcessorImpl implements IProcessor {
       return null;
     }
   }
+
+  @Override
+  public UserReturn getUser(int id) {
+    try {
+
+      Result userResult = db.fetch("select * from users where id=?;", id);
+      if (userResult.isEmpty()) {
+        System.out.println("error no record found");
+        return null;
+      }
+      String email = userResult.getValue(0, "email").toString();
+      String firstName = userResult.getValue(0, "first_name").toString();
+      String lastName = userResult.getValue(0, "first_name").toString();
+      String year = userResult.getValue(0, "graduation_year").toString();
+      String major = userResult.getValue(0, "major").toString();
+      int privilegeLevel = (int) userResult.getValue(0, "privilege_level");
+
+      return new UserReturn(id, email, firstName, lastName, year, major, privilegeLevel);
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e);
+      return null;
+    }
+  }
+
+  @Override
+  public boolean updateUser(int id, String email, String first, String last, String hashedPassword) {
+    try {
+      db.execute("update users set \n"
+          + "  email = ?, first_name = ?, last_name = ?, hashed_password = ?\n"
+          + "  where id = ?;", email, first, last, hashedPassword, id);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean deleteUser(int id) {
+    try {
+      db.execute("delete from users \n" + "where id = ?;", id);
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+
+
+  @Override
+  public boolean validate(String email, String password) {
+    Result result = db.fetch("select hashed_password \n" + "   from users\n" + "   where email = ?;", email);
+
+    try {
+      return UpdatableBCrypt.verifyHash(password, result.getValue(0, "hashed_password").toString());
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  
 
   @Override
   public boolean isBlacklistedToken(String jwt) {

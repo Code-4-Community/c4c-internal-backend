@@ -10,7 +10,8 @@ public interface IProcessor {
   /**
    * Get all the users first and last names.
    */
-  List<UserReturn> getAllUsers();
+
+  List<UserReturn> getEventUsers(int eventCode);
 
   boolean attendEvent(String eventCode, int userId);
 
@@ -24,9 +25,17 @@ public interface IProcessor {
   
   boolean deleteEvent(int id);
 
+  List<UserReturn> getAllUsers();
+
   boolean addUser(String email, String first, String last, String hashedPassword);
 
   UserReturn getUserByEmail(String email);
+
+  UserReturn getUser(int id);
+
+  boolean updateUser(int id, String email, String first, String last, String hashedPassword);
+
+  boolean deleteUser(int id);
 
   boolean validate(String email, String password);
 
