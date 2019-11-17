@@ -76,7 +76,6 @@ public class ApiRouter {
    * Initialize a router and register all route handlers on it.
    */
   public Router initializeRouter(Vertx vertx) {
-    System.out.println("got to router");
     Router router = Router.router(vertx);
     v = vertx;
     router.route().handler(CookieHandler.create());
@@ -107,10 +106,12 @@ public class ApiRouter {
     signUpRoute.handler(this::handleSignUp);
 
     // Should any authorized user be able to see the information of another user?
-    // No! Maybe? Probably should be able to view your own, but admins should defnitely be able to see everyone
-    
-    //maybe, two seperate sets of routes, protected and admin. protected takes id from JWT, admin takes from params
-    //or should admins have access at all? 
+    // No! Maybe? Probably should be able to view your own, but admins should
+    // defnitely be able to see everyone
+
+    // maybe, two seperate sets of routes, protected and admin. protected takes id
+    // from JWT, admin takes from params
+    // or should admins have access at all?
 
     // should this be admin only?
     Route getUsersRoute = router.route("/protected/users");
@@ -123,7 +124,8 @@ public class ApiRouter {
     Route updateUserRoute = router.put("/protected/users");
     updateUserRoute.handler(this::handleUpdateUser);
 
-    // what happens when a user deletes their account, its fine, but what about when an admin does it?
+    // what happens when a user deletes their account, its fine, but what about when
+    // an admin does it?
     Route deleteUserRoute = router.delete("/protected/user");
     deleteUserRoute.handler(this::handleDeleteUser);
 
@@ -136,7 +138,6 @@ public class ApiRouter {
     // Route sessionRoute = router.route("/session");
     // sessionRoute.handler(this::handleSession);
 
-  
     Route getEventsRoute = router.route().path("/protected/events");
     getEventsRoute.handler(this::handleGetEvents);
 
@@ -208,10 +209,7 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
 
-    System.out.println("got here");
-
     if (!flag && processor.validate(email, password)) {
-      System.out.println("got past validation");
 
       // JWTAuthOptions config = new JWTAuthOptions()
       // .setKeyStore(new KeyStoreOptions()
@@ -229,7 +227,6 @@ public class ApiRouter {
       // Authorization: Bearer <token>
 
       UserReturn user = processor.getUserByEmail(email);
-      System.out.println(user);
 
       // something is terribly wrong with this JWT, the fields arent right
       String token = createJWT("c4c", "auth-token", TOKEN_DURATION, user.id, user.privilegeLevel > 0);
@@ -292,12 +289,10 @@ public class ApiRouter {
         e.printStackTrace();
         response.setStatusCode(400).end();
       }
-      System.out.println("got past variable setting");
 
       boolean success = false;
       if (!email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
         success = processor.addUser(email, firstName, lastName, encryptedPassword);
-      System.out.println("got past database addition");
       if (success)
         response.setStatusCode(201).end();
       else {
@@ -308,7 +303,7 @@ public class ApiRouter {
     }
   }
 
-  private void handleGetUser(RoutingContext ctx){
+  private void handleGetUser(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
     int id = -1;
@@ -323,7 +318,6 @@ public class ApiRouter {
     if (id > 0)
       result = processor.getUser(id);
 
-    System.out.println(result);
 
     String json = "";
     try {
@@ -363,12 +357,12 @@ public class ApiRouter {
         e.printStackTrace();
         response.setStatusCode(400).end();
       }
-      System.out.println("got past variable setting");
+      ln("got past variable setting");
 
       boolean success = false;
-      if (id != 0 && !email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
+      if (id != 0 && !email.equals("") && !firstName.equals("") && !lastName.equals("")
+          && !encryptedPassword.equals(""))
         success = processor.updateUser(id, email, firstName, lastName, encryptedPassword);
-      System.out.println("got past database addition");
       if (success)
         response.setStatusCode(201).end();
       else {
@@ -471,8 +465,8 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     int id = -1;
 
-    try{
-    id = Integer.parseInt(request.params().get("id"));
+    try {
+      id = Integer.parseInt(request.params().get("id"));
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
@@ -481,7 +475,6 @@ public class ApiRouter {
     if (id > 0)
       result = processor.getEvent(id);
 
-    System.out.println(result);
 
     String json = "";
     try {
@@ -559,12 +552,10 @@ public class ApiRouter {
     try {
       userId = getUserId(request);
       eventCode = request.params().get("id");
-      System.out.println("parsed the event id successfully");
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    
 
     if (!eventCode.isEmpty() && userId != -1)
       success = processor.attendEvent(eventCode, userId);
@@ -584,9 +575,8 @@ public class ApiRouter {
     List<UserReturn> users = null;
 
     try {
-    
+
       eventId = Integer.parseInt(request.params().get("id"));
-      System.out.println("parsed the event id successfully");
 
       users = processor.getEventUsers(eventId);
     } catch (Exception e) {

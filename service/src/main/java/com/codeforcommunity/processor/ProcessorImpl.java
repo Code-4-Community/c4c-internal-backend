@@ -61,7 +61,6 @@ public class ProcessorImpl implements IProcessor {
     if (eventResult.isEmpty() || !open || LocalDateTime.now().compareTo(date) >= 0)
       return false;
 
-    System.out.println("going to insert in db now");
     try {
       db.execute("insert into event_check_ins\n" + "  (id, user_id, event_id)\n" + "  values (DEFAULT, ?, ?);", userid,
           eventid);
@@ -102,18 +101,14 @@ public class ProcessorImpl implements IProcessor {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
       Result eventResult = db.fetch("select * from events where id=?;", id);
       if (eventResult.isEmpty()) {
-        System.out.println("error no record found");
         return null;
       }
-      System.out.println("Record found");
       String name = eventResult.getValue(0, "name").toString();
       LocalDateTime date = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
       boolean open = (boolean) eventResult.getValue(0, "open");
-      System.out.println("conversions successful");
       return new EventReturn(id, name, date, open);
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println(e);
       return null;
     }
   }
@@ -158,7 +153,6 @@ public class ProcessorImpl implements IProcessor {
 
       Result userResult = db.fetch("select * from users where email=?;", email);
       if (userResult.isEmpty()) {
-        System.out.println("error no record found");
         return null;
       }
       int id = (int) userResult.getValue(0, "id");
@@ -171,7 +165,6 @@ public class ProcessorImpl implements IProcessor {
       return new UserReturn(id, email, firstName, lastName, year, major, privilegeLevel);
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println(e);
       return null;
     }
   }
@@ -182,7 +175,6 @@ public class ProcessorImpl implements IProcessor {
 
       Result userResult = db.fetch("select * from users where id=?;", id);
       if (userResult.isEmpty()) {
-        System.out.println("error no record found");
         return null;
       }
       String email = userResult.getValue(0, "email").toString();
@@ -195,7 +187,6 @@ public class ProcessorImpl implements IProcessor {
       return new UserReturn(id, email, firstName, lastName, year, major, privilegeLevel);
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println(e);
       return null;
     }
   }
