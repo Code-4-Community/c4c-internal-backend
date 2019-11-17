@@ -40,9 +40,9 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public List<UserReturn> getEventUsers(int eventCode) {
+  public List<UserReturn> getEventUsers(int eventId) {
     //List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
-    List<Users> users = db.fetch("SELECT * FROM users CROSS JOIN (SELECT * FROM event_check_ins where id = 1) AS x;")
+    List<Users> users = db.fetch("SELECT * FROM users CROSS JOIN (SELECT * FROM event_check_ins where id = ?) AS x;", eventId)
         .into(Users.class);
     return users.stream()
         .map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),

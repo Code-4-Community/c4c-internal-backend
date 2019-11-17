@@ -11,7 +11,7 @@ public interface IProcessor {
    * Get all the users first and last names.
    */
 
-  List<UserReturn> getEventUsers(int eventCode);
+  List<UserReturn> getEventUsers(int eventId);
 
   boolean attendEvent(String eventCode, int userId);
 

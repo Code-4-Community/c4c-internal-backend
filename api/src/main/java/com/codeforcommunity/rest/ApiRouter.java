@@ -112,11 +112,15 @@ public class ApiRouter {
     //maybe, two seperate sets of routes, protected and admin. protected takes id from JWT, admin takes from params
     //or should admins have access at all? 
 
+    // should this be admin only?
+    Route getUsersRoute = router.route("/protected/users");
+    getUsersRoute.handler(this::handleGetAllUsers);
+
     // Get User : Protected POST method
     Route getUserRoute = router.route("/protected/user/:id");
     getUserRoute.handler(this::handleGetUser);
 
-    Route updateUserRoute = router.post("/protected/user");
+    Route updateUserRoute = router.put("/protected/users");
     updateUserRoute.handler(this::handleUpdateUser);
 
     // what happens when a user deletes their account, its fine, but what about when an admin does it?
@@ -132,9 +136,7 @@ public class ApiRouter {
     // Route sessionRoute = router.route("/session");
     // sessionRoute.handler(this::handleSession);
 
-    Route getUserRoute = router.route().path("/protected/users");
-    getUserRoute.handler(this::handleGetUserRoute);
-
+  
     Route getEventsRoute = router.route().path("/protected/events");
     getEventsRoute.handler(this::handleGetEvents);
 
@@ -164,7 +166,7 @@ public class ApiRouter {
   /**
    * Add a handler for getting all users.
    */
-  private void handleGetUserRoute(RoutingContext ctx) {
+  private void handleGetAllUsers(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     response.putHeader("content-type", "application/json");
     List<UserReturn> users = processor.getAllUsers();
@@ -578,15 +580,15 @@ public class ApiRouter {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
 
-    String eventCode = "";
-    List<UserReturn> users; ;
+    int eventId = -1;
+    List<UserReturn> users = null;
 
     try {
     
-      eventCode = request.params().get("id");
+      eventId = Integer.parseInt(request.params().get("id"));
       System.out.println("parsed the event id successfully");
 
-      users = processor.getEventUsers(eventCode);
+      users = processor.getEventUsers(eventId);
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
