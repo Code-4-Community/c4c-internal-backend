@@ -433,7 +433,7 @@ public class ApiRouter {
     String name = "";
     LocalDateTime date = null;
     Boolean open = null;
-    String code = "";
+    String eventCode = "";
     // for now, the input date is to the minute
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -441,14 +441,14 @@ public class ApiRouter {
       name = body.getString("name");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       open = body.getBoolean("open");
-      code = body.getString("code");
+      eventCode = body.getString("code");
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
     boolean success = false;
     if (!name.equals("") && !date.equals(null) && !open.equals(null))
-      success = processor.createEvent(name, date, open, code);
+      success = processor.createEvent(name, date, open, eventCode);
 
     if (success)
       response.setStatusCode(201).end();
@@ -497,7 +497,7 @@ public class ApiRouter {
     String name = "";
     LocalDateTime date = null;
     Boolean open = null;
-    String code = "";
+    String eventCode = "";
     // for now, the input date is to the minute
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     int id = -1;
@@ -507,14 +507,14 @@ public class ApiRouter {
       name = body.getString("name");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       open = body.getBoolean("open");
-      code = body.getString("code");
+      eventCode = body.getString("code");
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
     boolean success = false;
     if (!name.equals("") && !date.equals(null) && !open.equals(null))
-      success = processor.updateEvent(id, name, date, open, code);
+      success = processor.updateEvent(id, name, date, open, eventCode);
 
     if (success)
       response.setStatusCode(201).end();

@@ -85,10 +85,10 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean createEvent(String name, LocalDateTime date, boolean open, String code) {
+  public boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode) {
     try {
       db.execute("insert into events\n" + "  (id, name, date, open, code)\n" + "  values (DEFAULT, ?, ?, ?, ?);", name, date,
-          open, code);
+          open, eventCode);
     } catch (Exception e) {
       return false;
     }

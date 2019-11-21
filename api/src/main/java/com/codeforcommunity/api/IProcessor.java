@@ -17,7 +17,7 @@ public interface IProcessor {
 
   List<EventReturn> getAllEvents();
 
-  boolean createEvent(String name, LocalDateTime date, boolean open, String code);
+  boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode);
   
   EventReturn getEvent(int id);
   
