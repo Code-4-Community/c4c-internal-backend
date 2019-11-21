@@ -357,7 +357,6 @@ public class ApiRouter {
         e.printStackTrace();
         response.setStatusCode(400).end();
       }
-      ln("got past variable setting");
 
       boolean success = false;
       if (id != 0 && !email.equals("") && !firstName.equals("") && !lastName.equals("")
