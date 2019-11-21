@@ -155,7 +155,7 @@ public class ApiRouter {
 
     // asd asdsad
 
-    Route attendEventRoute = router.post("/protected/eventcheckin/:id");
+    Route attendEventRoute = router.post("/protected/eventcheckin/:code");
     attendEventRoute.handler(this::handleAttendEvent);
 
     Route getEventUsersRoute = router.get("/protected/eventcheckin/:id");
@@ -550,7 +550,7 @@ public class ApiRouter {
 
     try {
       userId = getUserId(request);
-      eventCode = request.params().get("id");
+      eventCode = request.params().get("code");
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();

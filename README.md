@@ -6,52 +6,170 @@ Code 4 Community internal website backend to manage logins, event attendance, an
 
 ### Authorization
 
-For any request to protected resources you should pass the JWT in the format of this string in the HTTP header Authorization as:
+For any request to protected resources (/protected/_ or /admin/_) you should pass the JWT in the format of this string in the HTTP header Authorization as:
 Authorization: Bearer <token>
 
 ### Endpoints
 
-Note that routes that should modify data ought to be POST requests, this is being changed soon.
-
 ```sh
-GET https://localhost:8443/signup?username=<username>&password=<password>
+GET /
 ```
 
-- Creates a user in the database the given username and password
+Gets the public "home" page.
 
 ```sh
-GET https://localhost:8443/login?username=<username>&password=<password>
+POST /signup
 ```
 
-- Returns JWT in response header under "Authorization".
+Takes JSON in request body in format:
+ - String email
+ - String firstName
+ - String lastName
+ - String password
+
+```json
+{
+  "email": "john.doe@email.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "password": "password123"
+}
+```
+
+Creates a user in the database with the given username and password.
 
 ```sh
-GET https://localhost:8443/logout
+POST /login
 ```
 
-- Given a valid JWT through the request header, will invalidate the JWT on the server-side
+Takes JSON in request body in format:
+ - String email
+ - String password
+
+```json
+{
+  "email": "john.doe@email.com",
+  "password": "password123"
+}
+```
+
+Returns a JWT in response header under "Authorization".
 
 ```sh
-GET https://localhost:8443/api/v1/users/
+GET /logout
 ```
 
-- Returns a list of all of our users.
+Given a valid JWT through the request header, will invalidate the JWT on the server-side.
 
 ```sh
-GET https://localhost:8443/protected/createevent?id=<id>&name=<name>&date=<yyyy-MM-dd HH-mm>&open=<open>
+GET /protected/users
 ```
 
-- Given a valid JWT through the request header, will create a event with:
-- a unique id,
-- name,
-- date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05),
-- and a boolean representing if the meetting is still open.
+Returns a list of all of our users.
 
 ```sh
-GET https://localhost:8443/https://localhost:8443/protected/attendevent?id=<id>
+GET /protected/users:id
 ```
 
-- Given a valid JWT through the request header, will attend the event with the event id
+Returns the information for the user with this :id.
+
+```sh
+PUT /protected/user
+```
+
+Takes JSON in request body in format:
+ - String email
+ - String firstName
+ - String lastName
+ - String password
+```json
+{
+  "email": "john.doe@email.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "password": "password123"
+}
+```
+
+Updates and overwrites all information for the user with the id in the JWT.
+
+```sh
+DELETE /protected/user
+```
+
+Deletes the user with the id in the JWT.
+
+```sh
+GET /protected/events
+```
+
+Returns a list of all of our events.
+
+```sh
+GET /protected/event/:id
+```
+
+Gets information for the event with this :id.
+
+```sh
+POST /admin/event
+```
+
+Takes JSON in request body in format:
+- String name
+- String date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05)
+- boolean open
+- String code
+
+```json
+{
+  "name": "Introduction to Vert.x",
+  "date": "2019-12-25 12:05",
+  "open": true,
+  "code": "Meeting Code"
+}
+```
+
+Creates a new event in the database with the given information.
+
+```sh
+POST /admin/event/:id
+```
+
+Takes JSON in request body in format:
+- String name
+- String date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05)
+- boolean open
+- String code
+
+```json
+{
+  "name": "Introduction to Vert.x",
+  "date": "2019-12-25 12:05",
+  "open": true,
+  "code": "Meeting Code"
+}
+```
+
+Updates and overwrites all information for the meeting with this :id
+
+```sh
+DELETE /admin/event/:id
+```
+
+Deletes the event with this :id.
+
+```sh
+GET /protected/eventcheckin/:id
+```
+
+Gets all the users in an event with this :id
+
+```sh
+POST /protected/eventcheckin/:code
+```
+
+Check in the user with id in the given JWT to the event with this :code
 
 ## Build Setup
 
@@ -63,7 +181,7 @@ Make sure you hava Java 8 installed, it can be downloaded [here](https://www.ora
 
 Maven is used to install dependencies, build, and compile our Vert.x application into a jar file. Download it [here](https://maven.apache.org/download.cgi) or install it using homebrew/chocolatey. Maven must be added to the PATH environment variable on your computer to be used globally.
 
-### Installation Part 1
+### Installation
 
 Clone the repo into a folder.
 
@@ -89,7 +207,7 @@ $ \q
 $ psql -U postgres -d c4cneu-db -f <file> -h localhost
 ```
 
-### Installation Part 2
+### Compiling & Running
 
 ```sh
 $ cd c4c-internal-backend
