@@ -229,7 +229,7 @@ public class ApiRouter {
       UserReturn user = processor.getUserByEmail(email);
 
       // something is terribly wrong with this JWT, the fields arent right
-      String token = createJWT("c4c", "auth-token", TOKEN_DURATION, user.id, user.privilegeLevel > 0);
+      String token = createJWT("c4c", "auth-token", TOKEN_DURATION, user.getId(), user.getPrivilegeLevel() > 0);
       // JWT given back in header
       response.putHeader("Authorization", "Bearer " + token);
       // could respond with the token in body, but for now Authorization is passed

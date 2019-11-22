@@ -3,13 +3,13 @@ package com.codeforcommunity.dto;
 public class UserReturn {
   // doesnt make sense that we would ever set these values after construction.
   // favor immutibility.
-  public final int id;
-  public final String email;
-  public final String firstName;
-  public final String lastName;
-  public final String year;
-  public final String major;
-  public final int privilegeLevel;
+  private final int id;
+  private final String email;
+  private final String firstName;
+  private final String lastName;
+  private final String year;
+  private final String major;
+  private final int privilegeLevel;
 
   public UserReturn(int id, String email, String firstName, String lastName, String year, String major,
       int privilegeLevel) {
@@ -22,9 +22,6 @@ public class UserReturn {
     this.privilegeLevel = privilegeLevel;
   }
 
-  public String toString() {
-    return id + " " + email + " " + firstName + " " + lastName + " " + year + " " + major + " " + privilegeLevel;
-  }
 
   public int getId() {
     return this.id;
@@ -52,5 +49,10 @@ public class UserReturn {
 
   public int getPrivilegeLevel() {
     return this.privilegeLevel;
+  }
+
+  @Override
+  public String toString() {
+    return this.id + " " + this.email + " " + this.firstName + " " + this.lastName + " " + this.year + " " + this.major + " " + this.privilegeLevel;
   }
 }
