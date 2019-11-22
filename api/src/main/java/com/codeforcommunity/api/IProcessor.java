@@ -4,6 +4,8 @@ import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.EventReturn;
 
 import java.util.List;
+import java.util.Optional;
+
 import java.time.LocalDateTime;
 
 public interface IProcessor {
@@ -19,7 +21,7 @@ public interface IProcessor {
 
   boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode);
   
-  EventReturn getEvent(int id);
+  Optional<EventReturn> getEvent(int id);
   
   boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code);
   

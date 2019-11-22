@@ -5,14 +5,20 @@ import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
 import org.jooq.Result;
 import org.jooq.Table;
+import org.jooq.exception.NoDataFoundException;
 import org.jooq.generated.tables.pojos.Users;
-import org.jooq.generated.tables.pojos.Events;
 
+import antlr.debug.Event;
+import io.vertx.core.cli.Option;
+
+import org.jooq.generated.tables.pojos.Events;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 import java.io.Console;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,38 +47,40 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public List<UserReturn> getEventUsers(int eventId) {
-    //List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
-    List<Users> users = db.fetch("SELECT * FROM users CROSS JOIN (SELECT * FROM event_check_ins where id = ?) AS x;", eventId)
+    // List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
+    List<Users> users = db
+        .fetch("SELECT * FROM users CROSS JOIN (SELECT * FROM event_check_ins where id = ?) AS x;", eventId)
         .into(Users.class);
     return users.stream()
         .map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
             user.getGraduationYear().toString(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
+
   @Override
   public boolean attendEvent(String eventCode, int userid) {
-    try{
-    Result eventResult = db.fetch("select * from events where code = ?;", eventCode);
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-    LocalDateTime date = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
-    boolean open = Boolean.parseBoolean(eventResult.getValue(0, "open").toString());
-    int eventid = Integer.parseInt(eventResult.getValue(0, "id").toString());
-    if (eventResult.isEmpty() || !open || LocalDateTime.now().compareTo(date) >= 0)
-      return false;
-
     try {
-      db.execute("insert into event_check_ins\n" + "  (id, user_id, event_id)\n" + "  values (DEFAULT, ?, ?);", userid,
-          eventid);
+      Result eventResult = db.fetch("select * from events where code = ?;", eventCode);
 
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+      LocalDateTime date = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
+      boolean open = Boolean.parseBoolean(eventResult.getValue(0, "open").toString());
+      int eventid = Integer.parseInt(eventResult.getValue(0, "id").toString());
+      if (eventResult.isEmpty() || !open || LocalDateTime.now().compareTo(date) >= 0)
+        return false;
+
+      try {
+        db.execute("insert into event_check_ins\n" + "  (id, user_id, event_id)\n" + "  values (DEFAULT, ?, ?);",
+            userid, eventid);
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       return false;
     }
-  } catch (Exception e) {
-      e.printStackTrace();
-      return false;
-    } 
     return true;
   }
 
@@ -80,15 +88,17 @@ public class ProcessorImpl implements IProcessor {
   public List<EventReturn> getAllEvents() {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
     List<Events> events = db.selectFrom(Tables.EVENTS).fetchInto(Events.class);
-    return events.stream().map(event -> new EventReturn(event.getId(), event.getName(),
-        LocalDateTime.parse(event.getDate().toString(), formatter), event.getOpen())).collect(Collectors.toList());
+    return events.stream()
+        .map(event -> new EventReturn(event.getId(), event.getName(),
+            LocalDateTime.parse(event.getDate().toString(), formatter), event.getOpen(), event.getCode()))
+        .collect(Collectors.toList());
   }
 
   @Override
   public boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode) {
     try {
-      db.execute("insert into events\n" + "  (id, name, date, open, code)\n" + "  values (DEFAULT, ?, ?, ?, ?);", name, date,
-          open, eventCode);
+      db.execute("insert into events\n" + "  (id, name, date, open, code)\n" + "  values (DEFAULT, ?, ?, ?, ?);", name,
+          date, open, eventCode);
     } catch (Exception e) {
       return false;
     }
@@ -96,27 +106,38 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public EventReturn getEvent(int id) {
+  public Optional<EventReturn> getEvent(int id) {
+    /*
+     * try { DateTimeFormatter formatter =
+     * DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"); Result eventResult =
+     * db.fetch("select * from events where id=?;", id); if (eventResult.isEmpty())
+     * { return null; }
+     * 
+     * 
+     * 
+     * 
+     * String name = eventResult.getValue(0, "name").toString(); LocalDateTime date
+     * = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
+     * boolean open = (boolean) eventResult.getValue(0, "open"); } catch (Exception
+     * e) { e.printStackTrace(); return null; }
+     */
+
+    // Events result =
+    // db.select().from(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id)).fetchSingleInto(Events.class);
     try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-      Result eventResult = db.fetch("select * from events where id=?;", id);
-      if (eventResult.isEmpty()) {
-        return null;
-      }
-      String name = eventResult.getValue(0, "name").toString();
-      LocalDateTime date = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
-      boolean open = (boolean) eventResult.getValue(0, "open");
-      return new EventReturn(id, name, date, open);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+      EventReturn result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id))
+          .fetchSingleInto(EventReturn.class);
+      return Optional.of(result);
+    } catch (NoDataFoundException e) {
+      return Optional.empty();
     }
   }
 
   @Override
   public boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code) {
     try {
-      db.execute("update events set \n" + " name = ?, date = ?, open = ?, code = ? \n" + "  where id = ?;", name, date, open, id, code);
+      db.execute("update events set \n" + " name = ?, date = ?, open = ?, code = ? \n" + "  where id = ?;", name, date,
+          open, id, code);
     } catch (Exception e) {
       return false;
     }
@@ -194,8 +215,7 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean updateUser(int id, String email, String first, String last, String hashedPassword) {
     try {
-      db.execute("update users set \n"
-          + "  email = ?, first_name = ?, last_name = ?, hashed_password = ?\n"
+      db.execute("update users set \n" + "  email = ?, first_name = ?, last_name = ?, hashed_password = ?\n"
           + "  where id = ?;", email, first, last, hashedPassword, id);
     } catch (Exception e) {
       e.printStackTrace();
@@ -214,8 +234,6 @@ public class ProcessorImpl implements IProcessor {
     return true;
   }
 
-
-
   @Override
   public boolean validate(String email, String password) {
     Result result = db.fetch("select hashed_password \n" + "   from users\n" + "   where email = ?;", email);
@@ -227,8 +245,6 @@ public class ProcessorImpl implements IProcessor {
       return false;
     }
   }
-
-  
 
   @Override
   public boolean isBlacklistedToken(String jwt) {

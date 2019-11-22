@@ -52,6 +52,7 @@ import io.vertx.core.json.Json;
 import java.util.UUID;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
+import java.util.Optional;
 
 public class ApiRouter {
   private HashMap<String, Integer> loginmap = new HashMap<String, Integer>();
@@ -318,7 +319,6 @@ public class ApiRouter {
     if (id > 0)
       result = processor.getUser(id);
 
-
     String json = "";
     try {
       json = JacksonMapper.getMapper().writeValueAsString(result);
@@ -470,21 +470,17 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    EventReturn result = null;
-    if (id > 0)
-      result = processor.getEvent(id);
 
-
+    Optional<EventReturn> ret = processor.getEvent(id);
     String json = "";
     try {
-      json = JacksonMapper.getMapper().writeValueAsString(result);
-    } catch (Exception e) {
-      e.printStackTrace();
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
     }
 
-    if (result != null && !json.isEmpty()) {
+    if (!json.isEmpty()) {
       response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
-
     } else {
       response.setStatusCode(400).end();
     }
