@@ -227,17 +227,13 @@ public class ApiRouter {
       // HTTP header Authorization as:
       // Authorization: Bearer <token>
 
-      UserReturn user = processor.getUserByEmail(email);
+      // This optional will never be non-present because validate() called above
+      // ensures that such a record exists
+      UserReturn user = processor.getUserByEmail(email).get();
 
-      // something is terribly wrong with this JWT, the fields arent right
       String token = createJWT("c4c", "auth-token", TOKEN_DURATION, user.getId(), user.getPrivilegeLevel() > 0);
-      // JWT given back in header
       response.putHeader("Authorization", "Bearer " + token);
-      // could respond with the token in body, but for now Authorization is passed
-      // back in header
       response.setStatusCode(200).end();
-      // we COULD store misc info about the user in the session but
-      // ctx.session().put("username", username);
     }
     /*
      * Need to fix, because this will cause a timeout if login failure occurs 5
@@ -311,24 +307,22 @@ public class ApiRouter {
 
     try {
       id = Integer.parseInt(request.params().get("id"));
-    } catch (Exception e) {
+    } catch (NumberFormatException e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    UserReturn result = null;
-    if (id > 0)
-      result = processor.getUser(id);
 
+    Optional<UserReturn> ret = processor.getUser(id);
     String json = "";
     try {
-      json = JacksonMapper.getMapper().writeValueAsString(result);
-    } catch (Exception e) {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
 
-    if (result != null && !json.isEmpty()) {
+    if (!json.isEmpty()) {
       response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
-
     } else {
       response.setStatusCode(400).end();
     }
@@ -466,7 +460,7 @@ public class ApiRouter {
 
     try {
       id = Integer.parseInt(request.params().get("id"));
-    } catch (Exception e) {
+    } catch (NumberFormatException e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }

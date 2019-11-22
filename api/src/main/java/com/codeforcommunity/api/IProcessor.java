@@ -9,9 +9,6 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 
 public interface IProcessor {
-  /**
-   * Get all the users first and last names.
-   */
 
   List<UserReturn> getEventUsers(int eventId);
 
@@ -31,9 +28,9 @@ public interface IProcessor {
 
   boolean addUser(String email, String first, String last, String hashedPassword);
 
-  UserReturn getUserByEmail(String email);
+  Optional<UserReturn> getUserByEmail(String email);
 
-  UserReturn getUser(int id);
+  Optional<UserReturn> getUser(int id);
 
   boolean updateUser(int id, String email, String first, String last, String hashedPassword);
 

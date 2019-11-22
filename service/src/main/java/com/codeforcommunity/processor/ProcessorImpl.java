@@ -107,23 +107,6 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public Optional<EventReturn> getEvent(int id) {
-    /*
-     * try { DateTimeFormatter formatter =
-     * DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"); Result eventResult =
-     * db.fetch("select * from events where id=?;", id); if (eventResult.isEmpty())
-     * { return null; }
-     * 
-     * 
-     * 
-     * 
-     * String name = eventResult.getValue(0, "name").toString(); LocalDateTime date
-     * = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
-     * boolean open = (boolean) eventResult.getValue(0, "open"); } catch (Exception
-     * e) { e.printStackTrace(); return null; }
-     */
-
-    // Events result =
-    // db.select().from(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id)).fetchSingleInto(Events.class);
     try {
       EventReturn result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id))
           .fetchSingleInto(EventReturn.class);
@@ -168,47 +151,26 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public UserReturn getUserByEmail(String email) {
-
+  public Optional<UserReturn> getUserByEmail(String email) {
     try {
-
-      Result userResult = db.fetch("select * from users where email=?;", email);
-      if (userResult.isEmpty()) {
-        return null;
-      }
-      int id = (int) userResult.getValue(0, "id");
-      String firstName = userResult.getValue(0, "first_name").toString();
-      String lastName = userResult.getValue(0, "first_name").toString();
-      String year = userResult.getValue(0, "graduation_year").toString();
-      String major = userResult.getValue(0, "major").toString();
-      int privilegeLevel = (int) userResult.getValue(0, "privilege_level");
-
-      return new UserReturn(id, email, firstName, lastName, year, major, privilegeLevel);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+      Users result = db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)).fetchSingleInto(Users.class);
+      UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
+          Integer.toString(result.getGraduationYear()), result.getMajor(), result.getPrivilegeLevel());
+      return Optional.of(ret);
+    } catch (NoDataFoundException e) {
+      return Optional.empty();
     }
   }
 
   @Override
-  public UserReturn getUser(int id) {
+  public Optional<UserReturn> getUser(int id) {
     try {
-
-      Result userResult = db.fetch("select * from users where id=?;", id);
-      if (userResult.isEmpty()) {
-        return null;
-      }
-      String email = userResult.getValue(0, "email").toString();
-      String firstName = userResult.getValue(0, "first_name").toString();
-      String lastName = userResult.getValue(0, "first_name").toString();
-      String year = userResult.getValue(0, "graduation_year").toString();
-      String major = userResult.getValue(0, "major").toString();
-      int privilegeLevel = (int) userResult.getValue(0, "privilege_level");
-
-      return new UserReturn(id, email, firstName, lastName, year, major, privilegeLevel);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+      Users result = db.select().from(Tables.USERS).where(Tables.USERS.ID.eq(id)).fetchSingleInto(Users.class);
+      UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
+          Integer.toString(result.getGraduationYear()), result.getMajor(), result.getPrivilegeLevel());
+      return Optional.of(ret);
+    } catch (NoDataFoundException e) {
+      return Optional.empty();
     }
   }
 
