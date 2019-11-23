@@ -100,21 +100,11 @@ public class ApiRouter {
      * afterRoute.handler(this::handleAfter);
      */
 
-    // USER CRUD
 
-    // Create User : Non-Protected POST method
     Route signUpRoute = router.post("/signup");
     signUpRoute.handler(this::handleSignUp);
 
-    // Should any authorized user be able to see the information of another user?
-    // No! Maybe? Probably should be able to view your own, but admins should
-    // defnitely be able to see everyone
 
-    // maybe, two seperate sets of routes, protected and admin. protected takes id
-    // from JWT, admin takes from params
-    // or should admins have access at all?
-
-    // should this be admin only?
     Route getUsersRoute = router.route("/protected/users");
     getUsersRoute.handler(this::handleGetAllUsers);
 
@@ -125,14 +115,10 @@ public class ApiRouter {
     Route updateUserRoute = router.put("/protected/user");
     updateUserRoute.handler(this::handleUpdateUser);
 
-    // what happens when a user deletes their account, its fine, but what about when
-    // an admin does it?
     Route deleteUserRoute = router.delete("/protected/user");
     deleteUserRoute.handler(this::handleDeleteUser);
 
-    // should logout be a POST or GET? we dont supply information but it is
-    // modifying a resource...
-    // 200 or 201
+
     Route logoutRoute = router.route("/logout");
     logoutRoute.handler(this::handleLogout);
 
@@ -153,8 +139,6 @@ public class ApiRouter {
 
     Route deleteEventRoute = router.delete("/admin/event/:id");
     deleteEventRoute.handler(this::handleDeleteEvent);
-
-    // asd asdsad
 
     Route attendEventRoute = router.post("/protected/eventcheckin/:code");
     attendEventRoute.handler(this::handleAttendEvent);
