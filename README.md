@@ -17,6 +17,8 @@ GET /
 
 Gets the public "home" page.
 
+---
+
 ```sh
 POST /signup
 ```
@@ -38,6 +40,8 @@ Takes JSON in request body in format:
 
 Creates a user in the database with the given username and password.
 
+---
+
 ```sh
 POST /login
 ```
@@ -55,11 +59,15 @@ Takes JSON in request body in format:
 
 Returns a JWT in response header under "Authorization".
 
+---
+
 ```sh
 GET /logout
 ```
 
 Given a valid JWT through the request header, will invalidate the JWT on the server-side.
+
+---
 
 ```sh
 GET /protected/users
@@ -67,11 +75,15 @@ GET /protected/users
 
 Returns a list of all of our users.
 
+---
+
 ```sh
 GET /protected/user/:id
 ```
 
 Returns the information for the user with this :id.
+
+---
 
 ```sh
 PUT /protected/user
@@ -93,11 +105,15 @@ Takes JSON in request body in format:
 
 Updates and overwrites all information for the user with the id in the JWT.
 
+---
+
 ```sh
 DELETE /protected/user
 ```
 
 Deletes the user with the id in the JWT.
+
+---
 
 ```sh
 GET /protected/events
@@ -105,11 +121,15 @@ GET /protected/events
 
 Returns a list of all of our events.
 
+---
+
 ```sh
 GET /protected/event/:id
 ```
 
 Gets information for the event with this :id.
+
+---
 
 ```sh
 POST /admin/event
@@ -132,8 +152,10 @@ Takes JSON in request body in format:
 
 Creates a new event in the database with the given information.
 
+---
+
 ```sh
-POST /admin/event/:id
+PUT /admin/event/:id
 ```
 
 Takes JSON in request body in format:
@@ -153,17 +175,23 @@ Takes JSON in request body in format:
 
 Updates and overwrites all information for the meeting with this :id
 
+---
+
 ```sh
 DELETE /admin/event/:id
 ```
 
 Deletes the event with this :id.
 
+---
+
 ```sh
 GET /protected/eventcheckin/:id
 ```
 
 Gets all the users in an event with this :id
+
+---
 
 ```sh
 POST /protected/eventcheckin/:code
