@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>backend-scaffold</artifactId>
     <groupId>com.codeforcommunity</groupId>
@@ -14,7 +12,7 @@
   <properties>
     <flyway.version>6.0.3</flyway.version>
     <database.driver>org.postgresql.Driver</database.driver>
-    <database.url>jdbc:postgresql://localhost:5434/checkin?autoreconnect=true</database.url>
+    <database.url>jdbc:postgresql://localhost:5432/c4cneu-db?autoreconnect=true</database.url>
     <database.username>postgres</database.username>
     <database.password>root</database.password>
   </properties>
@@ -104,7 +102,7 @@
           <user>${database.username}</user>
           <password>${database.password}</password>
 
-       <!--   <schemas>
+          <!--   <schemas>
             <schema>scaffold</schema>
           </schemas> -->
           <encoding>ISO-8859-1</encoding>
@@ -115,7 +113,7 @@
             <id>flyway database migration</id>
             <phase>pre-integration-test</phase>
             <goals>
-          <!--<goal>clean</goal>-->
+              <!--<goal>clean</goal>-->
               <goal>migrate</goal>
               <goal>info</goal>
             </goals>

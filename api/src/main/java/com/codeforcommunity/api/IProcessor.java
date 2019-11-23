@@ -1,21 +1,46 @@
 package com.codeforcommunity.api;
 
-import com.codeforcommunity.dto.MemberReturn;
+import com.codeforcommunity.dto.UserReturn;
+import com.codeforcommunity.dto.EventReturn;
 
 import java.util.List;
+import java.util.Optional;
+
 import java.time.LocalDateTime;
 
 public interface IProcessor {
-  /**
-   * Get all the members first and last names.
-   */
-  List<MemberReturn> getAllMembers();
 
-  boolean attendMeeting(String meetingid, String username);
-  boolean createMeeting(String id, String name, LocalDateTime date, boolean open);
-  boolean addMember(String first, String last);
-  boolean validate(String first, String last);
-  boolean isBlacklistedToken(String jwt);
-  boolean addBlacklistedToken(String jwt);
+  List<UserReturn> getEventUsers(int eventId);
+
+  boolean attendEvent(String eventCode, int userId);
+
+  List<EventReturn> getAllEvents();
+
+  boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode);
+  
+  Optional<EventReturn> getEvent(int id);
+  
+  boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code);
+  
+  boolean deleteEvent(int id);
+
+  List<UserReturn> getAllUsers();
+
+  boolean addUser(String email, String first, String last, String hashedPassword);
+
+  Optional<UserReturn> getUserByEmail(String email);
+
+  Optional<UserReturn> getUser(int id);
+
+  boolean updateUser(int id, String email, String first, String last, String hashedPassword);
+
+  boolean deleteUser(int id);
+
+  boolean validate(String email, String password);
+
+  boolean isBlacklistedToken(String jti);
+
+  boolean addBlacklistedToken(String jti);
+
   boolean clearBlacklistedTokens(long tokenDuration);
 }
