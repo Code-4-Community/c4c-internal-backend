@@ -38,9 +38,9 @@ public interface IProcessor {
 
   boolean validate(String email, String password);
 
-  boolean isBlacklistedToken(String jwt);
+  boolean isBlacklistedToken(String jti);
 
-  boolean addBlacklistedToken(String jwt);
+  boolean addBlacklistedToken(String jti);
 
   boolean clearBlacklistedTokens(long tokenDuration);
 }

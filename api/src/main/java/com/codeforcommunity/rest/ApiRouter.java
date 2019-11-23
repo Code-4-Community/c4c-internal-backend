@@ -371,7 +371,7 @@ public class ApiRouter {
       // onLogout clear expired tokens to periodically "trim" the blacklsited tokens
       // (should probably instead daily)
       boolean cleared = processor.clearBlacklistedTokens(TOKEN_DURATION);
-      boolean success = processor.addBlacklistedToken(request.headers().get("Authorization"));
+      boolean success = processor.addBlacklistedToken(getClaims(request).getId());
 
       if (success) {
         // ctx.reroute(ctx.request().path());
@@ -635,16 +635,22 @@ public class ApiRouter {
   public Claims getClaims(HttpServerRequest request) {
     String jwt = request.headers().get("Authorization");
     boolean isNullOrEmpty = jwt == null || jwt.isEmpty();
-    boolean isBlacklisted = isBlacklistedToken(jwt);
-    if (isNullOrEmpty || isBlacklisted)
+    
+    if (isNullOrEmpty)
       return null;
 
     Claims c = decodeJWT(jwt.split(" ")[1]);
+
+    boolean isBlacklisted = isBlacklistedToken(c.getId());
+
+    if(isBlacklisted) 
+      return null;
+
     return c;
   }
 
-  public boolean isBlacklistedToken(String jwt) {
-    return processor.isBlacklistedToken(jwt);
+  public boolean isBlacklistedToken(String jti) {
+    return processor.isBlacklistedToken(jti);
   }
 
   public Claims decodeJWT(String jwt) {

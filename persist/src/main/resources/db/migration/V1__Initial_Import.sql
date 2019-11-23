@@ -47,7 +47,6 @@ IF NOT EXISTS event_check_ins
 CREATE TABLE
 IF NOT EXISTS blacklisted_tokens
 (
-  id VARCHAR
-(256) NOT NULL PRIMARY KEY,
+  id VARCHAR(255) NOT NULL PRIMARY KEY,
   time_milliseconds BIGINT
 );

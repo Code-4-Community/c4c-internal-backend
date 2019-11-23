@@ -245,19 +245,20 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean isBlacklistedToken(String jwt) {
-    Result result = db.select().from(Tables.BLACKLISTED_TOKENS).where(Tables.BLACKLISTED_TOKENS.ID.eq(jwt)).fetch();
+  public boolean isBlacklistedToken(String jti) {
+    Result result = db.select().from(Tables.BLACKLISTED_TOKENS).where(Tables.BLACKLISTED_TOKENS.ID.eq(jti)).fetch();
     if (result.isEmpty())
       return false;
     return true;
   }
 
   @Override
-  public boolean addBlacklistedToken(String jwt) {
+  public boolean addBlacklistedToken(String jti) {
     try {
       db.insertInto(Tables.BLACKLISTED_TOKENS, Tables.BLACKLISTED_TOKENS.ID,
-          Tables.BLACKLISTED_TOKENS.TIME_MILLISECONDS).values(jwt, System.currentTimeMillis()).execute();
+          Tables.BLACKLISTED_TOKENS.TIME_MILLISECONDS).values(jti, System.currentTimeMillis()).execute();
     } catch (Exception e) {
+      e.printStackTrace();
       // If this fails this is a security risk as there exists a token that is still
       // technically "valid" even though the user logged out
       return false;
@@ -275,6 +276,7 @@ public class ProcessorImpl implements IProcessor {
       db.delete(Tables.BLACKLISTED_TOKENS)
           .where(Tables.BLACKLISTED_TOKENS.TIME_MILLISECONDS.le(System.currentTimeMillis() - tokenDuration)).execute();
     } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
     return true;
