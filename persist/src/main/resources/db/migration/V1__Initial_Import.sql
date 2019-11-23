@@ -26,7 +26,7 @@ IF NOT EXISTS events
   date TIMESTAMP,
   open BOOLEAN,
   code VARCHAR
-(255)
+(255) UNIQUE
 );
 
 CREATE TABLE
