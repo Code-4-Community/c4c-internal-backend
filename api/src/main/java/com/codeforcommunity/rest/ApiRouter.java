@@ -269,7 +269,7 @@ public class ApiRouter {
     }
 
     boolean success = false;
-    if (!email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
+    if (email != null && firstName != null && lastName != null && encryptedPassword != null)
       success = processor.addUser(email, firstName, lastName, encryptedPassword);
     if (success)
       response.setStatusCode(201).end();
@@ -335,8 +335,7 @@ public class ApiRouter {
       }
 
       boolean success = false;
-      if (id != 0 && !email.equals("") && !firstName.equals("") && !lastName.equals("")
-          && !encryptedPassword.equals(""))
+      if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null)
         success = processor.updateUser(id, email, firstName, lastName, encryptedPassword);
       if (success)
         response.setStatusCode(201).end();
@@ -423,7 +422,7 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     boolean success = false;
-    if (!name.equals("") && !date.equals(null) && !open.equals(null))
+    if (name != null && date != null && open != null && eventCode != null)
       success = processor.createEvent(name, date, open, eventCode);
 
     if (success)
@@ -485,7 +484,7 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     boolean success = false;
-    if (!name.equals("") && !date.equals(null) && !open.equals(null))
+    if (name != null && date != null && open != null && eventCode != null)
       success = processor.updateEvent(id, name, date, open, eventCode);
 
     if (success)
