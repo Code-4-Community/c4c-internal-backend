@@ -68,7 +68,7 @@ GET /protected/users
 Returns a list of all of our users.
 
 ```sh
-GET /protected/users:id
+GET /protected/user/:id
 ```
 
 Returns the information for the user with this :id.

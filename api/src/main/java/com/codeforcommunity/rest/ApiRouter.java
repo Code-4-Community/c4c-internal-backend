@@ -353,9 +353,11 @@ public class ApiRouter {
     int id = -1;
     try {
       id = getUserId(request);
-      processor.deleteEvent(id);
-      response.setStatusCode(200).end();
-
+      boolean success = processor.deleteUser(id);
+      if (success)
+        response.setStatusCode(200).end();
+      else
+        response.setStatusCode(400).end();
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
@@ -635,7 +637,7 @@ public class ApiRouter {
   public Claims getClaims(HttpServerRequest request) {
     String jwt = request.headers().get("Authorization");
     boolean isNullOrEmpty = jwt == null || jwt.isEmpty();
-    
+
     if (isNullOrEmpty)
       return null;
 
@@ -643,7 +645,7 @@ public class ApiRouter {
 
     boolean isBlacklisted = isBlacklistedToken(c.getId());
 
-    if(isBlacklisted) 
+    if (isBlacklisted)
       return null;
 
     return c;
