@@ -7,11 +7,11 @@ public class UserReturn {
   private final String email;
   private final String firstName;
   private final String lastName;
-  private final String year;
+  private final int year;
   private final String major;
   private final int privilegeLevel;
 
-  public UserReturn(int id, String email, String firstName, String lastName, String year, String major,
+  public UserReturn(int id, String email, String firstName, String lastName, int year, String major,
       int privilegeLevel) {
     this.id = id;
     this.email = email;
@@ -39,7 +39,7 @@ public class UserReturn {
     return this.lastName;
   }
 
-  public String getYear() {
+  public int getYear() {
     return this.year;
   }
 

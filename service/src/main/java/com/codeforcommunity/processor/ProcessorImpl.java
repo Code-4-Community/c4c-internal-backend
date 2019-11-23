@@ -39,9 +39,8 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public List<UserReturn> getAllUsers() {
     List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
-    return users.stream()
-        .map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
-            user.getGraduationYear().toString(), user.getMajor(), user.getPrivilegeLevel()))
+    return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
+        user.getLastName(), user.getGraduationYear(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
 
@@ -50,14 +49,17 @@ public class ProcessorImpl implements IProcessor {
     // List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
 
     // I dont know how to turn this SQL statement into JOOQ
+    // db.fetch(
+    // "SELECT * FROM USERS INNER JOIN (SELECT user_id FROM event_check_ins where
+    // event_id = ?) as Z ON USERS.id = Z.user_id;",
+    // eventId).into(Users.class);
+    List<Users> users = db.select().from(Tables.USERS)
+        .where(Tables.USERS.ID.in(db.select(Tables.EVENT_CHECK_INS.USER_ID).from(Tables.EVENT_CHECK_INS)
+            .where(Tables.EVENT_CHECK_INS.EVENT_ID.eq(eventId))))
+        .fetchInto(Users.class);
 
-    List<Users> users = db.fetch(
-        "SELECT * FROM USERS INNER JOIN (SELECT user_id FROM event_check_ins where event_id = ?) as Z ON USERS.id = Z.user_id;",
-        eventId).into(Users.class);
-      
-    return users.stream()
-        .map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
-            user.getGraduationYear().toString(), user.getMajor(), user.getPrivilegeLevel()))
+    return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
+        user.getLastName(), user.getGraduationYear(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
 
@@ -189,7 +191,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       Users result = db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)).fetchSingleInto(Users.class);
       UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          Integer.toString(result.getGraduationYear()), result.getMajor(), result.getPrivilegeLevel());
+          result.getGraduationYear(), result.getMajor(), result.getPrivilegeLevel());
       return Optional.of(ret);
     } catch (NoDataFoundException e) {
       return Optional.empty();
@@ -201,7 +203,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       Users result = db.select().from(Tables.USERS).where(Tables.USERS.ID.eq(id)).fetchSingleInto(Users.class);
       UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          Integer.toString(result.getGraduationYear()), result.getMajor(), result.getPrivilegeLevel());
+          result.getGraduationYear(), result.getMajor(), result.getPrivilegeLevel());
       return Optional.of(ret);
     } catch (NoDataFoundException e) {
       return Optional.empty();
