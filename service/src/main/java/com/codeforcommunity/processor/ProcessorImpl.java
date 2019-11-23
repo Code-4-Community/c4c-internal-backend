@@ -28,9 +28,6 @@ import java.sql.Timestamp;
 public class ProcessorImpl implements IProcessor {
 
   private final DSLContext db;
-  // id should really not be a static number! see down below for dynamic id, hash
-  // of username
-  // private int id = 10;
 
   public ProcessorImpl(DSLContext db) {
     this.db = db;

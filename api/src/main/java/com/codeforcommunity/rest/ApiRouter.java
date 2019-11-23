@@ -178,6 +178,7 @@ public class ApiRouter {
       userJson = JacksonMapper.getMapper().writeValueAsString(users);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
+      response.setStatusCode(400).end();
     }
     response.end(userJson);
   }
