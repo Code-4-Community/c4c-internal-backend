@@ -48,9 +48,13 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public List<UserReturn> getEventUsers(int eventId) {
     // List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
-    List<Users> users = db
-        .fetch("SELECT * FROM users CROSS JOIN (SELECT * FROM event_check_ins where id = ?) AS x;", eventId)
-        .into(Users.class);
+
+    // I dont know how to turn this SQL statement into JOOQ
+
+    List<Users> users = db.fetch(
+        "SELECT * FROM USERS INNER JOIN (SELECT user_id FROM event_check_ins where event_id = ?) as Z ON USERS.id = Z.user_id;",
+        eventId).into(Users.class);
+      
     return users.stream()
         .map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
             user.getGraduationYear().toString(), user.getMajor(), user.getPrivilegeLevel()))
@@ -59,46 +63,59 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean attendEvent(String eventCode, int userid) {
+
+    // Result eventResult = db.fetch("select * from events where code = ?;",
+    // eventCode);
+    EventReturn result;
     try {
-      Result eventResult = db.fetch("select * from events where code = ?;", eventCode);
+      result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.CODE.eq(eventCode))
+          .fetchSingleInto(EventReturn.class);
+    } catch (NoDataFoundException e) {
+      // bad event code
+      return false;
+    }
 
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-      LocalDateTime date = LocalDateTime.parse(eventResult.getValue(0, "date").toString(), formatter);
-      boolean open = Boolean.parseBoolean(eventResult.getValue(0, "open").toString());
-      int eventid = Integer.parseInt(eventResult.getValue(0, "id").toString());
-      if (eventResult.isEmpty() || !open || LocalDateTime.now().compareTo(date) >= 0)
-        return false;
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
+    // HH:mm:ss.S");
 
-      try {
-        db.execute("insert into event_check_ins\n" + "  (id, user_id, event_id)\n" + "  values (DEFAULT, ?, ?);",
-            userid, eventid);
+    if (result == null || !result.getOpen() || LocalDateTime.now().compareTo(result.getDate()) >= 0)
+      return false;
 
-      } catch (Exception e) {
-        e.printStackTrace();
-        return false;
-      }
+    try {
+      /*
+       * db.execute("insert into event_check_ins\n" + "  (id, user_id, event_id)\n" +
+       * "  values (DEFAULT, ?, ?);", userid, eventid);
+       */
+
+      db.insertInto(Tables.EVENT_CHECK_INS, Tables.EVENT_CHECK_INS.USER_ID, Tables.EVENT_CHECK_INS.EVENT_ID)
+          .values(userid, result.getId()).execute();
+
     } catch (Exception e) {
       e.printStackTrace();
       return false;
     }
+
     return true;
   }
 
   @Override
   public List<EventReturn> getAllEvents() {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-    List<Events> events = db.selectFrom(Tables.EVENTS).fetchInto(Events.class);
-    return events.stream()
-        .map(event -> new EventReturn(event.getId(), event.getName(),
-            LocalDateTime.parse(event.getDate().toString(), formatter), event.getOpen(), event.getCode()))
-        .collect(Collectors.toList());
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
+    // HH:mm:ss.S");
+    List<EventReturn> events = db.selectFrom(Tables.EVENTS).fetchInto(EventReturn.class);
+    return events;
   }
 
   @Override
   public boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode) {
     try {
-      db.execute("insert into events\n" + "  (id, name, date, open, code)\n" + "  values (DEFAULT, ?, ?, ?, ?);", name,
-          date, open, eventCode);
+      /*
+       * db.execute("insert into events\n" + "  (id, name, date, open, code)\n" +
+       * "  values (DEFAULT, ?, ?, ?, ?);", name, date, open, eventCode);
+       */
+
+      db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
+          .values(name, Timestamp.valueOf(date), open, eventCode).execute();
     } catch (Exception e) {
       return false;
     }
@@ -119,8 +136,13 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code) {
     try {
-      db.execute("update events set \n" + " name = ?, date = ?, open = ?, code = ? \n" + "  where id = ?;", name, date,
-          open, id, code);
+      // db.execute("update events set \n" + " name = ?, date = ?, open = ?, code = ?
+      // \n" + " where id = ?;", name, date,
+      // open, id, code);
+
+      db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
+          .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).execute();
+
     } catch (Exception e) {
       return false;
     }
@@ -130,7 +152,10 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean deleteEvent(int id) {
     try {
-      db.execute("delete from events \n" + "where id = ?;", id);
+      // db.execute("delete from events \n" + "where id = ?;", id);
+
+      db.delete(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id)).execute();
+
     } catch (Exception e) {
       return false;
     }
@@ -140,9 +165,18 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean addUser(String email, String first, String last, String hashedPassword) {
     try {
-      db.execute("insert into users\n"
-          + "  (id, email, first_name, last_name, hashed_password, graduation_year, major, privilege_level)\n"
-          + "  values (DEFAULT, ?, ?, ?, ?, \n" + "2020, 'CS Probably', 0);", email, first, last, hashedPassword);
+      // dont know if we want the graduation year and major yet so in the meantime
+      // just dont change what was here before
+      // db.execute("insert into users\n"
+      // + " (id, email, first_name, last_name, hashed_password, graduation_year,
+      // major, privilege_level)\n"
+      // + " values (DEFAULT, ?, ?, ?, ?, \n" + "2020, 'CS Probably', 0);", email,
+      // first, last, hashedPassword);
+
+      db.insertInto(Tables.USERS, Tables.USERS.EMAIL, Tables.USERS.FIRST_NAME, Tables.USERS.LAST_NAME,
+          Tables.USERS.HASHED_PASSWORD, Tables.USERS.GRADUATION_YEAR, Tables.USERS.MAJOR, Tables.USERS.PRIVILEGE_LEVEL)
+          .values(email, first, last, hashedPassword, 2020, "Computer Science", 0).execute();
+
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -177,8 +211,10 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean updateUser(int id, String email, String first, String last, String hashedPassword) {
     try {
-      db.execute("update users set \n" + "  email = ?, first_name = ?, last_name = ?, hashed_password = ?\n"
-          + "  where id = ?;", email, first, last, hashedPassword, id);
+      db.update(Tables.USERS).set(Tables.USERS.EMAIL, email).set(Tables.USERS.FIRST_NAME, first)
+          .set(Tables.USERS.LAST_NAME, last).set(Tables.USERS.HASHED_PASSWORD, hashedPassword)
+          .where(Tables.USERS.ID.eq(id)).execute();
+
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -189,7 +225,7 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean deleteUser(int id) {
     try {
-      db.execute("delete from users \n" + "where id = ?;", id);
+      db.delete(Tables.USERS).where(Tables.USERS.ID.eq(id)).execute();
     } catch (Exception e) {
       return false;
     }
@@ -198,10 +234,11 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean validate(String email, String password) {
-    Result result = db.fetch("select hashed_password \n" + "   from users\n" + "   where email = ?;", email);
-
     try {
-      return UpdatableBCrypt.verifyHash(password, result.getValue(0, "hashed_password").toString());
+      String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
+          .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
+
+      return UpdatableBCrypt.verifyHash(password, storedPassword);
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -210,7 +247,7 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean isBlacklistedToken(String jwt) {
-    Result result = db.fetch("select * \n" + "   from blacklisted_tokens\n" + "   where id = ?;", jwt);
+    Result result = db.select().from(Tables.BLACKLISTED_TOKENS).where(Tables.BLACKLISTED_TOKENS.ID.eq(jwt)).fetch();
     if (result.isEmpty())
       return false;
     return true;
@@ -219,8 +256,8 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean addBlacklistedToken(String jwt) {
     try {
-      db.execute("insert into blacklisted_tokens\n" + "  (id, time_milliseconds)\n" + "  values (?, ?);", jwt,
-          System.currentTimeMillis());
+      db.insertInto(Tables.BLACKLISTED_TOKENS, Tables.BLACKLISTED_TOKENS.ID,
+          Tables.BLACKLISTED_TOKENS.TIME_MILLISECONDS).values(jwt, System.currentTimeMillis()).execute();
     } catch (Exception e) {
       // If this fails this is a security risk as there exists a token that is still
       // technically "valid" even though the user logged out
@@ -232,8 +269,12 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean clearBlacklistedTokens(long tokenDuration) {
     try {
-      db.execute("delete from blacklisted_tokens\n" + " where time_millisecond < ?;",
-          System.currentTimeMillis() - tokenDuration);
+      /*
+       * db.execute("delete from blacklisted_tokens\n" +
+       * " where time_millisecond < ?;", System.currentTimeMillis() - tokenDuration);
+       */
+      db.delete(Tables.BLACKLISTED_TOKENS)
+          .where(Tables.BLACKLISTED_TOKENS.TIME_MILLISECONDS.le(System.currentTimeMillis() - tokenDuration)).execute();
     } catch (Exception e) {
       return false;
     }

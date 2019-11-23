@@ -122,7 +122,7 @@ public class ApiRouter {
     Route getUserRoute = router.route("/protected/user/:id");
     getUserRoute.handler(this::handleGetUser);
 
-    Route updateUserRoute = router.put("/protected/users");
+    Route updateUserRoute = router.put("/protected/user");
     updateUserRoute.handler(this::handleUpdateUser);
 
     // what happens when a user deletes their account, its fine, but what about when
@@ -338,7 +338,9 @@ public class ApiRouter {
 
       int id = -1;
       String email = "";
+      String password = "";
       String encryptedPassword = "";
+
       String firstName = "";
       String lastName = "";
       try {
@@ -346,7 +348,9 @@ public class ApiRouter {
         email = body.getString("email");
         firstName = body.getString("firstName");
         lastName = body.getString("lastName");
-        encryptedPassword = bcrypt.hash(body.getString("password"));
+        password = body.getString("password");
+        if (!password.isEmpty())
+          encryptedPassword = bcrypt.hash(password);
       } catch (Exception e) {
         e.printStackTrace();
         response.setStatusCode(400).end();
