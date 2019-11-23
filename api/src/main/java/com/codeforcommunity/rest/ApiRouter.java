@@ -100,10 +100,8 @@ public class ApiRouter {
      * afterRoute.handler(this::handleAfter);
      */
 
-
     Route signUpRoute = router.post("/signup");
     signUpRoute.handler(this::handleSignUp);
-
 
     Route getUsersRoute = router.route("/protected/users");
     getUsersRoute.handler(this::handleGetAllUsers);
@@ -117,7 +115,6 @@ public class ApiRouter {
 
     Route deleteUserRoute = router.delete("/protected/user");
     deleteUserRoute.handler(this::handleDeleteUser);
-
 
     Route logoutRoute = router.route("/logout");
     logoutRoute.handler(this::handleLogout);
@@ -251,37 +248,33 @@ public class ApiRouter {
   }
 
   private void handleSignUp(RoutingContext ctx) {
+
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+
+    JsonObject body = ctx.getBodyAsJson();
+
+    String email = "";
+    String encryptedPassword = "";
+    String firstName = "";
+    String lastName = "";
     try {
-
-      HttpServerResponse response = ctx.response();
-      HttpServerRequest request = ctx.request();
-
-      JsonObject body = ctx.getBodyAsJson();
-
-      String email = "";
-      String encryptedPassword = "";
-      String firstName = "";
-      String lastName = "";
-      try {
-        email = body.getString("email");
-        firstName = body.getString("firstName");
-        lastName = body.getString("lastName");
-        encryptedPassword = bcrypt.hash(body.getString("password"));
-      } catch (Exception e) {
-        e.printStackTrace();
-        response.setStatusCode(400).end();
-      }
-
-      boolean success = false;
-      if (!email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
-        success = processor.addUser(email, firstName, lastName, encryptedPassword);
-      if (success)
-        response.setStatusCode(201).end();
-      else {
-        response.setStatusCode(400).end();
-      }
+      email = body.getString("email");
+      firstName = body.getString("firstName");
+      lastName = body.getString("lastName");
+      encryptedPassword = bcrypt.hash(body.getString("password"));
     } catch (Exception e) {
       e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+
+    boolean success = false;
+    if (!email.equals("") && !firstName.equals("") && !lastName.equals("") && !encryptedPassword.equals(""))
+      success = processor.addUser(email, firstName, lastName, encryptedPassword);
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
     }
   }
 

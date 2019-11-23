@@ -3,8 +3,8 @@ IF NOT EXISTS users
 (
   id SERIAL
 PRIMARY KEY,
-  email VARCHAR
-(255),
+  email VARCHAR 
+(255) UNIQUE,
   first_name VARCHAR
 (255),
   last_name VARCHAR
