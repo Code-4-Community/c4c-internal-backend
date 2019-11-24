@@ -196,6 +196,81 @@ Gets all the users in an event with this :id
 ```sh
 POST /protected/eventcheckin/:code
 ```
+---
+
+```sh
+GET /admin/applicants
+```
+
+Returns a list of all of our applicants.
+
+---
+
+```sh
+GET /admin/applicant/:userid
+```
+
+Gets information for the application whose user has this :id.
+
+---
+
+```sh
+POST /protected/applicant
+```
+
+Takes JSON in request body in format:
+- Base64String fileBLOB that represents the Base64 encoded binary string for this file
+- String fileType, .pdf or .docx
+- String[] interests
+- String priorInvolvment
+- String whyJoin
+
+```json
+{
+	"fileBLOB": "aaaaaaaaaaaaaaaaaaa",
+	"fileType": ".pdf",
+	"interests": ["design", "outreach"],
+	"priorInvolvement": "Msibdds bdu budsb udisbf iudsb ufbdsuifdsb dsa fdsf.",
+	"whyJoin": "dsoi nfio disnio isn foisdnf id nioenion noew ifninf weion  sdf."
+}
+```
+
+Creates a new applicant for the userId of the JWT.
+
+---
+
+```sh
+PUT /protected/applicant
+```
+
+Takes JSON in request body in format:
+- Base64String fileBLOB that represents the Base64 encoded binary string for this file
+- String fileType, .pdf or .docx
+- String[] interests
+- String priorInvolvment
+- String whyJoin
+
+```json
+{
+	"fileBLOB": "aaaaaaaaaaaaaaaaaaa",
+	"fileType": ".pdf",
+	"interests": ["design", "outreach"],
+	"priorInvolvement": "Msibdds bdu budsb udisbf iudsb ufbdsuifdsb dsa fdsf.",
+	"whyJoin": "dsoi nfio disnio isn foisdnf id nioenion noew ifninf weion  sdf."
+}
+```
+
+Updates and overwrites all information for the applicant with the userId of the JWT
+
+---
+
+```sh
+DELETE /admin/applicant/:userid
+```
+
+Deletes the applicant with this :userid.
+
+---
 
 Check in the user with id in the given JWT to the event with this :code
 

@@ -148,19 +148,19 @@ public class ApiRouter {
 
     // Applicants
 
-    Route getApplicantsRoute = router.route().path("/protected/applicants");
+    Route getApplicantsRoute = router.route().path("/admin/applicants");
     getApplicantsRoute.handler(this::handleGetApplicants);
 
     Route createApplicantRoute = router.post("/protected/applicant");
     createApplicantRoute.handler(this::handleCreateApplicant);
 
-    Route getApplicantRoute = router.get("/protected/applicant/:id");
+    Route getApplicantRoute = router.get("/admin/applicant/:id");
     getApplicantRoute.handler(this::handleGetApplicant);
 
-    Route updateApplicantRoute = router.put("/protected/applicant/:id");
+    Route updateApplicantRoute = router.put("/protected/applicant");
     updateApplicantRoute.handler(this::handleUpdateApplicant);
 
-    Route deleteApplicantRoute = router.delete("/admin/applicant/:id");
+    Route deleteApplicantRoute = router.delete("/admin/applicant/:userid");
     deleteApplicantRoute.handler(this::handleDeleteApplicant);
 
     return router;
@@ -616,18 +616,17 @@ public class ApiRouter {
 
     try {
       userId = getUserId(request);
-      fileBLOB = body.getBinary("email");
+      fileBLOB = body.getBinary("fileBLOB");
       fileType = body.getString("fileType");
 
       JsonArray interestsJSON = body.getJsonArray("interests");
       interests = new String[interestsJSON.size()];
-      for(int i = 0; i < interests.length; i++){
+      for (int i = 0; i < interests.length; i++) {
         interests[i] = interestsJSON.getString(i);
       }
 
       priorInvolvement = body.getString("priorInvolvement");
       whyJoin = body.getString("whyJoin");
-
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -635,7 +634,8 @@ public class ApiRouter {
     }
 
     boolean success = false;
-    if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null && whyJoin != null)
+    if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
+        && whyJoin != null)
       success = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
     if (success)
       response.setStatusCode(201).end();
@@ -689,7 +689,7 @@ public class ApiRouter {
 
       try {
         userId = getUserId(request);
-        fileBLOB = body.getBinary("email");
+        fileBLOB = body.getBinary("fileBLOB");
         fileType = body.getString("fileType");
 
         JsonArray interestsJSON = body.getJsonArray("interests");
@@ -725,7 +725,8 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     int userId = -1;
     try {
-      userId = getUserId(request);
+      //userId = getUserId(request);
+      userId = Integer.parseInt(request.params().get("userid"));
       boolean success = processor.deleteApplicant(userId);
       if (success)
         response.setStatusCode(200).end();
