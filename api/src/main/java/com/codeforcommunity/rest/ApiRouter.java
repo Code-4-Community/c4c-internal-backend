@@ -581,7 +581,158 @@ public class ApiRouter {
     response.end(userJson);
   }
 
-  
+  private void handleGetApplicants(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    response.putHeader("content-type", "application/json");
+    List<ApplicantReturn> applicants = processor.getAllApplicants();
+
+    String applicantJson = null;
+    try {
+      applicantJson = JacksonMapper.getMapper().writeValueAsString(applicants);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    response.end(applicantJson);
+  }
+
+  private void handleCreateApplicant(RoutingContext ctx) {
+
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+
+    JsonObject body = ctx.getBodyAsJson();
+
+    int userId = -1;
+    byte[] fileBLOB = null;
+    String fileType = "";
+    String[] interests = null;
+    String priorInvolvement = "";
+    String whyJoin = "";
+
+    try {
+      userId = getUserId(request);
+      fileBLOB = body.getBinary("fileBLOB");
+      fileType = body.getString("fileType");
+
+      JsonArray interestsJSON = body.getJsonArray("interests");
+      interests = new String[interestsJSON.size()];
+      for (int i = 0; i < interests.length; i++) {
+        interests[i] = interestsJSON.getString(i);
+      }
+
+      priorInvolvement = body.getString("priorInvolvement");
+      whyJoin = body.getString("whyJoin");
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+
+    boolean success = false;
+    if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
+        && whyJoin != null)
+      success = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleGetApplicant(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
+
+    try {
+      id = Integer.parseInt(request.params().get("id"));
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+
+    Optional<ApplicantReturn> ret = processor.getApplicant(id);
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    if (!json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+    } else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleUpdateApplicant(RoutingContext ctx) {
+    try {
+
+      HttpServerResponse response = ctx.response();
+      HttpServerRequest request = ctx.request();
+
+      JsonObject body = ctx.getBodyAsJson();
+
+      int userId = -1;
+      byte[] fileBLOB = null;
+      String fileType = "";
+      String[] interests = null;
+      String priorInvolvement = "";
+      String whyJoin = "";
+
+      try {
+        userId = getUserId(request);
+        fileBLOB = body.getBinary("fileBLOB");
+        fileType = body.getString("fileType");
+
+        JsonArray interestsJSON = body.getJsonArray("interests");
+        interests = new String[interestsJSON.size()];
+        for (int i = 0; i < interests.length; i++) {
+          interests[i] = interestsJSON.getString(i);
+        }
+
+        priorInvolvement = body.getString("priorInvolvement");
+        whyJoin = body.getString("whyJoin");
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        response.setStatusCode(400).end();
+      }
+
+      boolean success = false;
+      if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
+          && whyJoin != null)
+        success = processor.updateApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+      if (success)
+        response.setStatusCode(201).end();
+      else {
+        response.setStatusCode(400).end();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void handleDeleteApplicant(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int userId = -1;
+    try {
+      // userId = getUserId(request);
+      userId = Integer.parseInt(request.params().get("userid"));
+      boolean success = processor.deleteApplicant(userId);
+      if (success)
+        response.setStatusCode(200).end();
+      else
+        response.setStatusCode(400).end();
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+  }
 
   // News
 
