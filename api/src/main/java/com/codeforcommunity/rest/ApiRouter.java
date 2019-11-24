@@ -581,6 +581,10 @@ public class ApiRouter {
     response.end(userJson);
   }
 
+  
+
+  // News
+
   private void handleGetAllNews(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     response.putHeader("content-type", "application/json");
@@ -708,6 +712,8 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
   }
+
+  
 
   public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {
     // The JWT signature algorithm we will be using to sign the token
