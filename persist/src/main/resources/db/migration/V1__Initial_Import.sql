@@ -50,3 +50,20 @@ IF NOT EXISTS blacklisted_tokens
   id VARCHAR(255) NOT NULL PRIMARY KEY,
   time_milliseconds BIGINT
 );
+
+CREATE TABLE
+IF NOT EXISTS news
+(
+  id SERIAL
+PRIMARY KEY,
+  title VARCHAR
+(255),
+  description VARCHAR
+(255),
+  author VARCHAR
+(255),
+  date TIMESTAMP
+(255),
+  content VARCHAR
+(255),
+);

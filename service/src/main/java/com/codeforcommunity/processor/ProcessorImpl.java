@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.EventReturn;
+import com.codeforcommunity.dto.NewsReturn;
 import com.codeforcommunity.dto.UserReturn;
 import org.jooq.Result;
 import org.jooq.Table;
@@ -154,6 +155,71 @@ public class ProcessorImpl implements IProcessor {
       // db.execute("delete from events \n" + "where id = ?;", id);
 
       db.delete(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id)).execute();
+
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public List<NewsReturn> getAllNews() {
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
+    // HH:mm:ss.S");
+    List<NewsReturn> news = db.selectFrom(Tables.NEWS).fetchInto(NewsReturn.class);
+    return news;
+  }
+
+  @Override
+  public boolean createNews(String title, String description, String author, LocalDateTime date, String content) {
+    try {
+      /*
+       * db.execute("insert into events\n" + "  (id, name, date, open, code)\n" +
+       * "  values (DEFAULT, ?, ?, ?, ?);", name, date, open, eventCode);
+       */
+
+      db.insertInto(Tables.NEWS, Tables.NEWS.TITLE, Tables.NEWS.DESCRIPTION, Tables.NEWS.AUTHOR, Tables.NEWS.DATE, Tables.NEWS.CONTENT)
+              .values(title, description, author, date, content).execute();
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public Optional<NewsReturn> getNews(int id) {
+    try {
+      NewsReturn result = db.select().from(Tables.NEWS).where(Tables.NEWS.ID.eq(id))
+              .fetchSingleInto(NewsReturn.class);
+      return Optional.of(result);
+    } catch (NoDataFoundException e) {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public boolean updateNews(int id, String title, String description, String author, LocalDateTime date, String content) {
+    try {
+      // db.execute("update events set \n" + " name = ?, date = ?, open = ?, code = ?
+      // \n" + " where id = ?;", name, date,
+      // open, id, code);
+
+      db.update(Tables.NEWS).set(Tables.NEWS.TITLE, title).set(Tables.NEWS.DESCRIPTION, description)
+              .set(Tables.NEWS.AUTHOR, author).set(Tables.NEWS.DATE, Timestamp.valueOf(date))
+              .set(TABLES.NEWS.CONTENT, content).where(Tables.NEWS.ID.eq(id)).execute();
+
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean deleteNews(int id) {
+    try {
+      // db.execute("delete from events \n" + "where id = ?;", id);
+
+      db.delete(Tables.NEWS).where(Tables.NEWS.ID.eq(id)).execute();
 
     } catch (Exception e) {
       return false;

@@ -12,6 +12,7 @@ import javax.xml.bind.DatatypeConverter;
 import com.codeforcommunity.JacksonMapper;
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.EventReturn;
+import com.codeforcommunity.dto.NewsReturn;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,6 +143,18 @@ public class ApiRouter {
 
     Route getEventUsersRoute = router.get("/protected/eventcheckin/:id");
     getEventUsersRoute.handler(this::handleGetEventUsers);
+
+    Route createNewsRoute = router.post("/admin/news");
+    createEventRoute.handler(this::handleCreateNews);
+
+    Route getNewsRoute = router.get("/event/");
+    getEventRoute.handler(this::handleGetNews);
+
+    Route updateNewsRoute = router.put("/protected/event/:id");
+    updateEventRoute.handler(this::handleUpdateNews);
+
+    Route deleteNewsRoute = router.delete("/admin/event/:id");
+    deleteEventRoute.handler(this::handleDeleteNews);
 
     return router;
   }
@@ -563,6 +576,120 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     response.end(userJson);
+  }
+
+  private void handleCreateNews(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    JsonObject body = ctx.getBodyAsJson();
+    String title = "";
+    String description = "";
+    String author = "";
+    LocalDateTime date = null;
+    String content = "";
+    // for now, the input date is to the minute
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    try {
+      title = body.getString("title");
+      description = body.getString("description");
+      author = body.getString("author");
+      date = LocalDateTime.parse(body.getString("date"), formatter);
+      content = body.getString("content");
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    boolean success = false;
+    if (title != null && description != null && author != null && date != null && content != null)
+      success = processor.createNews(title, description, author, date, content);
+
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+
+    response.setStatusCode(201);
+  }
+
+  private void handleGetNews(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
+
+    try {
+      id = Integer.parseInt(request.params().get("id"));
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+
+    Optional<NewsReturn> ret = processor.getNews(id);
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+    }
+
+    if (!json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+    } else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleUpdateNews(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    JsonObject body = ctx.getBodyAsJson();
+    String title = "";
+    String description = "";
+    String author = "";
+    LocalDateTime date = null;
+    String content = "";
+    // for now, the input date is to the minute
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    int id = -1;
+
+    try {
+      id = Integer.parseInt(request.getParam("id"));
+      title = body.getString("title");
+      description = body.getString("description");
+      author = body.getString("author");
+      date = LocalDateTime.parse(body.getString("date"), formatter);
+      content = body.getString("content");
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    boolean success = false;
+    if (title != null && description != null && author != null && date != null && content != null)
+      success = processor.updateNews(id, title, description, author, date, content);
+
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+
+    response.setStatusCode(201);
+  }
+
+  private void handleDeleteNews(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
+    try {
+      id = Integer.parseInt(request.params().get("id"));
+      processor.deleteNews(id);
+      response.setStatusCode(200).end();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
   }
 
   public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {

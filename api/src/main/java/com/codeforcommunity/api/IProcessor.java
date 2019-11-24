@@ -1,5 +1,6 @@
 package com.codeforcommunity.api;
 
+import com.codeforcommunity.dto.NewsReturn;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.EventReturn;
 
@@ -43,4 +44,14 @@ public interface IProcessor {
   boolean addBlacklistedToken(String jti);
 
   boolean clearBlacklistedTokens(long tokenDuration);
+
+  List<NewsReturn> getAllNews();
+
+  boolean createNews(String title, String description, String author, LocalDateTime date, String content);
+
+  Optional<NewsReturn> getNews(int id);
+
+  boolean updateNews(int id, String title, String description, String author, LocalDateTime date, String content);
+
+  boolean deleteNews(int id);
 }
