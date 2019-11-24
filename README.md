@@ -34,7 +34,9 @@ Takes JSON in request body in format:
   "email": "john.doe@email.com",
   "firstName": "John",
   "lastName": "Doe",
-  "password": "password123"
+  "password": "password123",
+  "currentYear": 1,
+	"major": "Computer Science"
 }
 ```
 
@@ -99,7 +101,9 @@ Takes JSON in request body in format:
   "email": "john.doe@email.com",
   "firstName": "John",
   "lastName": "Doe",
-  "password": "password123"
+  "password": "password123",
+  "currentYear": 1,
+	"major": "Computer Science"
 }
 ```
 
