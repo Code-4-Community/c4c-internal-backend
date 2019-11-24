@@ -58,11 +58,9 @@ IF NOT EXISTS news
 PRIMARY KEY,
   title VARCHAR
 (255),
-  description VARCHAR
-(255),
+  description TEXT,
   author VARCHAR
 (255),
   date TIMESTAMP,
-  content VARCHAR
-(255)
+  content TEXT
 );

@@ -144,17 +144,20 @@ public class ApiRouter {
     Route getEventUsersRoute = router.get("/protected/eventcheckin/:id");
     getEventUsersRoute.handler(this::handleGetEventUsers);
 
+    Route getAllNewsRoute = router.get("/news");
+    getAllNewsRoute.handler(this::handleGetAllNews);
+
     Route createNewsRoute = router.post("/admin/news");
-    createEventRoute.handler(this::handleCreateNews);
+    createNewsRoute.handler(this::handleCreateNews);
 
-    Route getNewsRoute = router.get("/event/");
-    getEventRoute.handler(this::handleGetNews);
+    Route getNewsRoute = router.get("/news/:id");
+    getNewsRoute.handler(this::handleGetNews);
 
-    Route updateNewsRoute = router.put("/admin/event/:id");
-    updateEventRoute.handler(this::handleUpdateNews);
+    Route updateNewsRoute = router.put("/admin/news/:id");
+    updateNewsRoute.handler(this::handleUpdateNews);
 
-    Route deleteNewsRoute = router.delete("/admin/event/:id");
-    deleteEventRoute.handler(this::handleDeleteNews);
+    Route deleteNewsRoute = router.delete("/admin/news/:id");
+    deleteNewsRoute.handler(this::handleDeleteNews);
 
     return router;
   }
@@ -576,6 +579,20 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     response.end(userJson);
+  }
+
+  private void handleGetAllNews(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    response.putHeader("content-type", "application/json");
+    List<NewsReturn> news = processor.getAllNews();
+
+    String newsJson = null;
+    try {
+      newsJson = JacksonMapper.getMapper().writeValueAsString(news);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    response.end(newsJson);
   }
 
   private void handleCreateNews(RoutingContext ctx) {

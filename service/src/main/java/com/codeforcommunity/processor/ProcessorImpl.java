@@ -179,7 +179,7 @@ public class ProcessorImpl implements IProcessor {
        */
 
       db.insertInto(Tables.NEWS, Tables.NEWS.TITLE, Tables.NEWS.DESCRIPTION, Tables.NEWS.AUTHOR, Tables.NEWS.DATE, Tables.NEWS.CONTENT)
-              .values(title, description, author, date, content).execute();
+              .values(title, description, author, Timestamp.valueOf(date), content).execute();
     } catch (Exception e) {
       return false;
     }
