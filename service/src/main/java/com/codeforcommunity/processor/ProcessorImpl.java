@@ -206,7 +206,7 @@ public class ProcessorImpl implements IProcessor {
 
       db.update(Tables.NEWS).set(Tables.NEWS.TITLE, title).set(Tables.NEWS.DESCRIPTION, description)
               .set(Tables.NEWS.AUTHOR, author).set(Tables.NEWS.DATE, Timestamp.valueOf(date))
-              .set(TABLES.NEWS.CONTENT, content).where(Tables.NEWS.ID.eq(id)).execute();
+              .set(Tables.NEWS.CONTENT, content).where(Tables.NEWS.ID.eq(id)).execute();
 
     } catch (Exception e) {
       return false;

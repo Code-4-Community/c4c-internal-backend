@@ -150,7 +150,7 @@ public class ApiRouter {
     Route getNewsRoute = router.get("/event/");
     getEventRoute.handler(this::handleGetNews);
 
-    Route updateNewsRoute = router.put("/protected/event/:id");
+    Route updateNewsRoute = router.put("/admin/event/:id");
     updateEventRoute.handler(this::handleUpdateNews);
 
     Route deleteNewsRoute = router.delete("/admin/event/:id");

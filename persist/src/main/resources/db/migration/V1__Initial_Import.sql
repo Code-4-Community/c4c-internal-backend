@@ -62,8 +62,7 @@ PRIMARY KEY,
 (255),
   author VARCHAR
 (255),
-  date TIMESTAMP
-(255),
+  date TIMESTAMP,
   content VARCHAR
-(255),
+(255)
 );
