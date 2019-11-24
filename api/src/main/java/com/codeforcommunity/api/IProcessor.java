@@ -2,6 +2,7 @@ package com.codeforcommunity.api;
 
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.EventReturn;
+import com.codeforcommunity.dto.ApplicantReturn;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,17 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 
 public interface IProcessor {
+
+  List<ApplicantReturn> getAllApplicants();
+
+  boolean createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement,
+      String whyJoin);
+
+  Optional<ApplicantReturn> getApplicant(int userId);
+
+  boolean updateApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement, String whyJoin);
+
+  boolean deleteApplicant(int userId);
 
   List<UserReturn> getEventUsers(int eventId);
 

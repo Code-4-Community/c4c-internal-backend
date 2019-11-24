@@ -11,8 +11,11 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.codeforcommunity.JacksonMapper;
 import com.codeforcommunity.api.IProcessor;
+
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
+import com.codeforcommunity.dto.ApplicantReturn;
+
 import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -21,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -91,14 +95,10 @@ public class ApiRouter {
     router.route("/protected/*").handler(this::checkAuthentication);
     router.route("/admin/*").handler(this::checkAdmin);
 
+    // Users
+
     Route loginRoute = router.post("/login");
     loginRoute.handler(this::handleLogin);
-
-    /*
-     * after route is not needed as the only purpose of login is now to return the
-     * JWT Route afterRoute = router.route("/after");
-     * afterRoute.handler(this::handleAfter);
-     */
 
     Route signUpRoute = router.post("/signup");
     signUpRoute.handler(this::handleSignUp);
@@ -106,7 +106,6 @@ public class ApiRouter {
     Route getUsersRoute = router.route("/protected/users");
     getUsersRoute.handler(this::handleGetAllUsers);
 
-    // Get User : Protected POST method
     Route getUserRoute = router.route("/protected/user/:id");
     getUserRoute.handler(this::handleGetUser);
 
@@ -121,6 +120,8 @@ public class ApiRouter {
 
     // Route sessionRoute = router.route("/session");
     // sessionRoute.handler(this::handleSession);
+
+    // Events
 
     Route getEventsRoute = router.route().path("/protected/events");
     getEventsRoute.handler(this::handleGetEvents);
@@ -137,11 +138,30 @@ public class ApiRouter {
     Route deleteEventRoute = router.delete("/admin/event/:id");
     deleteEventRoute.handler(this::handleDeleteEvent);
 
+    // Event Check Ins
+
     Route attendEventRoute = router.post("/protected/eventcheckin/:code");
     attendEventRoute.handler(this::handleAttendEvent);
 
     Route getEventUsersRoute = router.get("/protected/eventcheckin/:id");
     getEventUsersRoute.handler(this::handleGetEventUsers);
+
+    // Applicants
+
+    Route getApplicantsRoute = router.route().path("/protected/applicants");
+    getApplicantsRoute.handler(this::handleGetApplicants);
+
+    Route createApplicantRoute = router.post("/protected/applicant");
+    createApplicantRoute.handler(this::handleCreateApplicant);
+
+    Route getApplicantRoute = router.get("/protected/applicant/:id");
+    getApplicantRoute.handler(this::handleGetApplicant);
+
+    Route updateApplicantRoute = router.put("/protected/applicant/:id");
+    updateApplicantRoute.handler(this::handleUpdateApplicant);
+
+    Route deleteApplicantRoute = router.delete("/admin/applicant/:id");
+    deleteApplicantRoute.handler(this::handleDeleteApplicant);
 
     return router;
   }
@@ -563,6 +583,158 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     response.end(userJson);
+  }
+
+  private void handleGetApplicants(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    response.putHeader("content-type", "application/json");
+    List<ApplicantReturn> applicants = processor.getAllApplicants();
+
+    String applicantJson = null;
+    try {
+      applicantJson = JacksonMapper.getMapper().writeValueAsString(applicants);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+    response.end(applicantJson);
+  }
+
+  private void handleCreateApplicant(RoutingContext ctx) {
+
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+
+    JsonObject body = ctx.getBodyAsJson();
+
+    int userId = -1;
+    byte[] fileBLOB = null;
+    String fileType = "";
+    String[] interests = null;
+    String priorInvolvement = "";
+    String whyJoin = "";
+
+    try {
+      userId = getUserId(request);
+      fileBLOB = body.getBinary("email");
+      fileType = body.getString("fileType");
+
+      JsonArray interestsJSON = body.getJsonArray("interests");
+      interests = new String[interestsJSON.size()];
+      for(int i = 0; i < interests.length; i++){
+        interests[i] = interestsJSON.getString(i);
+      }
+
+      priorInvolvement = body.getString("priorInvolvement");
+      whyJoin = body.getString("whyJoin");
+
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+
+    boolean success = false;
+    if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null && whyJoin != null)
+      success = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+    if (success)
+      response.setStatusCode(201).end();
+    else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleGetApplicant(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int id = -1;
+
+    try {
+      id = Integer.parseInt(request.params().get("id"));
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
+
+    Optional<ApplicantReturn> ret = processor.getApplicant(id);
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    if (!json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+    } else {
+      response.setStatusCode(400).end();
+    }
+  }
+
+  private void handleUpdateApplicant(RoutingContext ctx) {
+    try {
+
+      HttpServerResponse response = ctx.response();
+      HttpServerRequest request = ctx.request();
+
+      JsonObject body = ctx.getBodyAsJson();
+
+      int userId = -1;
+      byte[] fileBLOB = null;
+      String fileType = "";
+      String[] interests = null;
+      String priorInvolvement = "";
+      String whyJoin = "";
+
+      try {
+        userId = getUserId(request);
+        fileBLOB = body.getBinary("email");
+        fileType = body.getString("fileType");
+
+        JsonArray interestsJSON = body.getJsonArray("interests");
+        interests = new String[interestsJSON.size()];
+        for (int i = 0; i < interests.length; i++) {
+          interests[i] = interestsJSON.getString(i);
+        }
+
+        priorInvolvement = body.getString("priorInvolvement");
+        whyJoin = body.getString("whyJoin");
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        response.setStatusCode(400).end();
+      }
+
+      boolean success = false;
+      if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
+          && whyJoin != null)
+        success = processor.updateApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+      if (success)
+        response.setStatusCode(201).end();
+      else {
+        response.setStatusCode(400).end();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void handleDeleteApplicant(RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    int userId = -1;
+    try {
+      userId = getUserId(request);
+      boolean success = processor.deleteApplicant(userId);
+      if (success)
+        response.setStatusCode(200).end();
+      else
+        response.setStatusCode(400).end();
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
   }
 
   public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {

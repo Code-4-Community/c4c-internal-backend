@@ -48,9 +48,9 @@ CREATE TABLE
 IF NOT EXISTS applicants
 (
   id SERIAL PRIMARY KEY,
-  user_id INT,
+  user_id INT UNIQUE,
   resume bytea,
-  file_type VARCHAR(15),
+  file_type VARCHAR(255),
   interests VARCHAR(255)[],
   prior_involvement TEXT,
   why_join TEXT,
