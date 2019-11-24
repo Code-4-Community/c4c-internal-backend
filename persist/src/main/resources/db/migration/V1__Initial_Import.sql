@@ -11,7 +11,7 @@ PRIMARY KEY,
 (255),
   hashed_password VARCHAR
 (255),
-  graduation_year INT,
+  current_year INT,
   major VARCHAR
 (255),
   privilege_level INT
@@ -49,6 +49,25 @@ IF NOT EXISTS blacklisted_tokens
 (
   id VARCHAR(255) NOT NULL PRIMARY KEY,
   time_milliseconds BIGINT
+);
+
+CREATE TABLE
+IF NOT EXISTS applicants
+(
+  id SERIAL PRIMARY KEY,
+  user_id INT UNIQUE,
+  resume bytea,
+  file_type VARCHAR
+(255),
+  interests VARCHAR
+(255)[],
+  prior_involvement TEXT,
+  why_join TEXT,
+
+  CONSTRAINT fk_applicant_user FOREIGN KEY
+(user_id) REFERENCES users
+(id)
+
 );
 
 CREATE TABLE

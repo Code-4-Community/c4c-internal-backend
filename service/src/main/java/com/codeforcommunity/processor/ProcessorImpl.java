@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.NewsReturn;
 import com.codeforcommunity.dto.UserReturn;
+import com.codeforcommunity.dto.ApplicantReturn;
 import org.jooq.Result;
 import org.jooq.Table;
 import org.jooq.exception.NoDataFoundException;
@@ -13,11 +14,14 @@ import antlr.debug.Event;
 import io.vertx.core.cli.Option;
 
 import org.jooq.generated.tables.pojos.Events;
+import org.jooq.generated.tables.pojos.Applicants;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import java.io.Console;
@@ -32,6 +36,65 @@ public class ProcessorImpl implements IProcessor {
 
   public ProcessorImpl(DSLContext db) {
     this.db = db;
+  }
+
+  public List<ApplicantReturn> getAllApplicants() {
+    List<Applicants> applicants = db.selectFrom(Tables.APPLICANTS).fetchInto(Applicants.class);
+    return applicants.stream()
+        .map(applicant -> new ApplicantReturn(applicant.getUserId(), applicant.getResume(), applicant.getFileType(),
+            Arrays.copyOf(applicant.getInterests(), applicant.getInterests().length, String[].class),
+            applicant.getPriorInvolvement(), applicant.getWhyJoin()))
+        .collect(Collectors.toList());
+  }
+
+  public boolean createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests,
+      String priorInvolvement, String whyJoin) {
+    try {
+      db.insertInto(Tables.APPLICANTS, Tables.APPLICANTS.USER_ID, Tables.APPLICANTS.RESUME, Tables.APPLICANTS.FILE_TYPE,
+          Tables.APPLICANTS.INTERESTS, Tables.APPLICANTS.PRIOR_INVOLVEMENT, Tables.APPLICANTS.WHY_JOIN)
+          .values(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin).execute();
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  public Optional<ApplicantReturn> getApplicant(int userId) {
+    try {
+      Applicants result = db.select().from(Tables.APPLICANTS).where(Tables.APPLICANTS.USER_ID.eq(userId))
+          .fetchSingleInto(Applicants.class);
+
+      ApplicantReturn ret = new ApplicantReturn(result.getUserId(), result.getResume(), result.getFileType(),
+          Arrays.copyOf(result.getInterests(), result.getInterests().length, String[].class),
+          result.getPriorInvolvement(), result.getWhyJoin());
+
+      return Optional.of(ret);
+    } catch (NoDataFoundException e) {
+      return Optional.empty();
+    }
+  }
+
+  public boolean updateApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests,
+      String priorInvolvement, String whyJoin) {
+
+    try {
+      db.update(Tables.APPLICANTS).set(Tables.APPLICANTS.RESUME, fileBLOB).set(Tables.APPLICANTS.FILE_TYPE, fileType)
+          .set(Tables.APPLICANTS.INTERESTS, interests).set(Tables.APPLICANTS.PRIOR_INVOLVEMENT, priorInvolvement)
+          .set(Tables.APPLICANTS.WHY_JOIN, whyJoin).where(Tables.APPLICANTS.USER_ID.eq(userId)).execute();
+
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  public boolean deleteApplicant(int userId) {
+    try {
+      db.delete(Tables.APPLICANTS).where(Tables.APPLICANTS.USER_ID.eq(userId)).execute();
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -63,30 +126,18 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public boolean attendEvent(String eventCode, int userid) {
-
-    // Result eventResult = db.fetch("select * from events where code = ?;",
-    // eventCode);
     EventReturn result;
     try {
       result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.CODE.eq(eventCode))
           .fetchSingleInto(EventReturn.class);
     } catch (NoDataFoundException e) {
-      // bad event code
       return false;
     }
-
-    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
-    // HH:mm:ss.S");
 
     if (result == null || !result.getOpen() || LocalDateTime.now().compareTo(result.getDate()) >= 0)
       return false;
 
     try {
-      /*
-       * db.execute("insert into event_check_ins\n" + "  (id, user_id, event_id)\n" +
-       * "  values (DEFAULT, ?, ?);", userid, eventid);
-       */
-
       db.insertInto(Tables.EVENT_CHECK_INS, Tables.EVENT_CHECK_INS.USER_ID, Tables.EVENT_CHECK_INS.EVENT_ID)
           .values(userid, result.getId()).execute();
 
@@ -109,11 +160,6 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode) {
     try {
-      /*
-       * db.execute("insert into events\n" + "  (id, name, date, open, code)\n" +
-       * "  values (DEFAULT, ?, ?, ?, ?);", name, date, open, eventCode);
-       */
-
       db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
           .values(name, Timestamp.valueOf(date), open, eventCode).execute();
     } catch (Exception e) {
@@ -136,10 +182,6 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code) {
     try {
-      // db.execute("update events set \n" + " name = ?, date = ?, open = ?, code = ?
-      // \n" + " where id = ?;", name, date,
-      // open, id, code);
-
       db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
           .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).execute();
 
@@ -152,10 +194,7 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean deleteEvent(int id) {
     try {
-      // db.execute("delete from events \n" + "where id = ?;", id);
-
       db.delete(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id)).execute();
-
     } catch (Exception e) {
       return false;
     }
