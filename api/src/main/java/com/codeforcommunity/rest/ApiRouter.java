@@ -942,7 +942,11 @@ public class ApiRouter {
 
   public boolean isAuthorizedUser(HttpServerRequest request) {
     try {
-      return getClaims(request) != null;
+      Claims c = getClaims(request);
+      if (c == null)
+        return false;
+
+      return c.getExpiration().getTime() > System.currentTimeMillis();
     } catch (Exception e) {
       return false;
     }
