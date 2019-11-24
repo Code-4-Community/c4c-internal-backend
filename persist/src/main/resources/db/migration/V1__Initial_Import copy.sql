@@ -3,7 +3,7 @@ IF NOT EXISTS users
 (
   id SERIAL
 PRIMARY KEY,
-  email VARCHAR 
+  email VARCHAR
 (255) UNIQUE,
   first_name VARCHAR
 (255),
@@ -11,7 +11,7 @@ PRIMARY KEY,
 (255),
   hashed_password VARCHAR
 (255),
-  graduation_year INT,
+  current_year INT,
   major VARCHAR
 (255),
   privilege_level INT
@@ -24,7 +24,8 @@ IF NOT EXISTS events
   name VARCHAR
 (255),
   date TIMESTAMP,
-  open BOOLEAN,
+open BOOLEAN
+,
   code VARCHAR
 (255) UNIQUE
 );
@@ -45,8 +46,28 @@ IF NOT EXISTS event_check_ins
 );
 
 CREATE TABLE
+IF NOT EXISTS applicants
+(
+  id SERIAL PRIMARY KEY,
+  user_id INT UNIQUE,
+  resume bytea,
+  file_type VARCHAR
+(255),
+  interests VARCHAR
+(255)[],
+  prior_involvement TEXT,
+  why_join TEXT,
+
+  CONSTRAINT fk_applicant_user FOREIGN KEY
+(user_id) REFERENCES users
+(id)
+
+);
+
+CREATE TABLE
 IF NOT EXISTS blacklisted_tokens
 (
-  id VARCHAR(255) NOT NULL PRIMARY KEY,
+  id VARCHAR
+(255) NOT NULL PRIMARY KEY,
   time_milliseconds BIGINT
 );

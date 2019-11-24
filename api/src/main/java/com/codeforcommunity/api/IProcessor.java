@@ -38,13 +38,14 @@ public interface IProcessor {
 
   List<UserReturn> getAllUsers();
 
-  boolean addUser(String email, String first, String last, String hashedPassword);
+  boolean addUser(String email, String first, String last, String hashedPassword, int currentYear, String major);
 
   Optional<UserReturn> getUserByEmail(String email);
 
   Optional<UserReturn> getUser(int id);
 
-  boolean updateUser(int id, String email, String first, String last, String hashedPassword);
+  boolean updateUser(int id, String email, String first, String last, String hashedPassword, int currentYear,
+      String major);
 
   boolean deleteUser(int id);
 
