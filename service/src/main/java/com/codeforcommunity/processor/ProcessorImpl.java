@@ -54,6 +54,7 @@ public class ProcessorImpl implements IProcessor {
           Tables.APPLICANTS.INTERESTS, Tables.APPLICANTS.PRIOR_INVOLVEMENT, Tables.APPLICANTS.WHY_JOIN)
           .values(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin).execute();
     } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
     return true;
