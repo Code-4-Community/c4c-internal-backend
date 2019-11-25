@@ -102,7 +102,7 @@ public class ProcessorImpl implements IProcessor {
   public List<UserReturn> getAllUsers() {
     List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
     return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
-        user.getLastName(), user.getGraduationYear(), user.getMajor(), user.getPrivilegeLevel()))
+        user.getLastName(), user.getCurrentYear(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
 
@@ -121,7 +121,7 @@ public class ProcessorImpl implements IProcessor {
         .fetchInto(Users.class);
 
     return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
-        user.getLastName(), user.getGraduationYear(), user.getMajor(), user.getPrivilegeLevel()))
+        user.getLastName(), user.getCurrentYear(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
 
@@ -279,7 +279,7 @@ public class ProcessorImpl implements IProcessor {
       // first, last, hashedPassword);
 
       db.insertInto(Tables.USERS, Tables.USERS.EMAIL, Tables.USERS.FIRST_NAME, Tables.USERS.LAST_NAME,
-          Tables.USERS.HASHED_PASSWORD, Tables.USERS.GRADUATION_YEAR, Tables.USERS.MAJOR, Tables.USERS.PRIVILEGE_LEVEL)
+          Tables.USERS.HASHED_PASSWORD, Tables.USERS.CURRENT_YEAR, Tables.USERS.MAJOR, Tables.USERS.PRIVILEGE_LEVEL)
           .values(email, first, last, hashedPassword, 2020, "Computer Science", 0).execute();
 
     } catch (Exception e) {
@@ -294,7 +294,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       Users result = db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)).fetchSingleInto(Users.class);
       UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          result.getGraduationYear(), result.getMajor(), result.getPrivilegeLevel());
+          result.getCurrentYear(), result.getMajor(), result.getPrivilegeLevel());
       return Optional.of(ret);
     } catch (NoDataFoundException e) {
       return Optional.empty();
@@ -306,7 +306,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       Users result = db.select().from(Tables.USERS).where(Tables.USERS.ID.eq(id)).fetchSingleInto(Users.class);
       UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          result.getGraduationYear(), result.getMajor(), result.getPrivilegeLevel());
+          result.getCurrentYear(), result.getMajor(), result.getPrivilegeLevel());
       return Optional.of(ret);
     } catch (NoDataFoundException e) {
       return Optional.empty();
