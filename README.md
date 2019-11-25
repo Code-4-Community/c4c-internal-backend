@@ -36,7 +36,7 @@ Takes JSON in request body in format:
   "lastName": "Doe",
   "password": "password123",
   "currentYear": 1,
-	"major": "Computer Science"
+  "major": "Computer Science"
 }
 ```
 
@@ -103,7 +103,7 @@ Takes JSON in request body in format:
   "lastName": "Doe",
   "password": "password123",
   "currentYear": 1,
-	"major": "Computer Science"
+  "major": "Computer Science"
 }
 ```
 
