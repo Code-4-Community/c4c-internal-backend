@@ -278,19 +278,25 @@ public class ApiRouter {
     String encryptedPassword = "";
     String firstName = "";
     String lastName = "";
+    int currentYear = -1;
+    String major = "";
     try {
       email = body.getString("email");
       firstName = body.getString("firstName");
       lastName = body.getString("lastName");
       encryptedPassword = bcrypt.hash(body.getString("password"));
+      currentYear = body.getInteger("currentYear");
+      major = body.getString("major");
+
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
 
     boolean success = false;
-    if (email != null && firstName != null && lastName != null && encryptedPassword != null)
-      success = processor.addUser(email, firstName, lastName, encryptedPassword);
+    if (email != null && firstName != null && lastName != null && encryptedPassword != null && currentYear != -1
+        && major != null)
+      success = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major);
     if (success)
       response.setStatusCode(201).end();
     else {
@@ -341,12 +347,18 @@ public class ApiRouter {
 
       String firstName = "";
       String lastName = "";
+
+      int currentYear = -1;
+      String major = "";
       try {
         id = getUserId(request);
         email = body.getString("email");
         firstName = body.getString("firstName");
         lastName = body.getString("lastName");
         password = body.getString("password");
+
+        currentYear = body.getInteger("currentYear");
+        major = body.getString("major");
         if (!password.isEmpty())
           encryptedPassword = bcrypt.hash(password);
       } catch (Exception e) {
@@ -355,8 +367,9 @@ public class ApiRouter {
       }
 
       boolean success = false;
-      if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null)
-        success = processor.updateUser(id, email, firstName, lastName, encryptedPassword);
+      if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null 
+          && currentYear != -1 && major != null)
+        success = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major);
       if (success)
         response.setStatusCode(201).end();
       else {

@@ -101,7 +101,7 @@ public class ProcessorImpl implements IProcessor {
   public List<UserReturn> getAllUsers() {
     List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
     return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
-        user.getLastName(), user.getGraduationYear(), user.getMajor(), user.getPrivilegeLevel()))
+        user.getLastName(), user.getCurrentYear(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
 
@@ -120,7 +120,7 @@ public class ProcessorImpl implements IProcessor {
         .fetchInto(Users.class);
 
     return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
-        user.getLastName(), user.getGraduationYear(), user.getMajor(), user.getPrivilegeLevel()))
+        user.getLastName(), user.getCurrentYear(), user.getMajor(), user.getPrivilegeLevel()))
         .collect(Collectors.toList());
   }
 
@@ -202,19 +202,12 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean addUser(String email, String first, String last, String hashedPassword) {
+  public boolean addUser(String email, String first, String last, String hashedPassword, int currentYear,
+      String major) {
     try {
-      // dont know if we want the graduation year and major yet so in the meantime
-      // just dont change what was here before
-      // db.execute("insert into users\n"
-      // + " (id, email, first_name, last_name, hashed_password, graduation_year,
-      // major, privilege_level)\n"
-      // + " values (DEFAULT, ?, ?, ?, ?, \n" + "2020, 'CS Probably', 0);", email,
-      // first, last, hashedPassword);
-
       db.insertInto(Tables.USERS, Tables.USERS.EMAIL, Tables.USERS.FIRST_NAME, Tables.USERS.LAST_NAME,
-          Tables.USERS.HASHED_PASSWORD, Tables.USERS.GRADUATION_YEAR, Tables.USERS.MAJOR, Tables.USERS.PRIVILEGE_LEVEL)
-          .values(email, first, last, hashedPassword, 2020, "Computer Science", 0).execute();
+          Tables.USERS.HASHED_PASSWORD, Tables.USERS.CURRENT_YEAR, Tables.USERS.MAJOR, Tables.USERS.PRIVILEGE_LEVEL)
+          .values(email, first, last, hashedPassword, currentYear, major, 0).execute();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -228,7 +221,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       Users result = db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)).fetchSingleInto(Users.class);
       UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          result.getGraduationYear(), result.getMajor(), result.getPrivilegeLevel());
+          result.getCurrentYear(), result.getMajor(), result.getPrivilegeLevel());
       return Optional.of(ret);
     } catch (NoDataFoundException e) {
       return Optional.empty();
@@ -240,7 +233,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       Users result = db.select().from(Tables.USERS).where(Tables.USERS.ID.eq(id)).fetchSingleInto(Users.class);
       UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          result.getGraduationYear(), result.getMajor(), result.getPrivilegeLevel());
+          result.getCurrentYear(), result.getMajor(), result.getPrivilegeLevel());
       return Optional.of(ret);
     } catch (NoDataFoundException e) {
       return Optional.empty();
@@ -248,11 +241,12 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean updateUser(int id, String email, String first, String last, String hashedPassword) {
+  public boolean updateUser(int id, String email, String first, String last, String hashedPassword, int currentYear,
+      String major) {
     try {
       db.update(Tables.USERS).set(Tables.USERS.EMAIL, email).set(Tables.USERS.FIRST_NAME, first)
           .set(Tables.USERS.LAST_NAME, last).set(Tables.USERS.HASHED_PASSWORD, hashedPassword)
-          .where(Tables.USERS.ID.eq(id)).execute();
+          .set(Tables.USERS.CURRENT_YEAR, currentYear).set(Tables.USERS.MAJOR, major).where(Tables.USERS.ID.eq(id)).execute();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -276,7 +270,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
           .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
-
+      System.out.println(password + " | " + storedPassword);
       return UpdatableBCrypt.verifyHash(password, storedPassword);
     } catch (Exception e) {
       e.printStackTrace();
