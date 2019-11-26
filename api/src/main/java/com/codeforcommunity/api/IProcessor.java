@@ -3,6 +3,7 @@ package com.codeforcommunity.api;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.ApplicantReturn;
+import com.codeforcommunity.dto.NewsReturn;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,16 @@ import java.time.LocalDateTime;
 
 public interface IProcessor {
 
+  List<NewsReturn> getAllNews();
+
+  boolean createNews(String title, String description, String author, LocalDateTime date, String content);
+
+  Optional<NewsReturn> getNews(int id);
+
+  boolean updateNews(int id, String title, String description, String author, LocalDateTime date, String content);
+
+  boolean deleteNews(int id);
+  
   List<ApplicantReturn> getAllApplicants();
 
   boolean createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement,
