@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.ApplicantReturn;
+import com.codeforcommunity.dto.NewsReturn;
 import org.jooq.Result;
 import org.jooq.Table;
 import org.jooq.exception.NoDataFoundException;
@@ -14,6 +15,7 @@ import io.vertx.core.cli.Option;
 
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.pojos.Applicants;
+import org.jooq.generated.tables.pojos.News;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -35,6 +37,60 @@ public class ProcessorImpl implements IProcessor {
 
   public ProcessorImpl(DSLContext db) {
     this.db = db;
+  }
+
+  @Override
+  public List<NewsReturn> getAllNews() {
+    List<NewsReturn> news = db.selectFrom(Tables.NEWS).fetchInto(NewsReturn.class);
+    return news;
+  }
+
+  @Override
+  public boolean createNews(String title, String description, String author, LocalDateTime date, String content) {
+    try {
+      db.insertInto(Tables.NEWS, Tables.NEWS.TITLE, Tables.NEWS.DESCRIPTION, Tables.NEWS.AUTHOR, Tables.NEWS.DATE,
+          Tables.NEWS.CONTENT).values(title, description, author, Timestamp.valueOf(date), content).execute();
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public Optional<NewsReturn> getNews(int id) {
+    try {
+      NewsReturn result = db.select().from(Tables.NEWS).where(Tables.NEWS.ID.eq(id)).fetchSingleInto(NewsReturn.class);
+      return Optional.of(result);
+    } catch (NoDataFoundException e) {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public boolean updateNews(int id, String title, String description, String author, LocalDateTime date,
+      String content) {
+    try {
+      db.update(Tables.NEWS).set(Tables.NEWS.TITLE, title).set(Tables.NEWS.DESCRIPTION, description)
+          .set(Tables.NEWS.AUTHOR, author).set(Tables.NEWS.DATE, Timestamp.valueOf(date))
+          .set(Tables.NEWS.CONTENT, content).where(Tables.NEWS.ID.eq(id)).execute();
+
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean deleteNews(int id) {
+    try {
+      // db.execute("delete from events \n" + "where id = ?;", id);
+
+      db.delete(Tables.NEWS).where(Tables.NEWS.ID.eq(id)).execute();
+
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 
   public List<ApplicantReturn> getAllApplicants() {
