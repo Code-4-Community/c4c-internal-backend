@@ -164,6 +164,23 @@ public class ApiRouter {
     Route deleteApplicantRoute = router.delete("/admin/applicant/:userid");
     deleteApplicantRoute.handler(this::handleDeleteApplicant);
 
+    // News
+
+    Route getAllNewsRoute = router.get("/news");
+    getAllNewsRoute.handler(this::handleGetAllNews);
+
+    Route createNewsRoute = router.post("/admin/news");
+    createNewsRoute.handler(this::handleCreateNews);
+
+    Route getNewsRoute = router.get("/news/:id");
+    getNewsRoute.handler(this::handleGetNews);
+
+    Route updateNewsRoute = router.put("/admin/news/:id");
+    updateNewsRoute.handler(this::handleUpdateNews);
+
+    Route deleteNewsRoute = router.delete("/admin/news/:id");
+    deleteNewsRoute.handler(this::handleDeleteNews);
+
     return router;
   }
 
