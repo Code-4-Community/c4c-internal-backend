@@ -326,7 +326,6 @@ public class ProcessorImpl implements IProcessor {
     try {
       String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
           .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
-      System.out.println(password + " | " + storedPassword);
       return UpdatableBCrypt.verifyHash(password, storedPassword);
     } catch (Exception e) {
       e.printStackTrace();
