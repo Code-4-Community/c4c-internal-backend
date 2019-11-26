@@ -274,9 +274,6 @@ DELETE /admin/applicant/:userid
 
 Deletes the applicant with this :userid.
 
----
-
-Check in the user with id in the given JWT to the event with this :code
 
 ---
 
