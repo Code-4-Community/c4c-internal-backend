@@ -278,6 +278,82 @@ Deletes the applicant with this :userid.
 
 Check in the user with id in the given JWT to the event with this :code
 
+---
+
+```sh
+GET /news
+```
+
+Returns a list of all of our news.
+
+---
+
+```sh
+GET /news/:id
+```
+
+Gets information for the news with this :id.
+
+---
+
+```sh
+POST /admin/news
+```
+
+Takes JSON in request body in format:
+- String title
+- String description
+- String author
+- String date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05)
+- String content
+
+```json
+{
+	"title": "How to do Things",
+	"description": "An article about doing things",
+	"author": "John Doe",
+	"date": "2020-01-01 12:00",
+	"content": "Fake content."
+}
+```
+
+Creates a new news post in the database with the given information.
+
+---
+
+```sh
+PUT /admin/news/:id
+```
+
+Takes JSON in request body in format:
+- String title
+- String description
+- String author
+- String date in yyyy-MM-dd HH:mm format (e.x 2019-12-25 12:05)
+- String content
+
+```json
+{
+	"title": "How to do Things",
+	"description": "An article about doing things",
+	"author": "John Doe",
+	"date": "2020-01-01 12:00",
+	"content": "Fake content."
+}
+```
+
+Updates and overwrites all information for the news with this :id
+
+---
+
+```sh
+DELETE /admin/news/:id
+```
+
+Deletes the news with this :id.
+
+---
+
 ## Build Setup
 
 ### Java
