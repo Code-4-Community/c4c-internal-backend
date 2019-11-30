@@ -34,7 +34,7 @@ public class ServiceMain {
     }
 
     // TODO: These arguments should be read out of a properties file
-    DSLContext db = DSL.using("jdbc:postgresql://localhost:5432/c4cneu-db", "postgres", "root");
+    DSLContext db = DSL.using("jdbc:postgresql://localhost:5434/c4cneu-db", "postgres", "root");
     this.db = db;
   }
 

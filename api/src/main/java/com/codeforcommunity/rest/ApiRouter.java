@@ -13,6 +13,7 @@ import com.codeforcommunity.JacksonMapper;
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
+import com.codeforcommunity.util.EmailUtil;
 import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -68,6 +69,8 @@ public class ApiRouter {
 
   // token duration is 60 minutes in milliseconds
   private static final long TOKEN_DURATION = 3600000;
+  
+  private HashMap<String, String> resetTokenMap = new HashMap<String, String>();
 
   public ApiRouter(IProcessor processor) {
     this.processor = processor;
@@ -142,6 +145,12 @@ public class ApiRouter {
 
     Route getEventUsersRoute = router.get("/protected/eventcheckin/:id");
     getEventUsersRoute.handler(this::handleGetEventUsers);
+    
+    Route resetPasswordEmail = router.post("/reset/email");
+    attendEventRoute.handler(this::handleResetPasswordEmail);
+
+    Route resetPassword = router.post("/reset/password");
+    attendEventRoute.handler(this::handleResetPassword);
 
     return router;
   }
@@ -260,6 +269,9 @@ public class ApiRouter {
     String lastName = "";
     try {
       email = body.getString("email");
+      if(!email.endsWith("@husky.neu.edu")) {
+        response.setStatusCode(400).setStatusMessage("Incorrect email. Must be of type @husky.neu.edu.").end();
+      }
       firstName = body.getString("firstName");
       lastName = body.getString("lastName");
       encryptedPassword = bcrypt.hash(body.getString("password"));
@@ -563,6 +575,46 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     response.end(userJson);
+  }
+  
+  private void handleResetPasswordEmail (RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String email = request.params().get("email"); 
+    
+    if(!email.endsWith("@husky.neu.edu")) {
+      response.setStatusCode(400).setStatusMessage("Incorrect email. Must be of type @husky.neu.edu.").end();
+    }
+    
+    //if email is valid send email
+    if(processor.validateEmail(email)) {
+      String token = createJWT(email, "auth-token", TOKEN_DURATION * 24, 0, true);
+      resetTokenMap.put(email, token);
+      EmailUtil.sendEmail(email, token);
+    }
+    else response.setStatusCode(400).setStatusMessage("Invalid email.").end();
+    
+    response.setStatusCode(200).end();
+    
+        
+  }
+  
+  private void handleResetPassword (RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String qs = request.params().get("qs");
+    String email = request.params().get("email");
+    String password = request.params().get("password"); 
+    
+    if(resetTokenMap.get(email).equals(qs)) { //right now is in memory so if server crashes all tokens will be reset
+      if(processor.changePassword(password, email)) {
+        response.putHeader("Authorization", "");
+        resetTokenMap.remove(email);
+        response.setStatusCode(200).end();
+      }
+    }   
+    else response.setStatusCode(400).setStatusMessage("Password could not be reset. Make sure to enter a password that you have not already used.").end();
+      
   }
 
   public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {

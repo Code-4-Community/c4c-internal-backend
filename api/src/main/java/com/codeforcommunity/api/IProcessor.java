@@ -43,4 +43,9 @@ public interface IProcessor {
   boolean addBlacklistedToken(String jti);
 
   boolean clearBlacklistedTokens(long tokenDuration);
+  
+  boolean validateEmail(String email);
+  
+  boolean changePassword(String password, String email);
+  
 }

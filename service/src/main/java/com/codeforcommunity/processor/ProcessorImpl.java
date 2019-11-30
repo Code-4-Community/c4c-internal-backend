@@ -281,4 +281,21 @@ public class ProcessorImpl implements IProcessor {
     }
     return true;
   }
+
+  @Override
+  public boolean validateEmail(String email) {
+    // TODO Auto-generated method stub
+    return db.fetchExists(db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)));   
+  }
+
+  @Override
+  public boolean changePassword(String password, String email) {
+    final UpdatableBCrypt bcrypt = new UpdatableBCrypt(12);
+    if(!db.fetchExists(db.select().from(Tables.USERS).where(Tables.USERS.HASHED_PASSWORD.eq(bcrypt.hash(password))))) {
+      db.update(Tables.USERS).set(Tables.USERS.HASHED_PASSWORD, password).where(Tables.USERS.EMAIL.eq(email)).execute();
+      return true;
+    }
+    else return false;
+    
+  }
 }

@@ -12,7 +12,7 @@
   <properties>
     <flyway.version>6.0.3</flyway.version>
     <database.driver>org.postgresql.Driver</database.driver>
-    <database.url>jdbc:postgresql://localhost:5432/c4cneu-db?autoreconnect=true</database.url>
+    <database.url>jdbc:postgresql://localhost:5434/c4cneu-db?autoreconnect=true</database.url>
     <database.username>postgres</database.username>
     <database.password>root</database.password>
   </properties>
