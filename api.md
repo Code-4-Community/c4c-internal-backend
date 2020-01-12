@@ -6,7 +6,7 @@ Main document for cataloging all the API endpoints for this application includin
 
 ### Users & Authentication
 
-* [Signup](apidocs/users.md)
+* [Signup](apidocs/users.md#post-signup)
 * [Login](apidocs/users.md)
 * [Logout](apidocs/users.md)
 
