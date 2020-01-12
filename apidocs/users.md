@@ -306,6 +306,9 @@ The request body was malformed according to the specification
 
 Deletes the user with the id in the JWT.
   
+### Authorization Requirements
+
+Requires a valid JWT
 
 ### Responses
 
