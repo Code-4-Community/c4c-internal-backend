@@ -4,23 +4,39 @@ Main document for cataloging all the API endpoints for this application includin
 
 ## Endpoints
 
-### Authentication
+### Users & Authentication
 
-* [Signup](apidocs/users.md#post-signup)
-* [Login](apidocs/users.md#post-login)
-* [Logout](apidocs/users.md#get-logout)
+- [Signup](apidocs/users.md#post-signup)
+- [Login](apidocs/users.md#post-login)
+- [Logout](apidocs/users.md#get-logout)
 
-### Users
+- [Get all users](apidocs/users.md#get-protectedusers)
+- [Get a user by ID](apidocs/users.md#get-protecteduserid)
+- [Update this user](apidocs/users.md#put-protecteduser)
+- [Delete this user](apidocs/users.md#delete-protecteduser)
 
-* [Get all users](apidocs/users.md#get-protectedusers)
-* [Get a user by ID](apidocs/users.md#get-protecteduserid)
-* [Update this user](apidocs/users.md#put-protecteduser)
-* [Delete this user](apidocs/users.md#delete-protecteduser)
+### Events & Checkins
+
+
+
+- [Get all events](apidocs/users.md#get-protectedevents)
+- [Get a user by ID](apidocs/users.md#get-protectedeventid)
+- [Update this user](apidocs/users.md#put-protectedevent)
+- [Delete this user](apidocs/users.md#delete-protectedevent)
+
+- [Get the list of users attending an event](apidocs/users.md#get-protectedeventcheckinid)
+- [Attend an event](apidocs/users.md#get-protectedeventcheckincode)
+
+### Applicants
+
+
+### News
+
 
 
 ### Misc
 
-* [Misc](apidocs/misc.md)
+- [Misc](apidocs/misc.md)
 
 
 
