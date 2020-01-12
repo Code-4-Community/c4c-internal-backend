@@ -106,6 +106,8 @@ Returns a JWT in response header under "Authorization" that expires in 60 minute
 
 The request body was malformed according to the specification.
 
+
+
 ## `GET /logout`
 
   
@@ -137,7 +139,9 @@ Requires a valid JWT token.
 
 The request body was malformed according to the specification.
 
-  
+#### `403 ERROR`
+
+Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
 ## `GET /protected/users`
 
@@ -201,7 +205,9 @@ This happens if the client sends a request that does not conform to the standard
 outlined above.
 
   
-  
+#### `403 ERROR`
+
+Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
 ## `GET /protected/user/:id`
 
@@ -252,7 +258,9 @@ Every thing is okay.
 This happens if the client sends a request that does not conform to the standard outlined above.
 
   
- 
+#### `403 ERROR`
+
+Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
 ## `PUT /protected/user`
 
@@ -298,7 +306,9 @@ The user was updated successfully.
 
 The request body was malformed according to the specification
 
-  
+#### `403 ERROR`
+
+Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
 ## `DELETE /protected/user`
 
@@ -316,6 +326,9 @@ Requires a valid JWT
 
 #### `200 OK`
 
-  
 
 The user was deleted successfully
+
+#### `403 ERROR`
+
+Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
