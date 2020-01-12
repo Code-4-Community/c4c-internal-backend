@@ -7,6 +7,10 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import io.vertx.core.net.NetServerOptions;
 
 /**
@@ -14,9 +18,24 @@ import io.vertx.core.net.NetServerOptions;
  */
 public class ApiMain {
   private final ApiRouter apiRouter;
+  private final Properties serverProperties = new Properties();
 
   public ApiMain(ApiRouter apiRouter) {
     this.apiRouter = apiRouter;
+    loadProperties();
+
+  }
+
+  /**
+   * Load properties from a server.properties file into a Properties field.
+   */
+  private void loadProperties() {
+    InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream("server.properties");
+    try {
+      serverProperties.load(propertiesStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -25,7 +44,7 @@ public class ApiMain {
   public void startApi() {
     Vertx vertx = Vertx.vertx();
     HttpServerOptions options = new HttpServerOptions().addEnabledSecureTransportProtocol("TLSv1.2").setSsl(true)
-        .setKeyStoreOptions(new JksOptions().setPath("classes/keystore.jks")
+        .setKeyStoreOptions(new JksOptions().setPath(serverProperties.getProperty("server.APIKeystorePath"))
             .setPassword("password"));
     HttpServer server = vertx.createHttpServer(options);
 
@@ -37,7 +56,7 @@ public class ApiMain {
   public void startHTTP() {
     Vertx vertx = Vertx.vertx();
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setSsl(true)
-        .setKeyStoreOptions(new JksOptions().setPath("classes/keystore.jks")
+        .setKeyStoreOptions(new JksOptions().setPath(serverProperties.getProperty("server.HTTPKeystorePath"))
             .setPassword("password")));
     Router router = Router.router(vertx);
 
