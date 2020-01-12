@@ -139,7 +139,7 @@ Requires a valid JWT token.
 
 The request body was malformed according to the specification.
 
-#### `403 FORBIDDEN`
+#### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
@@ -205,7 +205,7 @@ This happens if the client sends a request that does not conform to the standard
 outlined above.
 
   
-#### `403 FORBIDDEN`
+#### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
@@ -258,7 +258,7 @@ Every thing is okay.
 This happens if the client sends a request that does not conform to the standard outlined above.
 
   
-#### `403 FORBIDDEN`
+#### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
@@ -306,7 +306,7 @@ The user was updated successfully.
 
 The request body was malformed according to the specification
 
-#### `403 FORBIDDEN`
+#### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
@@ -329,6 +329,6 @@ Requires a valid JWT
 
 The user was deleted successfully
 
-#### `403 FORBIDDEN`
+#### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
