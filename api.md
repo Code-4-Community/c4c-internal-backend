@@ -14,8 +14,8 @@ Main document for cataloging all the API endpoints for this application includin
 
 * [Get all users](apidocs/users.md#get-protectedusers)
 * [Get a user by ID](apidocs/users.md#get-protecteduserid)
-* [Update this user](apidocs/users.md#put-protectedusers)
-* [Delete this user](apidocs/users.md#delete-protectedusers)
+* [Update this user](apidocs/users.md#put-protecteduser)
+* [Delete this user](apidocs/users.md#delete-protecteduser)
 
 
 ### Misc
