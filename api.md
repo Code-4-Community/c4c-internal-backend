@@ -4,11 +4,19 @@ Main document for cataloging all the API endpoints for this application includin
 
 ## Endpoints
 
-### Users & Authentication
+### Authentication
 
 * [Signup](apidocs/users.md#post-signup)
-* [Login](apidocs/users.md)
-* [Logout](apidocs/users.md)
+* [Login](apidocs/users.md#post-login)
+* [Logout](apidocs/users.md#get-logout)
+
+### Users
+
+* [Get all users](apidocs/users.md#get-protectedusers)
+* [Get a user by ID](apidocs/users.md#get-protecteduserid)
+* [Update this user](apidocs/users.md#put-protectedusers)
+* [Delete this user](apidocs/users.md#delete-protectedusers)
+
 
 ### Misc
 
