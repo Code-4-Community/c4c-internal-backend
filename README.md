@@ -4,10 +4,7 @@ Code 4 Community internal website backend to manage logins, event attendance, an
 
 ## API Endpoints
 
-### Authorization
 
-For any request to protected resources (/protected/_ or /admin/_) you should pass the JWT in the format of this string in the HTTP header Authorization as:
-Authorization: Bearer <token>
 
 ## Build Setup
 

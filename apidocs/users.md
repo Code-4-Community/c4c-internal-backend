@@ -5,9 +5,6 @@
 
 This API is for getting, creating, and updating user objects. All request and response bodies will be of type JSON and include an appropriate `Content-Type: application/json` header.
 
-Routes with authorization requirements must have a JWT in an appropriate `Authorization: Bearer [JWT]` header.
-
-
 ## `POST /signup`
 
   

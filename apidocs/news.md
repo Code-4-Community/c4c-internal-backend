@@ -1,23 +1,23 @@
-# Applicant API
+# News API
 
   
 
 This API is for getting, creating, and updating user objects. All request and response bodies will be of type JSON and include an appropriate `Content-Type: application/json` header.
 
 
-## `GET /admin/applicants`
+## `GET /news`
 
   
 
-Returns a list of all of our applicants.
+Returns a list of all of our news.
+
   
 
 ### Authorization Requirements
 
   
 
-Requires a valid JWT and admin privleges
-
+None
   
 
 ### Responses
@@ -36,45 +36,45 @@ Every thing is okay.
 ```json
 [
 {
-  "userId": INTEGER,
-  "fileBLOB": STRING,
-	"fileType": FILETYPE,
-	"interests": STRING[],
-	"priorInvolvement": STRING,
-	"whyJoin": STRING
+	"title": STRING,
+	"description": STRING,
+	"author": STRING,
+	"date": DATE,
+	"content": STRING
 },
 
 ...
 
 {
-  "userId": INTEGER,
-  "fileBLOB": STRING,
-	"fileType": FILETYPE,
-	"interests": STRING[],
-	"priorInvolvement": STRING,
-	"whyJoin": STRING
+	"title": STRING,
+	"description": STRING,
+	"author": STRING,
+	"date": DATE,
+	"content": STRING
 }
 ]
 ```
-**FILETYPE** is a **STRING** in the format ".pdf" or another file extension.
+**DATE** is in the format `YYYY-MM-DD HH:mm`
   
 
 #### `400 BAD REQUEST`
 
   
 
-This happens if the client sends a request that does not conform to the standard outlined above.
+This happens if the client sends a request that does not conform to the standard
+
+outlined above.
 
   
 #### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
-## `GET /admin/applicant/:userid`
+## `GET /news/:id`
 
   
 
-Gets information for the application whose user has the given id.
+Gets information for the news with this :id.
 
   
 
@@ -82,7 +82,7 @@ Gets information for the application whose user has the given id.
 
   
 
-Requires a valid JWT and admin privleges
+None
 
   
 
@@ -101,16 +101,15 @@ Every thing is okay.
 
 ```json
 {
-  "userId": INTEGER,
-  "fileBLOB": STRING,
-	"fileType": FILETYPE,
-	"interests": STRING[],
-	"priorInvolvement": STRING,
-	"whyJoin": STRING
+	"title": STRING,
+	"description": STRING,
+	"author": STRING,
+	"date": DATE,
+	"content": STRING
 }
 ```
 
-**FILETYPE** is a **STRING** in the format ".pdf" or another file extension.
+**DATE** is in the format `YYYY-MM-DD HH:mm`
 
   
 
@@ -125,14 +124,14 @@ This happens if the client sends a request that does not conform to the standard
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
-## `POST /protected/applicant`
+## `POST /admin/news`
 
-Creates a new applicant for the userId of the JWT.
+Creates a new news post in the database with the given information.
 
   
 ### Authorization Requirements
 
-Requires a valid JWT
+Requires a valid JWT and admin privleges
 
 ### Request Body
 
@@ -140,14 +139,62 @@ Requires a valid JWT
 
 ```json
 {
-  "fileBLOB": STRING,
-	"fileType": FILETYPE,
-	"interests": STRING[],
-	"priorInvolvement": STRING,
-	"whyJoin": STRING
+	"title": STRING,
+	"description": STRING,
+	"author": STRING,
+	"date": DATE,
+	"content": STRING
 }
 ```
-**FILETYPE** is a **STRING** in the format ".pdf" or another file extension.
+**DATE** is in the format `YYYY-MM-DD HH:mm`
+
+  
+
+### Responses
+
+  
+
+#### `200 OK`
+
+  
+
+The news post was updated successfully.
+  
+
+#### `400 BAD REQUEST`
+
+  
+
+The request body was malformed according to the specification
+
+#### `401 UNAUTHORIZED`
+
+Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
+
+
+## `PUT /admin/news/:id`
+
+
+Updates and overwrites all information for the news post with the given id
+  
+### Authorization Requirements
+
+Requires a valid JWT and admin privleges
+
+### Request Body
+
+  
+
+```json
+{
+	"title": STRING,
+	"description": STRING,
+	"author": STRING,
+	"date": DATE,
+	"content": STRING
+}
+```
+**DATE** is in the format `YYYY-MM-DD HH:mm`
 
   
 
@@ -164,63 +211,17 @@ The event was updated successfully.
 
 #### `400 BAD REQUEST`
 
-  
-
 The request body was malformed according to the specification
 
 #### `401 UNAUTHORIZED`
 
 Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
 
-
-## `PUT /protected/applicant`
-
-
-Updates and overwrites all information for the applicant with the userId of the JWT
-  
-### Authorization Requirements
-
-Requires a valid JWT
-
-### Request Body
-
-
-```json
-{
-  "fileBLOB": STRING,
-	"fileType": FILETYPE,
-	"interests": STRING[],
-	"priorInvolvement": STRING,
-	"whyJoin": STRING
-}
-```
-**FILETYPE** is a **STRING** in the format ".pdf" or another file extension.
+## `DELETE /admin/news/:id`
 
   
 
-### Responses
-
-  
-
-#### `200 OK`
-
-  
-
-The event was updated successfully.
-  
-
-#### `400 BAD REQUEST`
-
-The request body was malformed according to the specification
-
-#### `401 UNAUTHORIZED`
-
-Not sufficent authorization, either the JWT is invalid or does not have sufficent prvileges.
-
-## `DELETE /admin/applicant/:userid`
-
-Deletes the applicant with the given userid.
-
+Deletes the event with the given id.
   
 ### Authorization Requirements
 
