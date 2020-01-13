@@ -22,8 +22,6 @@ For any request to protected resources (/protected/_ or /admin/_) you should pas
 
 ### Events & Checkins
 
-
-
 - [Get all events](apidocs/events.md#get-protectedevents)
 - [Get an event by ID](apidocs/events.md#get-protectedeventid)
 - [Create an event](apidocs/events.md#post-adminevent)
@@ -31,7 +29,7 @@ For any request to protected resources (/protected/_ or /admin/_) you should pas
 - [Delete an event by ID](apidocs/events.md#delete-admineventid)
 
 - [Get the list of users attending an event](apidocs/events.md#get-protectedeventcheckinid)
-- [Attend an event](apidocs/events.md#get-protectedeventcheckincode)
+- [Attend an event by event code](apidocs/events.md#post-protectedeventcheckincode)
 
 ### Applicants
 
@@ -39,13 +37,13 @@ For any request to protected resources (/protected/_ or /admin/_) you should pas
 - [Get an applicant by ID](apidocs/applicants.md#get-adminapplicantuserid)
 - [Create an applicant](apidocs/applicants.md#post-protectedapplicant)
 - [Update this applicant](apidocs/applicants.md#put-protectedapplicant)
-- [Delete this applicant](apidocs/applicants.md#delete-admineventid)
+- [Delete applicant by ID](apidocs/applicants.md#delete-admineventuserid)
 
 ### News
 
 - [Get all news posts](apidocs/news.md#get-news)
 - [Get a news post by ID](apidocs/news.md#get-newsid)
-- [Create a news post](apidocs/news.md#post-adminnewsid)
+- [Create a news post](apidocs/news.md#post-adminnews)
 - [Update a news post by ID](apidocs/news.md#put-adminnewsid)
 - [Delete a news post by ID](apidocs/news.md#delete-adminnewsid)
 
