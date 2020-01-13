@@ -2,7 +2,7 @@
 
 Code 4 Community internal website backend to manage logins, event attendance, and requests from other organizations. Created using Vert.x in Java.
 
-## API Endpoints
+## [API Endpoints](api.md)
 
 
 
