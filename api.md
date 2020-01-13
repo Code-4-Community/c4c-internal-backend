@@ -37,7 +37,7 @@ For any request to protected resources (/protected/_ or /admin/_) you should pas
 - [Get an applicant by ID](apidocs/applicants.md#get-adminapplicantuserid)
 - [Create an applicant](apidocs/applicants.md#post-protectedapplicant)
 - [Update this applicant](apidocs/applicants.md#put-protectedapplicant)
-- [Delete applicant by ID](apidocs/applicants.md#delete-admineventuserid)
+- [Delete applicant by ID](apidocs/applicants.md#delete-adminapplicantuserid)
 
 ### News
 
