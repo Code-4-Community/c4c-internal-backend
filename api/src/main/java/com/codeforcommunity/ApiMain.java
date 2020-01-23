@@ -44,8 +44,8 @@ public class ApiMain {
   public void startApi() {
     Vertx vertx = Vertx.vertx();
     HttpServerOptions options = new HttpServerOptions().addEnabledSecureTransportProtocol("TLSv1.2").setSsl(true)
-        .setKeyStoreOptions(new JksOptions().setPath(serverProperties.getProperty("server.APIKeystorePath"))
-            .setPassword("password"));
+        .setKeyStoreOptions(new JksOptions().setPath(serverProperties.getProperty("server.keystorePath"))
+            .setPassword(serverProperties.getProperty("server.keystorePassword")));
     HttpServer server = vertx.createHttpServer(options);
 
     Router router = apiRouter.initializeRouter(vertx);
@@ -56,8 +56,8 @@ public class ApiMain {
   public void startHTTP() {
     Vertx vertx = Vertx.vertx();
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setSsl(true)
-        .setKeyStoreOptions(new JksOptions().setPath(serverProperties.getProperty("server.HTTPKeystorePath"))
-            .setPassword("password")));
+        .setKeyStoreOptions(new JksOptions().setPath(serverProperties.getProperty("server.keystorePath"))
+            .setPassword(serverProperties.getProperty("server.keystorePassword"))));
     Router router = Router.router(vertx);
 
     // Start
