@@ -389,6 +389,10 @@ $ psql -U postgres -d c4cneu-db -f <file> -h localhost
 
 ### Compiling & Running
 
+Update the properties file in `/persist/src/main/resources/db.properties` to contain your database connection information
+
+Update the properties file in `/persist/src/main/resources/server.properties` to contain the paths to keystores for the API and HTTP servers
+
 ```sh
 $ cd c4c-internal-backend
 $ mvn clean package

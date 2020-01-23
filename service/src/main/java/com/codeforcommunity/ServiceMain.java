@@ -6,8 +6,13 @@ import com.codeforcommunity.rest.ApiRouter;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 public class ServiceMain {
   private DSLContext db;
+  private final Properties dbProperties = new Properties();
 
   public static void main(String[] args) {
     ServiceMain serviceMain = new ServiceMain();
@@ -18,8 +23,21 @@ public class ServiceMain {
    * Start the server, get everything going.
    */
   public void initialize() {
+    loadProperties();
     connectDb();
     initializeServer();
+  }
+
+  /**
+   * Load properties from a db.properties file into a Properties field.
+   */
+  private void loadProperties() {
+    InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream("db.properties");
+    try {
+      dbProperties.load(propertiesStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -28,13 +46,13 @@ public class ServiceMain {
   private void connectDb() {
     // This block ensures that the MySQL driver is loaded in the classpath
     try {
-      Class.forName("org.postgresql.Driver");
+      Class.forName(dbProperties.getProperty("database.driver"));
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
 
-    // TODO: These arguments should be read out of a properties file
-    DSLContext db = DSL.using("jdbc:postgresql://localhost:5432/c4cneu-db", "postgres", "root");
+    DSLContext db = DSL.using(dbProperties.getProperty("database.url"), dbProperties.getProperty("database.username"),
+        dbProperties.getProperty("database.password"));
     this.db = db;
   }
 
