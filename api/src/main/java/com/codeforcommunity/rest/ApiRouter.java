@@ -73,6 +73,7 @@ public class ApiRouter {
 
   // token duration is 60 minutes in milliseconds
   private static final long TOKEN_DURATION = 3600000;
+  private HashMap<String, String> resetTokenMap = new HashMap<String, String>();
 
   public ApiRouter(IProcessor processor) {
     this.processor = processor;
@@ -897,6 +898,58 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
   }
+  
+  private void handleResetPasswordEmail (RoutingContext ctx) {
+    long DAY = 24 * 60 * 60 * 1000;
+    HashMap<String, Date> validToken = new HashMap<String, Date>();
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String email = request.params().get("email"); 
+
+    if(!email.endsWith("@husky.neu.edu")) {
+      response.setStatusCode(400).setStatusMessage("Incorrect email. Must be of type @husky.neu.edu.").end();
+    }
+
+    //if email is valid send email
+    if(processor.validateEmail(email)) {      
+      if(!resetTokenMap.containsKey(email)){
+        String token = createJWT(email, "auth-token", TOKEN_DURATION * 24, 0, true);
+        validToken.put(token, new Date());
+        resetTokenMap.put(email, token);   
+      }
+      // checks if token is still valid in the 24 hours
+     if(validToken.get(resetTokenMap.get(email)) != null && validToken.get(resetTokenMap.get(email)).getTime() < System.currentTimeMillis() - DAY) {
+      EmailUtil.sendEmail(email, resetTokenMap.get(email));
+     }
+     else {
+       validToken.remove(resetTokenMap.get(email)); //if token is expired delete it from the cache
+     }
+    }
+    else response.setStatusCode(400).setStatusMessage("Invalid email.").end();
+
+    response.setStatusCode(200).end();
+
+
+  }
+
+  private void handleResetPassword (RoutingContext ctx) {
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
+    String qs = request.params().get("qs");
+    String email = request.params().get("email");
+    String password = request.params().get("password"); 
+
+    if(resetTokenMap.get(email).equals(qs)) { //right now is in memory so if server crashes all tokens will be reset
+      if(processor.changePassword(password, email)) {
+        response.putHeader("Authorization", "");
+        resetTokenMap.remove(email);
+        response.setStatusCode(200).end();
+      }
+    }   
+    else response.setStatusCode(400).setStatusMessage("Password could not be reset. Make sure to enter a password that you have not already used.").end();
+
+  }
+
 
   public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {
     // The JWT signature algorithm we will be using to sign the token

@@ -333,6 +333,11 @@ public class ProcessorImpl implements IProcessor {
       return false;
     }
   }
+  
+  public boolean validateEmail(String email) {
+    // TODO Auto-generated method stub
+    return db.fetchExists(db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)));   
+  }
 
   @Override
   public boolean isBlacklistedToken(String jti) {
