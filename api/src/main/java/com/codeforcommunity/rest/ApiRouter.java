@@ -1,7 +1,7 @@
 package com.codeforcommunity.rest;
 
 //import java.awt.RenderingHints.Key;
-import java.sql.Date;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,7 +16,7 @@ import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.ApplicantReturn;
 import com.codeforcommunity.dto.NewsReturn;
-
+import com.codeforcommunity.util.EmailUtil;
 import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
