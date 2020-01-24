@@ -1,0 +1,18 @@
+<target name="junit" depends="compile">
+
+    <junit printsummary="yes" haltonfailure="no">
+
+	<!-- Project classpath, must include junit.jar -->
+	<classpath refid="test.path" />
+		
+	<!-- test class -->
+	<classpath location="${test.classes.dir}" />
+		
+	<test name="RandomTest" 
+		haltonfailure="no" todir="${report.dir}">
+		<formatter type="plain" />
+		<formatter type="xml" />
+	</test>
+		
+  </junit>
+</target>
