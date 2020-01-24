@@ -31,27 +31,25 @@ Download PostgreSQL for your OS [here](https://www.postgresql.org/download/).
 
 Again, make sure that there is a PATH to the /bin for PostgreSQL.
 
-Set up a database running on localhost:5432 with a username of "postgres" and password "root".
+Set up a database named c4cneu-db running on localhost:5432 with a username of "postgres" and password "root".
 
-Create the database "c4cneu-db" and import the tables from the inital migration .sql file. Where it sayse <file>, use the absolute path to the .sql file.
+Create the database "c4cneu-db", tables will be generated automatically during `mvn clean install` by flyway.
 
 ```sh
 $ psql -U postgres
 $ CREATE DATABASE c4cneu-db;
-$ \q
-$ psql -U postgres -d c4cneu-db -f <file> -h localhost
 ```
 
 ### Compiling & Running
 
 Update the properties file in `/persist/src/main/resources/db.properties` to contain your database connection information
 
-Update the properties file in `/persist/src/main/resources/server.properties` to contain the paths to keystores for the API and HTTP servers
+Update the properties file in `/persist/src/main/resources/server.properties` to contain the paths to keystores for the API and HTTP servers. Depending on your OS, the path may either be `classes/keystore.jks` or `service/target/keystore.jks`
 
 ```sh
 $ cd c4c-internal-backend
-$ mvn clean package
-$ java -jar .\service\target\service-1.0-SNAPSHOT-jar-with-dependencies.jar
+$ mvn clean install
+$ sh build.sh
 ```
 
-The application should be running on https://localhost:8090 and https://localhost:8443
+The application should be running on https://localhost:8443
