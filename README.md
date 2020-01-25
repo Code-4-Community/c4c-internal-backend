@@ -53,3 +53,23 @@ $ sh build.sh
 ```
 
 The application should be running on https://localhost:8443
+
+### Testing
+
+API testing is done with newman, the cli for Postman. The collection JSON (including API tests) should be `/newman` folder. Before you star testing, make sure you have an admin user already in your user table. To do so, run the following commands:
+
+```sh
+$ psql -U postgres
+$ \c c4cneu-db;
+$ insert into users (email, first_name, last_name, hashed_password, current_year, major, privilege_level) values ('admin@husky.neu.edu', 'admin', 'admin',  '$2a$12$TsV9egpd1IXx013lVLpo5.OPbxI0w3EuObh8..gD4mR7YqCV7Md1W', 5, 'Computer Science', 1);
+```
+
+This will create a user with admin privileges with the password expected in the test collection.
+
+Now navigate to the `/newman` folder and run
+
+```sh
+$ newman test.json
+```
+
+If you need to add more tests, simply go to the Postman website or download their desktop app and import `test.json`, then add your new tests and replace the test.json in `/newman`.

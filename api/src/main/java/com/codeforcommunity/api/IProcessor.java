@@ -14,11 +14,11 @@ public interface IProcessor {
 
   List<NewsReturn> getAllNews();
 
-  boolean createNews(String title, String description, String author, LocalDateTime date, String content);
+  boolean createNews(String title, String description, String imageUrl, String author, LocalDateTime date, String content);
 
   Optional<NewsReturn> getNews(int id);
 
-  boolean updateNews(int id, String title, String description, String author, LocalDateTime date, String content);
+  boolean updateNews(int id, String title, String description, String imageUrl, String author, LocalDateTime date, String content);
 
   boolean deleteNews(int id);
   
@@ -39,11 +39,11 @@ public interface IProcessor {
 
   List<EventReturn> getAllEvents();
 
-  boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode);
+  Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String eventCode);
   
   Optional<EventReturn> getEvent(int id);
   
-  boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code);
+  boolean updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code);
   
   boolean deleteEvent(int id);
 

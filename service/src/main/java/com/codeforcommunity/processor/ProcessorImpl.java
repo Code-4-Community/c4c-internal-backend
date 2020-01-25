@@ -46,10 +46,10 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean createNews(String title, String description, String author, LocalDateTime date, String content) {
+  public boolean createNews(String title, String description, String imageUrl, String author, LocalDateTime date, String content) {
     try {
-      db.insertInto(Tables.NEWS, Tables.NEWS.TITLE, Tables.NEWS.DESCRIPTION, Tables.NEWS.AUTHOR, Tables.NEWS.DATE,
-          Tables.NEWS.CONTENT).values(title, description, author, Timestamp.valueOf(date), content).execute();
+      db.insertInto(Tables.NEWS, Tables.NEWS.TITLE, Tables.NEWS.DESCRIPTION, Tables.NEWS.IMAGE_URL, Tables.NEWS.AUTHOR, Tables.NEWS.DATE,
+          Tables.NEWS.CONTENT).values(title, description, imageUrl, author, Timestamp.valueOf(date), content).execute();
     } catch (Exception e) {
       return false;
     }
@@ -67,10 +67,11 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean updateNews(int id, String title, String description, String author, LocalDateTime date,
+  public boolean updateNews(int id, String title, String description, String imageUrl, String author, LocalDateTime date,
       String content) {
     try {
       db.update(Tables.NEWS).set(Tables.NEWS.TITLE, title).set(Tables.NEWS.DESCRIPTION, description)
+          .set(Tables.NEWS.IMAGE_URL, imageUrl)
           .set(Tables.NEWS.AUTHOR, author).set(Tables.NEWS.DATE, Timestamp.valueOf(date))
           .set(Tables.NEWS.CONTENT, content).where(Tables.NEWS.ID.eq(id)).execute();
 
@@ -214,14 +215,16 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode) {
+  public Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String eventCode) {
     try {
-      db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
-          .values(name, Timestamp.valueOf(date), open, eventCode).execute();
+       db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
+          .values(name, subtitle, description, imageUrl, Timestamp.valueOf(date), open, eventCode).returning(Tables.EVENTS.ID).fetchOne();
+        db.fet
+      if(ret != null) return new Optional.of(result);
+      return Optional.empty();
     } catch (Exception e) {
-      return false;
+      return Optional.empty();
     }
-    return true;
   }
 
   @Override
@@ -236,9 +239,10 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code) {
+  public boolean updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code) {
     try {
-      db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
+      db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.SUBTITLE, subtitle).set(Tables.EVENTS.DESCRIPTION, description)
+          .set(Tables.EVENTS.IMAGE_URL, imageUrl).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
           .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).execute();
 
     } catch (Exception e) {
@@ -327,6 +331,8 @@ public class ProcessorImpl implements IProcessor {
     try {
       String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
           .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
+      //if(storedPassword == null) return false;
+      System.out.println("email: " + email + " password: " + password + " storedpassword: " + storedPassword);
       return UpdatableBCrypt.verifyHash(password, storedPassword);
     } catch (Exception e) {
       e.printStackTrace();

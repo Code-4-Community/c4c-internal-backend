@@ -104,16 +104,16 @@ public class ApiRouter {
     Route signUpRoute = router.post("/signup");
     signUpRoute.handler(this::handleSignUp);
 
-    Route getUsersRoute = router.route("/protected/users");
+    Route getUsersRoute = router.get("/protected/users");
     getUsersRoute.handler(this::handleGetAllUsers);
 
-    Route getUserRoute = router.route("/protected/user/:id");
+    Route getUserRoute = router.get("/protected/users/:id");
     getUserRoute.handler(this::handleGetUser);
 
-    Route updateUserRoute = router.put("/protected/user");
+    Route updateUserRoute = router.put("/protected/users");
     updateUserRoute.handler(this::handleUpdateUser);
 
-    Route deleteUserRoute = router.delete("/protected/user");
+    Route deleteUserRoute = router.delete("/protected/users");
     deleteUserRoute.handler(this::handleDeleteUser);
 
     Route logoutRoute = router.route("/logout");
@@ -124,19 +124,19 @@ public class ApiRouter {
 
     // Events
 
-    Route getEventsRoute = router.route().path("/protected/events");
+    Route getEventsRoute = router.get().path("/events");
     getEventsRoute.handler(this::handleGetEvents);
 
-    Route createEventRoute = router.post("/admin/event");
+    Route createEventRoute = router.post("/admin/events");
     createEventRoute.handler(this::handleCreateEvent);
 
-    Route getEventRoute = router.get("/protected/event/:id");
+    Route getEventRoute = router.get("/events/:id");
     getEventRoute.handler(this::handleGetEvent);
 
-    Route updateEventRoute = router.put("/admin/event/:id");
+    Route updateEventRoute = router.put("/admin/events/:id");
     updateEventRoute.handler(this::handleUpdateEvent);
 
-    Route deleteEventRoute = router.delete("/admin/event/:id");
+    Route deleteEventRoute = router.delete("/admin/events/:id");
     deleteEventRoute.handler(this::handleDeleteEvent);
 
     // Event Check Ins
@@ -149,19 +149,19 @@ public class ApiRouter {
 
     // Applicants
 
-    Route getApplicantsRoute = router.route().path("/admin/applicants");
+    Route getApplicantsRoute = router.get().path("/admin/applicants");
     getApplicantsRoute.handler(this::handleGetApplicants);
 
-    Route createApplicantRoute = router.post("/protected/applicant");
+    Route createApplicantRoute = router.post("/protected/applicants");
     createApplicantRoute.handler(this::handleCreateApplicant);
 
-    Route getApplicantRoute = router.get("/admin/applicant/:id");
+    Route getApplicantRoute = router.get("/admin/applicants/:id");
     getApplicantRoute.handler(this::handleGetApplicant);
 
-    Route updateApplicantRoute = router.put("/protected/applicant");
+    Route updateApplicantRoute = router.put("/protected/applicans");
     updateApplicantRoute.handler(this::handleUpdateApplicant);
 
-    Route deleteApplicantRoute = router.delete("/admin/applicant/:userid");
+    Route deleteApplicantRoute = router.delete("/admin/applicants/:userid");
     deleteApplicantRoute.handler(this::handleDeleteApplicant);
 
     // News
@@ -459,6 +459,9 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     JsonObject body = ctx.getBodyAsJson();
     String name = "";
+    String subtitle = "";
+    String description = "";
+    String imageUrl = "";
     LocalDateTime date = null;
     Boolean open = null;
     String eventCode = "";
@@ -467,6 +470,9 @@ public class ApiRouter {
 
     try {
       name = body.getString("name");
+      subtitle = body.getString("subtitle");
+      description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       open = body.getBoolean("open");
       eventCode = body.getString("code");
@@ -474,12 +480,21 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    boolean success = false;
-    if (name != null && date != null && open != null && eventCode != null)
-      success = processor.createEvent(name, date, open, eventCode);
+    Optional<EventReturn> result = Optional.empty();
+    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null && eventCode != null)
+      result = processor.createEvent(name, subtitle, description, imageUrl, date, open, eventCode);
 
-    if (success)
-      response.setStatusCode(201).end();
+    if (result.isPresent()){
+
+      String json = "";
+      try {
+        if (result.isPresent())
+          json = JacksonMapper.getMapper().writeValueAsString(result.get());
+      } catch (JsonProcessingException e) {
+        response.setStatusCode(400).end();
+      }
+      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+    }
     else {
       response.setStatusCode(400).end();
     }
@@ -519,6 +534,9 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     JsonObject body = ctx.getBodyAsJson();
     String name = "";
+    String subtitle = "";
+    String description = "";
+    String imageUrl = "";
     LocalDateTime date = null;
     Boolean open = null;
     String eventCode = "";
@@ -529,6 +547,9 @@ public class ApiRouter {
     try {
       id = Integer.parseInt(request.getParam("id"));
       name = body.getString("name");
+      subtitle = body.getString("subtitle");
+      description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       open = body.getBoolean("open");
       eventCode = body.getString("code");
@@ -537,8 +558,8 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     boolean success = false;
-    if (name != null && date != null && open != null && eventCode != null)
-      success = processor.updateEvent(id, name, date, open, eventCode);
+    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null && eventCode != null)
+      success = processor.updateEvent(id, name, subtitle, description, imageUrl, date, open, eventCode);
 
     if (success)
       response.setStatusCode(201).end();
@@ -789,6 +810,7 @@ public class ApiRouter {
     JsonObject body = ctx.getBodyAsJson();
     String title = "";
     String description = "";
+    String imageUrl = "";
     String author = "";
     LocalDateTime date = null;
     String content = "";
@@ -798,6 +820,7 @@ public class ApiRouter {
     try {
       title = body.getString("title");
       description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       author = body.getString("author");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       content = body.getString("content");
@@ -806,8 +829,8 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     boolean success = false;
-    if (title != null && description != null && author != null && date != null && content != null)
-      success = processor.createNews(title, description, author, date, content);
+    if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
+      success = processor.createNews(title, description, imageUrl, author, date, content);
 
     if (success)
       response.setStatusCode(201).end();
@@ -852,6 +875,7 @@ public class ApiRouter {
     JsonObject body = ctx.getBodyAsJson();
     String title = "";
     String description = "";
+    String imageUrl = "";
     String author = "";
     LocalDateTime date = null;
     String content = "";
@@ -863,6 +887,7 @@ public class ApiRouter {
       id = Integer.parseInt(request.getParam("id"));
       title = body.getString("title");
       description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       author = body.getString("author");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       content = body.getString("content");
@@ -871,8 +896,8 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
     boolean success = false;
-    if (title != null && description != null && author != null && date != null && content != null)
-      success = processor.updateNews(id, title, description, author, date, content);
+    if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
+      success = processor.updateNews(id, title, description, imageUrl, author, date, content);
 
     if (success)
       response.setStatusCode(201).end();

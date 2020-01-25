@@ -7,14 +7,20 @@ public class EventReturn {
   // favor immutibility.
   private final int id;
   private final String name;
+  private final String subtitle;
+  private final String description;
+  private final String imageUrl;
   private final LocalDateTime date;
   private final boolean open;
   private final String code;
 
 
-  public EventReturn(int id, String name, LocalDateTime date, boolean open, String code) {
+  public EventReturn(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code) {
     this.id = id;
     this.name = name;
+    this.subtitle = subtitle;
+    this.description = description;
+    this.imageUrl = imageUrl;
     this.date = date;
     this.open = open;
     this.code = code;
@@ -26,6 +32,18 @@ public class EventReturn {
 
   public String getName() {
     return this.name;
+  }
+
+  public String getSubtitle() {
+    return this.subtitle;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public String getImageUrl() {
+    return this.imageUrl;
   }
 
   public LocalDateTime getDate() {
