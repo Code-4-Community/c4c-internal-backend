@@ -217,10 +217,13 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String eventCode) {
     try {
-       db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
-          .values(name, subtitle, description, imageUrl, Timestamp.valueOf(date), open, eventCode).returning(Tables.EVENTS.ID).fetchOne();
-        db.fet
-      if(ret != null) return new Optional.of(result);
+       Events event = db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
+          .values(name, subtitle, description, imageUrl, Timestamp.valueOf(date), open, eventCode)
+          .returning(Tables.EVENTS.ID, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
+          .fetchOne().into(Events.class);
+
+        EventReturn result = new EventReturn(event.getId(), event.getName(), event.getSubtitle(), event.getDescription(), event.getImageUrl(), event.getDate().toLocalDateTime(), event.getOpen(), event.getCode());
+      if(result != null) return Optional.of(result);
       return Optional.empty();
     } catch (Exception e) {
       return Optional.empty();
