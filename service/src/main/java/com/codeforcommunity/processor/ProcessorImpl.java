@@ -191,7 +191,7 @@ public class ProcessorImpl implements IProcessor {
       return false;
     }
 
-    if (result == null || !result.getOpen() || LocalDateTime.now().compareTo(result.getDate()) >= 0)
+    if (result == null || !result.getOpen() || LocalDateTime.now().compareTo(LocalDateTime.parse(result.getDate())) >= 0)
       return false;
 
     try {

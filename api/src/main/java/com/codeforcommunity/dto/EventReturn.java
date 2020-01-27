@@ -10,7 +10,7 @@ public class EventReturn {
   private final String subtitle;
   private final String description;
   private final String imageUrl;
-  private final LocalDateTime date;
+  private final String date;
   private final boolean open;
   private final String code;
 
@@ -21,7 +21,7 @@ public class EventReturn {
     this.subtitle = subtitle;
     this.description = description;
     this.imageUrl = imageUrl;
-    this.date = date;
+    this.date = date.toString();
     this.open = open;
     this.code = code;
   }
@@ -46,7 +46,7 @@ public class EventReturn {
     return this.imageUrl;
   }
 
-  public LocalDateTime getDate() {
+  public String getDate() {
     return this.date;
   }
 
