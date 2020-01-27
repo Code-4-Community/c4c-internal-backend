@@ -15,7 +15,7 @@ public class EventReturn {
   private final String code;
 
 
-  public EventReturn(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code) {
+  public EventReturn(int id, String name, LocalDateTime date, boolean open, String code, String subtitle, String description, String imageUrl) {
     this.id = id;
     this.name = name;
     this.subtitle = subtitle;

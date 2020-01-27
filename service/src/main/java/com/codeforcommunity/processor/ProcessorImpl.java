@@ -227,11 +227,15 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public Optional<EventReturn> getEvent(int id) {
+    System.out.println("made it to get event");
     try {
+      System.out.println("selecting and converting");
       EventReturn result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id))
           .fetchSingleInto(EventReturn.class);
+      System.out.println("result " + result.toString());
       return Optional.of(result);
     } catch (NoDataFoundException e) {
+      e.printStackTrace();
       return Optional.empty();
     }
   }
