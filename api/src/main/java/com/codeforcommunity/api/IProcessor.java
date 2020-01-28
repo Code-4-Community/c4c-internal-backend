@@ -43,9 +43,9 @@ public interface IProcessor {
   
   Optional<EventReturn> getEvent(int id);
   
-  boolean updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code);
+  Optional<EventReturn> updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code);
   
-  boolean deleteEvent(int id);
+  Optional<EventReturn> deleteEvent(int id);
 
   List<UserReturn> getAllUsers();
 

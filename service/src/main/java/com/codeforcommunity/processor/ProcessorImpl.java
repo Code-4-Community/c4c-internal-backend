@@ -216,13 +216,18 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String eventCode) {
-       Result result = db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
+    try{
+    Result result = db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
           .values(name, subtitle, description, imageUrl, Timestamp.valueOf(date), open, eventCode)
           .returning(Tables.EVENTS.ID)
           .fetch();
 
           System.out.println(result.getValue(0,0));
         return getEvent((int)result.getValue(0,0));
+    } catch (NoDataFoundException e) {
+      e.printStackTrace();
+      return Optional.empty();
+    }
   }
 
   @Override
@@ -241,26 +246,30 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public boolean updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code) {
+  public Optional<EventReturn> updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code) {
     try {
-      db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.SUBTITLE, subtitle).set(Tables.EVENTS.DESCRIPTION, description)
+      Result result = db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.SUBTITLE, subtitle).set(Tables.EVENTS.DESCRIPTION, description)
           .set(Tables.EVENTS.IMAGE_URL, imageUrl).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
-          .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).execute();
-
+          .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).returning(Tables.EVENTS.ID)
+          .fetch();
+        System.out.println(result.getValue(0,0));
+        return getEvent((int)result.getValue(0,0));
     } catch (Exception e) {
-      return false;
+      e.printStackTrace();
+      return Optional.empty();
     }
-    return true;
   }
 
   @Override
-  public boolean deleteEvent(int id) {
+  public Optional<EventReturn> deleteEvent(int id) {
     try {
+
+      Optional<EventReturn> ret = getEvent(id);
       db.delete(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id)).execute();
+      return ret;
     } catch (Exception e) {
-      return false;
+      return Optional.empty();
     }
-    return true;
   }
 
   @Override

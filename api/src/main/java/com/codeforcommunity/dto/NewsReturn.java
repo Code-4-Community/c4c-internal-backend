@@ -13,7 +13,7 @@ public class NewsReturn {
   private final LocalDateTime date;
   private final String content;
 
-  public NewsReturn(int id, String title, String description, String imageUrl, String author, LocalDateTime date, String content) {
+  public NewsReturn(int id, String title, String description, String author, LocalDateTime date, String content, String imageUrl) {
     this.id = id;
     this.title = title;
     this.description = description;
