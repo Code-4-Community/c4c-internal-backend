@@ -4,8 +4,6 @@ Code 4 Community internal website backend to manage logins, event attendance, an
 
 ## [API Endpoints](api.md)
 
-
-
 ## Build Setup
 
 ### Java
@@ -56,7 +54,7 @@ The application should be running on https://localhost:8443
 
 ### Testing
 
-API testing is done with newman, the cli for Postman. The collection JSON (including API tests) should be `/newman` folder. Before you star testing, make sure you have an admin user already in your user table. To do so, run the following commands:
+API testing is done with newman, the cli for Postman. The collection JSON (including API tests) should be `/apitest` folder. Before you star testing, make sure you have an admin user already in your user table. To do so, run the following commands:
 
 ```sh
 $ psql -U postgres
@@ -66,10 +64,10 @@ $ insert into users (email, first_name, last_name, hashed_password, current_year
 
 This will create a user with admin privileges with the password expected in the test collection.
 
-Now navigate to the `/newman` folder and run
+Now navigate to the `/apitest` folder and run
 
 ```sh
-$ newman test.json
+$ newman "Local Testing.postman_collection.json"
 ```
 
-If you need to add more tests, simply go to the Postman website or download their desktop app and import `test.json`, then add your new tests and replace the test.json in `/newman`.
+If you need to add more tests, simply go to the Postman website or download their desktop app and import `Local Testing.postman_collection.json`, then add your new tests and replace the test.json in `/newman`.
