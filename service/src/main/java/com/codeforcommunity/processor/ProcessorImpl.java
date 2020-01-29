@@ -89,7 +89,7 @@ public class ProcessorImpl implements IProcessor {
     try {
       // db.execute("delete from events \n" + "where id = ?;", id);
       Optional<NewsReturn> ret = getNews(id);
-      Result result = db.delete(Tables.NEWS).where(Tables.NEWS.ID.eq(id)).execute();
+      db.delete(Tables.NEWS).where(Tables.NEWS.ID.eq(id)).execute();
       return ret;
     } catch (Exception e) {
       return Optional.empty();
@@ -108,12 +108,11 @@ public class ProcessorImpl implements IProcessor {
   public Optional<ApplicantReturn> createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests,
       String priorInvolvement, String whyJoin) {
     try {
-      Result result = db.insertInto(Tables.APPLICANTS, Tables.APPLICANTS.USER_ID, Tables.APPLICANTS.RESUME, Tables.APPLICANTS.FILE_TYPE,
+      db.insertInto(Tables.APPLICANTS, Tables.APPLICANTS.USER_ID, Tables.APPLICANTS.RESUME, Tables.APPLICANTS.FILE_TYPE,
               Tables.APPLICANTS.INTERESTS, Tables.APPLICANTS.PRIOR_INVOLVEMENT, Tables.APPLICANTS.WHY_JOIN)
               .values(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin)
-              .returning(Tables.APPLICANTS.ID)
-              .fetch();
-      return getApplicant((int) result.getValue(0, 0));
+              .execute();
+      return getApplicant(userId);
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -139,13 +138,13 @@ public class ProcessorImpl implements IProcessor {
       String priorInvolvement, String whyJoin) {
 
     try {
-      Result result = db.update(Tables.APPLICANTS).set(Tables.APPLICANTS.RESUME, fileBLOB).set(Tables.APPLICANTS.FILE_TYPE, fileType)
+      db.update(Tables.APPLICANTS).set(Tables.APPLICANTS.RESUME, fileBLOB).set(Tables.APPLICANTS.FILE_TYPE, fileType)
               .set(Tables.APPLICANTS.INTERESTS, interests).set(Tables.APPLICANTS.PRIOR_INVOLVEMENT, priorInvolvement)
               .set(Tables.APPLICANTS.WHY_JOIN, whyJoin).where(Tables.APPLICANTS.USER_ID.eq(userId))
-              .returning(Tables.APPLICANTS.ID)
-              .fetch();
-      return getApplicant((int) result.getValue(0, 0));
+              .execute();
+      return getApplicant(userId);
     } catch (Exception e) {
+      e.printStackTrace();
       return Optional.empty();
     }
   }
@@ -194,16 +193,16 @@ public class ProcessorImpl implements IProcessor {
       result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.CODE.eq(eventCode))
           .fetchSingleInto(EventReturn.class);
     } catch (NoDataFoundException e) {
+      e.printStackTrace();
       return false;
     }
 
     if (result == null || !result.getOpen() || LocalDateTime.now().compareTo(LocalDateTime.parse(result.getDate())) >= 0)
       return false;
-
     try {
+
       db.insertInto(Tables.EVENT_CHECK_INS, Tables.EVENT_CHECK_INS.USER_ID, Tables.EVENT_CHECK_INS.EVENT_ID)
           .values(userid, result.getId()).execute();
-
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -228,7 +227,6 @@ public class ProcessorImpl implements IProcessor {
           .returning(Tables.EVENTS.ID)
           .fetch();
 
-          System.out.println(result.getValue(0,0));
         return getEvent((int)result.getValue(0,0));
     } catch (NoDataFoundException e) {
       e.printStackTrace();
@@ -238,12 +236,9 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public Optional<EventReturn> getEvent(int id) {
-    System.out.println("made it to get event");
     try {
-      System.out.println("selecting and converting");
       EventReturn result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.ID.eq(id))
           .fetchSingleInto(EventReturn.class);
-      System.out.println("result " + result.toString());
       return Optional.of(result);
     } catch (NoDataFoundException e) {
       e.printStackTrace();
@@ -258,7 +253,6 @@ public class ProcessorImpl implements IProcessor {
           .set(Tables.EVENTS.IMAGE_URL, imageUrl).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
           .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).returning(Tables.EVENTS.ID)
           .fetch();
-        System.out.println(result.getValue(0,0));
         return getEvent((int)result.getValue(0,0));
     } catch (Exception e) {
       e.printStackTrace();
@@ -322,12 +316,11 @@ public class ProcessorImpl implements IProcessor {
   public Optional<UserReturn> updateUser(int id, String email, String first, String last, String hashedPassword, int currentYear,
       String major) {
     try {
-      Result result = db.update(Tables.USERS).set(Tables.USERS.EMAIL, email).set(Tables.USERS.FIRST_NAME, first)
+      db.update(Tables.USERS).set(Tables.USERS.EMAIL, email).set(Tables.USERS.FIRST_NAME, first)
               .set(Tables.USERS.LAST_NAME, last).set(Tables.USERS.HASHED_PASSWORD, hashedPassword)
               .set(Tables.USERS.CURRENT_YEAR, currentYear).set(Tables.USERS.MAJOR, major).where(Tables.USERS.ID.eq(id))
-              .returning(Tables.USERS.ID)
-              .fetch();
-      return getUser((int) result.getValue(0, 0));
+              .execute();
+      return getUser(id);
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -341,6 +334,7 @@ public class ProcessorImpl implements IProcessor {
       db.delete(Tables.USERS).where(Tables.USERS.ID.eq(id)).execute();
       return ret;
     } catch (Exception e) {
+      e.printStackTrace();
       return Optional.empty();
     }
   }
@@ -351,7 +345,6 @@ public class ProcessorImpl implements IProcessor {
       String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
           .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
       //if(storedPassword == null) return false;
-      System.out.println("email: " + email + " password: " + password + " storedpassword: " + storedPassword);
       return UpdatableBCrypt.verifyHash(password, storedPassword);
     } catch (Exception e) {
       e.printStackTrace();

@@ -10,7 +10,7 @@ public class NewsReturn {
   private final String description;
   private final String imageUrl;
   private final String author;
-  private final LocalDateTime date;
+  private final String date;
   private final String content;
 
   public NewsReturn(int id, String title, String description, String author, LocalDateTime date, String content, String imageUrl) {
@@ -19,7 +19,7 @@ public class NewsReturn {
     this.description = description;
     this.imageUrl = imageUrl;
     this.author = author;
-    this.date = date;
+    this.date = date.toString();
     this.content = content;
   }
 
@@ -43,7 +43,7 @@ public class NewsReturn {
     return this.author;
   }
 
-  public LocalDateTime getDate() {
+  public String getDate() {
     return this.date;
   }
 
