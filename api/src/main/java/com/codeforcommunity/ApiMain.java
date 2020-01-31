@@ -13,7 +13,7 @@ import java.util.Properties;
 /**
  * The main point for the API.
  */
-public class ApiMain {gi
+public class ApiMain {
   private final ApiRouter apiRouter;
   private final Properties serverProperties = new Properties();
 
