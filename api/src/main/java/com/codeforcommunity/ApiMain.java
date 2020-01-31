@@ -1,22 +1,19 @@
 package com.codeforcommunity;
 
 import com.codeforcommunity.rest.ApiRouter;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.*;
-import io.vertx.core.net.JksOptions;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import io.vertx.core.net.NetServerOptions;
-
 /**
  * The main point for the API.
  */
-public class ApiMain {
+public class ApiMain {gi
   private final ApiRouter apiRouter;
   private final Properties serverProperties = new Properties();
 
