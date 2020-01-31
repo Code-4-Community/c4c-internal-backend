@@ -51,7 +51,8 @@ public class ServiceMain {
       e.printStackTrace();
     }
 
-    DSLContext db = DSL.using(dbProperties.getProperty("database.url"), dbProperties.getProperty("database.username"),
+    DSLContext db = DSL.using(dbProperties.getProperty("database.url"),
+        dbProperties.getProperty("database.username"),
         dbProperties.getProperty("database.password"));
     this.db = db;
   }
@@ -71,7 +72,6 @@ public class ServiceMain {
    */
   private void startApiServer(ApiRouter router) {
     ApiMain apiMain = new ApiMain(router);
-    apiMain.startHTTP();
-    apiMain.startApi();
+    apiMain.startHttpsServerApi();
   }
 }
