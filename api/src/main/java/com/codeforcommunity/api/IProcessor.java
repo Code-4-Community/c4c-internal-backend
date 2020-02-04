@@ -14,24 +14,24 @@ public interface IProcessor {
 
   List<NewsReturn> getAllNews();
 
-  boolean createNews(String title, String description, String author, LocalDateTime date, String content);
+  Optional<NewsReturn> createNews(String title, String description, String imageUrl, String author, LocalDateTime date, String content);
 
   Optional<NewsReturn> getNews(int id);
 
-  boolean updateNews(int id, String title, String description, String author, LocalDateTime date, String content);
+  Optional<NewsReturn> updateNews(int id, String title, String description, String imageUrl, String author, LocalDateTime date, String content);
 
-  boolean deleteNews(int id);
+  Optional<NewsReturn> deleteNews(int id);
   
   List<ApplicantReturn> getAllApplicants();
 
-  boolean createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement,
+  Optional<ApplicantReturn> createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement,
       String whyJoin);
 
   Optional<ApplicantReturn> getApplicant(int userId);
 
-  boolean updateApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement, String whyJoin);
+  Optional<ApplicantReturn> updateApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement, String whyJoin);
 
-  boolean deleteApplicant(int userId);
+  Optional<ApplicantReturn> deleteApplicant(int userId);
 
   List<UserReturn> getEventUsers(int eventId);
 
@@ -39,26 +39,26 @@ public interface IProcessor {
 
   List<EventReturn> getAllEvents();
 
-  boolean createEvent(String name, LocalDateTime date, boolean open, String eventCode);
+  Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String eventCode);
   
   Optional<EventReturn> getEvent(int id);
   
-  boolean updateEvent(int id, String name, LocalDateTime date, boolean open, String code);
+  Optional<EventReturn> updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code);
   
-  boolean deleteEvent(int id);
+  Optional<EventReturn> deleteEvent(int id);
 
   List<UserReturn> getAllUsers();
 
-  boolean addUser(String email, String first, String last, String hashedPassword, int currentYear, String major);
+  Optional<UserReturn> addUser(String email, String first, String last, String hashedPassword, int currentYear, String major);
 
   Optional<UserReturn> getUserByEmail(String email);
 
   Optional<UserReturn> getUser(int id);
 
-  boolean updateUser(int id, String email, String first, String last, String hashedPassword, int currentYear,
+  Optional<UserReturn> updateUser(int id, String email, String first, String last, String hashedPassword, int currentYear,
       String major);
 
-  boolean deleteUser(int id);
+  Optional<UserReturn> deleteUser(int id);
 
   boolean validate(String email, String password);
 

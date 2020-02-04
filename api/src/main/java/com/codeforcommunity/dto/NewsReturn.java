@@ -8,16 +8,18 @@ public class NewsReturn {
   private final int id;
   private final String title;
   private final String description;
+  private final String imageUrl;
   private final String author;
-  private final LocalDateTime date;
+  private final String date;
   private final String content;
 
-  public NewsReturn(int id, String title, String description, String author, LocalDateTime date, String content) {
+  public NewsReturn(int id, String title, String description, String author, LocalDateTime date, String content, String imageUrl) {
     this.id = id;
     this.title = title;
     this.description = description;
+    this.imageUrl = imageUrl;
     this.author = author;
-    this.date = date;
+    this.date = date.toString();
     this.content = content;
   }
 
@@ -33,11 +35,15 @@ public class NewsReturn {
     return this.description;
   }
 
+  public String getImageUrl(){
+    return this.imageUrl;
+  }
+
   public String getAuthor() {
     return this.author;
   }
 
-  public LocalDateTime getDate() {
+  public String getDate() {
     return this.date;
   }
 

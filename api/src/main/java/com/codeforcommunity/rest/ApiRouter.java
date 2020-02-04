@@ -104,16 +104,16 @@ public class ApiRouter {
     Route signUpRoute = router.post("/signup");
     signUpRoute.handler(this::handleSignUp);
 
-    Route getUsersRoute = router.route("/protected/users");
+    Route getUsersRoute = router.get("/protected/users");
     getUsersRoute.handler(this::handleGetAllUsers);
 
-    Route getUserRoute = router.route("/protected/user/:id");
+    Route getUserRoute = router.get("/protected/users/:id");
     getUserRoute.handler(this::handleGetUser);
 
-    Route updateUserRoute = router.put("/protected/user");
+    Route updateUserRoute = router.put("/protected/users");
     updateUserRoute.handler(this::handleUpdateUser);
 
-    Route deleteUserRoute = router.delete("/protected/user");
+    Route deleteUserRoute = router.delete("/protected/users");
     deleteUserRoute.handler(this::handleDeleteUser);
 
     Route logoutRoute = router.route("/logout");
@@ -124,19 +124,19 @@ public class ApiRouter {
 
     // Events
 
-    Route getEventsRoute = router.route().path("/protected/events");
+    Route getEventsRoute = router.get().path("/events");
     getEventsRoute.handler(this::handleGetEvents);
 
-    Route createEventRoute = router.post("/admin/event");
+    Route createEventRoute = router.post("/admin/events");
     createEventRoute.handler(this::handleCreateEvent);
 
-    Route getEventRoute = router.get("/protected/event/:id");
+    Route getEventRoute = router.get("/events/:id");
     getEventRoute.handler(this::handleGetEvent);
 
-    Route updateEventRoute = router.put("/admin/event/:id");
+    Route updateEventRoute = router.put("/admin/events/:id");
     updateEventRoute.handler(this::handleUpdateEvent);
 
-    Route deleteEventRoute = router.delete("/admin/event/:id");
+    Route deleteEventRoute = router.delete("/admin/events/:id");
     deleteEventRoute.handler(this::handleDeleteEvent);
 
     // Event Check Ins
@@ -149,19 +149,19 @@ public class ApiRouter {
 
     // Applicants
 
-    Route getApplicantsRoute = router.route().path("/admin/applicants");
+    Route getApplicantsRoute = router.get().path("/admin/applicants");
     getApplicantsRoute.handler(this::handleGetApplicants);
 
-    Route createApplicantRoute = router.post("/protected/applicant");
+    Route createApplicantRoute = router.post("/protected/applicants");
     createApplicantRoute.handler(this::handleCreateApplicant);
 
-    Route getApplicantRoute = router.get("/admin/applicant/:id");
+    Route getApplicantRoute = router.get("/admin/applicants/:id");
     getApplicantRoute.handler(this::handleGetApplicant);
 
-    Route updateApplicantRoute = router.put("/protected/applicant");
+    Route updateApplicantRoute = router.put("/protected/applicants");
     updateApplicantRoute.handler(this::handleUpdateApplicant);
 
-    Route deleteApplicantRoute = router.delete("/admin/applicant/:userid");
+    Route deleteApplicantRoute = router.delete("/admin/applicants/:userid");
     deleteApplicantRoute.handler(this::handleDeleteApplicant);
 
     // News
@@ -311,13 +311,21 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
 
-    boolean success = false;
+    Optional<UserReturn> ret = Optional.empty();
     if (email != null && firstName != null && lastName != null && encryptedPassword != null && currentYear != -1
         && major != null)
-      success = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major);
-    if (success)
-      response.setStatusCode(201).end();
-    else {
+      ret = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major);
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    if (!json.isEmpty()) {
+      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+    } else {
       response.setStatusCode(400).end();
     }
   }
@@ -351,7 +359,6 @@ public class ApiRouter {
   }
 
   private void handleUpdateUser(RoutingContext ctx) {
-    try {
 
       HttpServerResponse response = ctx.response();
       HttpServerRequest request = ctx.request();
@@ -384,18 +391,24 @@ public class ApiRouter {
         response.setStatusCode(400).end();
       }
 
-      boolean success = false;
+      Optional<UserReturn> ret = Optional.empty();
       if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null 
           && currentYear != -1 && major != null)
-        success = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major);
-      if (success)
-        response.setStatusCode(201).end();
-      else {
+        ret = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major);
+    
+     String json = "";
+      try {
+        if (ret.isPresent())
+          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+
+      if (!json.isEmpty()) {
+        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      } else {
         response.setStatusCode(400).end();
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   private void handleDeleteUser(RoutingContext ctx) {
@@ -404,11 +417,20 @@ public class ApiRouter {
     int id = -1;
     try {
       id = getUserId(request);
-      boolean success = processor.deleteUser(id);
-      if (success)
-        response.setStatusCode(200).end();
-      else
+      Optional<UserReturn> ret = processor.deleteUser(id);
+      String json = "";
+      try {
+        if (ret.isPresent())
+          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+
+      if (!json.isEmpty()) {
+        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      } else {
         response.setStatusCode(400).end();
+      }
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
@@ -459,6 +481,9 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     JsonObject body = ctx.getBodyAsJson();
     String name = "";
+    String subtitle = "";
+    String description = "";
+    String imageUrl = "";
     LocalDateTime date = null;
     Boolean open = null;
     String eventCode = "";
@@ -467,6 +492,9 @@ public class ApiRouter {
 
     try {
       name = body.getString("name");
+      subtitle = body.getString("subtitle");
+      description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       open = body.getBoolean("open");
       eventCode = body.getString("code");
@@ -474,17 +502,30 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    boolean success = false;
-    if (name != null && date != null && open != null && eventCode != null)
-      success = processor.createEvent(name, date, open, eventCode);
+    //-----------------------DUPLICATE FOR OTHER TYPES------------------
 
-    if (success)
-      response.setStatusCode(201).end();
+    Optional<EventReturn> result = Optional.empty();
+    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null && eventCode != null)
+      result = processor.createEvent(name, subtitle, description, imageUrl, date, open, eventCode);
+
+    if (result.isPresent()){
+
+      String json = "";
+      try {
+        if (result.isPresent())
+          json = JacksonMapper.getMapper().writeValueAsString(result.get());
+      } catch (JsonProcessingException e) {
+        response.setStatusCode(400).end();
+      }
+      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+    }
     else {
       response.setStatusCode(400).end();
     }
 
     response.setStatusCode(201);
+    //----------------------------------END------------------------------
+
   }
 
   private void handleGetEvent(RoutingContext ctx) {
@@ -519,6 +560,9 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     JsonObject body = ctx.getBodyAsJson();
     String name = "";
+    String subtitle = "";
+    String description = "";
+    String imageUrl = "";
     LocalDateTime date = null;
     Boolean open = null;
     String eventCode = "";
@@ -529,6 +573,9 @@ public class ApiRouter {
     try {
       id = Integer.parseInt(request.getParam("id"));
       name = body.getString("name");
+      subtitle = body.getString("subtitle");
+      description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       open = body.getBoolean("open");
       eventCode = body.getString("code");
@@ -536,32 +583,54 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    boolean success = false;
-    if (name != null && date != null && open != null && eventCode != null)
-      success = processor.updateEvent(id, name, date, open, eventCode);
 
-    if (success)
-      response.setStatusCode(201).end();
-    else {
-      response.setStatusCode(400).end();
+    //-----------------------DUPLICATE FOR OTHER TYPES------------------
+
+    Optional<EventReturn> ret = Optional.empty();
+    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null && eventCode != null)
+      ret = processor.updateEvent(id, name, subtitle, description, imageUrl, date, open, eventCode);
+
+       
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
     }
 
-    response.setStatusCode(201);
+    if (!json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+    } else {
+       response.setStatusCode(400).end();
+    }
+    //----------------------------------END------------------------------
   }
 
   private void handleDeleteEvent(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
+
+    //-----------------------DUPLICATE FOR OTHER TYPES------------------
     int id = -1;
     try {
       id = Integer.parseInt(request.params().get("id"));
-      processor.deleteEvent(id);
-      response.setStatusCode(200).end();
+      String json = "";
 
+      Optional<EventReturn> ret = processor.deleteEvent(id);
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+
+      if (!json.isEmpty()) {
+        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      } else {
+        response.setStatusCode(400).end();
+      }
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
+    //----------------------------------END------------------------------
   }
 
   private void handleAttendEvent(RoutingContext ctx) {
@@ -664,14 +733,24 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
 
-    boolean success = false;
+    Optional<ApplicantReturn> ret = Optional.empty();
     if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
         && whyJoin != null)
-      success = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
-    if (success)
-      response.setStatusCode(201).end();
-    else {
-      response.setStatusCode(400).end();
+      ret = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+    
+      
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    if (!json.isEmpty()) {
+      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+    } else {
+       response.setStatusCode(400).end();
     }
   }
 
@@ -737,13 +816,22 @@ public class ApiRouter {
         response.setStatusCode(400).end();
       }
 
-      boolean success = false;
+      Optional<ApplicantReturn> ret = Optional.empty();
       if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
           && whyJoin != null)
-        success = processor.updateApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
-      if (success)
-        response.setStatusCode(201).end();
-      else {
+        ret = processor.updateApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+      
+      String json = "";
+      try {
+        if (ret.isPresent())
+          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+
+      if (!json.isEmpty()) {
+        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      } else {
         response.setStatusCode(400).end();
       }
     } catch (Exception e) {
@@ -758,11 +846,17 @@ public class ApiRouter {
     try {
       //userId = getUserId(request);
       userId = Integer.parseInt(request.params().get("userid"));
-      boolean success = processor.deleteApplicant(userId);
-      if (success)
-        response.setStatusCode(200).end();
-      else
+      String json = "";
+
+      Optional<ApplicantReturn> ret = processor.deleteApplicant(userId);
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+
+      if (!json.isEmpty()) {
+        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      } else {
         response.setStatusCode(400).end();
+      }
     } catch (Exception e) {
       e.printStackTrace();
       response.setStatusCode(400).end();
@@ -789,6 +883,7 @@ public class ApiRouter {
     JsonObject body = ctx.getBodyAsJson();
     String title = "";
     String description = "";
+    String imageUrl = "";
     String author = "";
     LocalDateTime date = null;
     String content = "";
@@ -798,6 +893,7 @@ public class ApiRouter {
     try {
       title = body.getString("title");
       description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       author = body.getString("author");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       content = body.getString("content");
@@ -805,17 +901,24 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    boolean success = false;
-    if (title != null && description != null && author != null && date != null && content != null)
-      success = processor.createNews(title, description, author, date, content);
+    Optional<NewsReturn> ret = Optional.empty();
+    if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
+      ret = processor.createNews(title, description, imageUrl, author, date, content);
 
-    if (success)
-      response.setStatusCode(201).end();
-    else {
-      response.setStatusCode(400).end();
+        
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
     }
 
-    response.setStatusCode(201);
+    if (!json.isEmpty()) {
+      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+    } else {
+       response.setStatusCode(400).end();
+    }
   }
 
   private void handleGetNews(RoutingContext ctx) {
@@ -852,6 +955,7 @@ public class ApiRouter {
     JsonObject body = ctx.getBodyAsJson();
     String title = "";
     String description = "";
+    String imageUrl = "";
     String author = "";
     LocalDateTime date = null;
     String content = "";
@@ -863,6 +967,7 @@ public class ApiRouter {
       id = Integer.parseInt(request.getParam("id"));
       title = body.getString("title");
       description = body.getString("description");
+      imageUrl = body.getString("imageUrl");
       author = body.getString("author");
       date = LocalDateTime.parse(body.getString("date"), formatter);
       content = body.getString("content");
@@ -870,17 +975,25 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    boolean success = false;
-    if (title != null && description != null && author != null && date != null && content != null)
-      success = processor.updateNews(id, title, description, author, date, content);
+    
+    Optional<NewsReturn> ret = Optional.empty();
+    if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
+      ret = processor.updateNews(id, title, description, imageUrl, author, date, content);
 
-    if (success)
-      response.setStatusCode(201).end();
-    else {
-      response.setStatusCode(400).end();
+        
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
     }
 
-    response.setStatusCode(201);
+    if (!json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+    } else {
+       response.setStatusCode(400).end();
+    }
   }
 
   private void handleDeleteNews(RoutingContext ctx) {
@@ -889,8 +1002,20 @@ public class ApiRouter {
     int id = -1;
     try {
       id = Integer.parseInt(request.params().get("id"));
-      processor.deleteNews(id);
-      response.setStatusCode(200).end();
+      Optional<NewsReturn> ret = processor.deleteNews(id);
+      String json = "";
+      try {
+        if (ret.isPresent())
+          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+
+      if (!json.isEmpty()) {
+        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      } else {
+        response.setStatusCode(400).end();
+      }
 
     } catch (Exception e) {
       e.printStackTrace();
