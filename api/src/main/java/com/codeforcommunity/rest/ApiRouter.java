@@ -207,8 +207,8 @@ public class ApiRouter {
    */
   private void handleHome(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
-    response.putHeader("content-type", "application/json");
-    response.end("<h1>go to /login with query string</h1>");
+    response.putHeader("Content-Type", "text/html; charset=UTF-8");
+    response.end("<h1>go to /login with query string to login</h1>");
   }
 
   private void handleLogin(RoutingContext ctx) {

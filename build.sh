@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 echo "building and running server, may take around 20-40 seconds"
 
