@@ -37,6 +37,7 @@ import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
+import io.vertx.ext.web.handler.CorsHandler;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -87,6 +88,7 @@ public class ApiRouter {
     router.route().handler(CookieHandler.create());
     router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
+    router.route().handler(CorsHandler.create("*"));
     Route homeRoute = router.route("/");
     homeRoute.handler(this::handleHome);
 
