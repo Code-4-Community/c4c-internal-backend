@@ -4,6 +4,10 @@ DIR_WORK=/c4c-backend
 DIR_PERSIST=${DIR_WORK}/persist/src/main/resources
 DIR_JAR=${DIR_WORK}/service/target
 
+CFC_DB_USERNAME='cfcworker'
+CFC_DB_PASSWORD='c$cw0krJdz8gb!'
+CFC_DB_URL='jdbc:postgresql://c4cneu.cexlbyrdcxre.us-east-2.rds.amazonaws.com:5432/c4cneu?autoreconnect=true'
+
 # Check for updated database username
 if [[ -z "${CFC_DB_USERNAME}" ]]; then
     echo "ERROR: environment variable not set for database username"
@@ -27,16 +31,18 @@ cd ${DIR_PERSIST}
 mv db.properties input.properties
 
 awk -F" = " -v updatedVal="= $CFC_DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
-awk -F" = " -v updatedVal="= $CFC_DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > db.properties
+awk -F" = " -v updatedVal="= $CFC_DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
+awk -F" = " -v updatedVal="= $CFC_DB_URL" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
 rm user.properties
+rm pass.properties
 rm input.properties
 
 echo "SUCCESS: updated database credentials"
 
 # Perform maven install/package
 cd ${DIR_WORK}
-mvn -T 2C install
-mvn -T 2C package
+mvn -T 2C -o install
+mvn -T 2C -o package
 
 # Execute the jar file
 java -jar ${DIR_JAR}/service-1.0-SNAPSHOT-jar-with-dependencies.jar
