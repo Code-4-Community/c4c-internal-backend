@@ -1,5 +1,5 @@
-# Base the container image off JDK 12
-FROM openjdk:11
+# Base the container image off JDK 8
+FROM openjdk:8
 
 # Set the working dir env var
 ENV WORK_DIR /c4c-backend
