@@ -127,7 +127,7 @@
         <executions>
           <execution>
             <id>flyway database migration</id>
-            <phase>pre-integration-test</phase>d=
+            <phase>pre-integration-test</phase>
             <goals>
               <!--<goal>clean</goal>-->
               <goal>migrate</goal>
