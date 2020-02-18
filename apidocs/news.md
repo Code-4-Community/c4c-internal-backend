@@ -38,7 +38,7 @@ Every thing is okay.
 ]
 ```
 
-**DATE** is in the format `YYYY-MM-DD HH:mm`
+**DATE** is in the format `YYYY-MM-DDTHH:mm:ss`
 
 #### `400 BAD REQUEST`
 
@@ -75,7 +75,7 @@ Every thing is okay.
 }
 ```
 
-**DATE** is in the format `YYYY-MM-DD HH:mm`
+**DATE** is in the format `YYYY-MM-DDTHH:mm:ss`
 
 #### `400 BAD REQUEST`
 
@@ -106,7 +106,7 @@ Requires a valid JWT and admin privleges
 }
 ```
 
-**DATE** is in the format `YYYY-MM-DD HH:mm`
+**DATE** is in the format `YYYY-MM-DDTHH:mm:ss`
 
 ### Responses
 
@@ -143,7 +143,7 @@ Requires a valid JWT and admin privleges
 }
 ```
 
-**DATE** is in the format `YYYY-MM-DD HH:mm`
+**DATE** is in the format `YYYY-MM-DDTHH:mm:ss`
 
 ### Responses
 
