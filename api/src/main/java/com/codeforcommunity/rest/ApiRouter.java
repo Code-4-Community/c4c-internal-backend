@@ -490,7 +490,7 @@ public class ApiRouter {
     Boolean open = null;
     String eventCode = "";
     // for now, the input date is to the minute
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     try {
       name = body.getString("name");
@@ -569,7 +569,7 @@ public class ApiRouter {
     Boolean open = null;
     String eventCode = "";
     // for now, the input date is to the minute
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     int id = -1;
 
     try {
@@ -890,7 +890,7 @@ public class ApiRouter {
     LocalDateTime date = null;
     String content = "";
     // for now, the input date is to the minute
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     try {
       title = body.getString("title");
@@ -962,7 +962,7 @@ public class ApiRouter {
     LocalDateTime date = null;
     String content = "";
     // for now, the input date is to the minute
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     int id = -1;
 
     try {

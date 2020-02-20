@@ -29,12 +29,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/",
-					"protocol": "https",
+					"raw": "http://localhost:8090/",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						""
 					]
@@ -82,12 +82,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/signup",
-					"protocol": "https",
+					"raw": "http://localhost:8090/signup",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"signup"
 					]
@@ -138,12 +138,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/login",
-					"protocol": "https",
+					"raw": "http://localhost:8090/login",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"login"
 					]
@@ -194,12 +194,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/login",
-					"protocol": "https",
+					"raw": "http://localhost:8090/login",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"login"
 					]
@@ -237,12 +237,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/protected/users",
-					"protocol": "https",
+					"raw": "http://localhost:8090/protected/users",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"protected",
 						"users"
@@ -281,12 +281,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/protected/users/{{userId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/protected/users/{{userId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"protected",
 						"users",
@@ -342,12 +342,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/protected/users",
-					"protocol": "https",
+					"raw": "http://localhost:8090/protected/users",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"protected",
 						"users"
@@ -408,12 +408,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/admin/events",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/events",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"events"
@@ -445,12 +445,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/events",
-					"protocol": "https",
+					"raw": "http://localhost:8090/events",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"events"
 					]
@@ -481,12 +481,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/events/{{eventId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/events/{{eventId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"events",
 						"{{eventId}}"
@@ -541,12 +541,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/admin/events/{{eventId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/events/{{eventId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"events",
@@ -586,12 +586,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/admin/events/{{eventId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/events/{{eventId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"events",
@@ -644,7 +644,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"Another article about how to do Things\",\n\t\"description\": \"An article about doing things\",\n\t\"author\": \"John Doe\",\n\t\"date\": \"2020-01-01 12:00\",\n\t\"content\": \"j jbd  bdsjb db jdsb jkdsbf jdsbf jdsbf dsbj db dsbj bdsjb dsjbfjdsb kjdsbf jkdsb dsk.\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\"\n}",
+					"raw": "{\n    \"title\": \"Another article about how to do Things\",\n\t\"description\": \"An article about doing things\",\n\t\"author\": \"John Doe\",\n\t\"date\": \"2020-01-01T12:00:00\",\n\t\"content\": \"j jbd  bdsjb db jdsb jkdsbf jdsbf jdsbf dsbj db dsbj bdsjb dsjbfjdsb kjdsbf jkdsb dsk.\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -652,12 +652,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/admin/news",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/news",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"news"
@@ -689,12 +689,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/news",
-					"protocol": "https",
+					"raw": "http://localhost:8090/news",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"news"
 					]
@@ -725,12 +725,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/news/{{newsId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/news/{{newsId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"news",
 						"{{newsId}}"
@@ -785,12 +785,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/admin/news/{{newsId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/news/{{newsId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"news",
@@ -830,12 +830,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/admin/news/{{newsId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/news/{{newsId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"news",
@@ -896,12 +896,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/protected/applicants",
-					"protocol": "https",
+					"raw": "http://localhost:8090/protected/applicants",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"protected",
 						"applicants"
@@ -940,12 +940,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/admin/applicants",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/applicants",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"applicants"
@@ -984,12 +984,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/admin/applicants/{{userId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/applicants/{{userId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"applicants",
@@ -1045,12 +1045,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/protected/applicants",
-					"protocol": "https",
+					"raw": "http://localhost:8090/protected/applicants",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"protected",
 						"applicants"
@@ -1089,12 +1089,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/admin/applicants/{{userId}}",
-					"protocol": "https",
+					"raw": "http://localhost:8090/admin/applicants/{{userId}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"admin",
 						"applicants",
@@ -1134,12 +1134,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/protected/users",
-					"protocol": "https",
+					"raw": "http://localhost:8090/protected/users",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8443",
+					"port": "8090",
 					"path": [
 						"protected",
 						"users"
@@ -1151,61 +1151,61 @@
 	],
 	"variable": [
 		{
-			"id": "d41ae3e2-291a-4ccd-9b1f-ffd52bd441d6",
+			"id": "a97136e6-1496-4bbb-afcf-2e2b6ad05607",
 			"key": "host",
 			"value": "https://localhost:",
 			"type": "string"
 		},
 		{
-			"id": "bac94b8d-463e-443f-b906-ae7683362ba5",
+			"id": "eae62d8b-9858-4c8d-a5f2-04b740c4cdce",
 			"key": "port",
 			"value": "8443",
 			"type": "string"
 		},
 		{
-			"id": "fde7a129-812e-4334-a608-d612be54c426",
+			"id": "c59780cf-a561-4a8e-8e55-86f08d7f0c27",
 			"key": "token",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhNGY5ZjgzOC0xZTFiLTQxZDEtOTc5ZC1iNGRmMzdmNzk4ZDgiLCJpYXQiOjE1Nzk4ODkwMDUsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjIsImlzQWRtaW4iOnRydWUsImV4cCI6MTU3OTg5MjYwNX0.DJFTQ9E6cJcNEpBZSEdvVnJCS0r0XJv1QNvAzBrQtJA",
 			"type": "string"
 		},
 		{
-			"id": "6995bece-fa0a-4d7b-8e3d-e45720547a3c",
+			"id": "094fdd20-2a47-4cee-98ef-dd2bc60428ad",
 			"key": "token0",
-			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI0ZWM5MWJiNS01MDc0LTQ5YzQtYWY1Zi1lZWM5ZjE2MmVjYzMiLCJpYXQiOjE1ODAyNjU1NjcsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjY0LCJpc0FkbWluIjpmYWxzZSwiZXhwIjoxNTgwMjY5MTY3fQ.RiisGnMv8DIZpatuRfgWVKLFfX6SeHMHPFRv_vF5SVE",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwY2I2Njc3NC0xNmU2LTQ3MzQtYWYyNy1mZDFhMWU4OGQ2YzgiLCJpYXQiOjE1ODIwNDc2NzAsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjY3LCJpc0FkbWluIjpmYWxzZSwiZXhwIjoxNTgyMDUxMjcwfQ.HyMa4FIcYXNvt3bGwDET2goyKgzvWjUio3XQScNpygA",
 			"type": "string"
 		},
 		{
-			"id": "5df7978f-62e0-496f-95ba-d6980306b1ce",
+			"id": "9189021d-9462-4bc1-917f-72f538244bf5",
 			"key": "token1",
-			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI0ZDE3NDZlZi01ZmViLTQ5ODgtYTkyYy0yZTQ1NWIyZjA3ODAiLCJpYXQiOjE1ODAyNjU1NjgsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjM1LCJpc0FkbWluIjp0cnVlLCJleHAiOjE1ODAyNjkxNjh9.k_w6e93J0k5246e9ddu0d50b0C-TUkqLIcwDEho2kzA",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiMjViMjUxMi0yMmI4LTRhZGMtYjI4My04ODZhYzdjNzg2N2QiLCJpYXQiOjE1ODIwNDc2NzEsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjM1LCJpc0FkbWluIjp0cnVlLCJleHAiOjE1ODIwNTEyNzF9.EZUhsycMOQ3sPV1p73sY9npqQFkqYw5lsi5dxoYpyF8",
 			"type": "string"
 		},
 		{
-			"id": "ac162ca7-a4ab-46e3-990e-e52675fd83db",
+			"id": "a88fb307-c551-451b-9e1f-2d6f8cc34fbf",
 			"key": "eventId",
-			"value": 47,
+			"value": 52,
 			"type": "number"
 		},
 		{
-			"id": "6bafbeb9-98e4-4826-b551-231dce38e514",
+			"id": "2f42cae1-6a63-4a83-b9a6-0237245a1e53",
 			"key": "userId",
-			"value": 64,
+			"value": 67,
 			"type": "number"
 		},
 		{
-			"id": "9c2fb13c-3439-4f16-8130-5680be7b4554",
+			"id": "2982aa17-f5f4-49b4-b5c1-0e34c32d23d0",
 			"key": "newsId",
-			"value": 15,
+			"value": 17,
 			"type": "number"
 		},
 		{
-			"id": "bc24e7b0-eee1-4add-87da-ec9521a8d646",
+			"id": "0e441aaa-4671-467f-aac7-df013cc9dfeb",
 			"key": "eventCode",
 			"value": "1234",
 			"type": "string"
 		},
 		{
-			"id": "10e32909-af58-495f-916f-2046d51a76f5",
+			"id": "92176341-e537-4da1-957b-e215dbc2ea87",
 			"key": "applicantId",
 			"value": null,
 			"type": "any"
