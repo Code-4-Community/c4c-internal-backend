@@ -1,0 +1,7 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "Image": {
+    "Name": "489881683177.dkr.ecr.us-east-2.amazonaws.com/c4c-internal:latest",
+    "Update": "true"
+  }
+}
