@@ -21,7 +21,6 @@ ADD persist ${WORK_DIR}/persist
 ADD service ${WORK_DIR}/service
 ADD pom.xml ${WORK_DIR}/pom.xml
 ADD scripts ${WORK_DIR}
-ADD m2 /root/.m2/
 
 # Set a default command to execute
 CMD /c4c-backend/deploy.sh
