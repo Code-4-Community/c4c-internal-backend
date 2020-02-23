@@ -5,7 +5,7 @@ FROM openjdk:8
 ENV WORK_DIR /c4c-backend
 
 # Expose container port to host
-EXPOSE 8090
+EXPOSE 80
 
 # Set default working director
 WORKDIR ${WORK_DIR}
