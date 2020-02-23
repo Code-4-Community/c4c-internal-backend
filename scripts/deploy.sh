@@ -41,8 +41,8 @@ echo "SUCCESS: updated database credentials"
 
 # Perform maven install/package
 cd ${DIR_WORK}
-mvn -T 2C -o install
-mvn -T 2C -o package
+mvn -T 2C install
+mvn -T 2C package
 
 # Execute the jar file
 java -jar ${DIR_JAR}/service-1.0-SNAPSHOT-jar-with-dependencies.jar
