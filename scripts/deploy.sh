@@ -4,10 +4,6 @@ DIR_WORK=/c4c-backend
 DIR_PERSIST=${DIR_WORK}/persist/src/main/resources
 DIR_JAR=${DIR_WORK}/service/target
 
-CFC_DB_USERNAME='cfcworker'
-CFC_DB_PASSWORD='c$cw0krJdz8gb!'
-CFC_DB_URL='jdbc:postgresql://c4cneu.cexlbyrdcxre.us-east-2.rds.amazonaws.com:5432/c4cneu?autoreconnect=true'
-
 # Check for updated database username
 if [[ -z "${CFC_DB_USERNAME}" ]]; then
     echo "ERROR: environment variable not set for database username"
