@@ -1,0 +1,5 @@
+#NOTE: This is an Aether internal implementation file, its format can be changed without prior notice.
+#Sun Feb 16 16:46:01 UTC 2020
+service-1.0-SNAPSHOT.pom>=
+service-1.0-SNAPSHOT.jar>=
+service-1.0-SNAPSHOT-jar-with-dependencies.jar>=

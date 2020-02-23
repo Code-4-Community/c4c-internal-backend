@@ -45,6 +45,6 @@ public class ApiMain {
 
     HttpServer server = vertx.createHttpServer(serverOptions);
     Router router = apiRouter.initializeRouter(vertx);
-    server.requestHandler(router).listen(8090);
+    server.requestHandler(router).listen(80);
   }
 }

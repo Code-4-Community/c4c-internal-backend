@@ -1,30 +1,27 @@
-# Base the container image off of JDK 8
+# Base the container image off JDK 8
 FROM openjdk:8
 
+# Set the working dir env var
 ENV WORK_DIR /c4c-backend
 
-# Perform an update and upgrade to install any package updates
-RUN apt-get update && apt-get upgrade -y
+# Expose container port to host
+EXPOSE 80
 
-# Install maven
-RUN apt-get install maven -y
-
-# Change the default working directory of the image
+# Set default working director
 WORKDIR ${WORK_DIR}
+
+# Run necessary tasks
+RUN apt-get update -y
+RUN apt-get upgrade -y
+RUN apt-get install maven -y
 
 # Add some files
 ADD api ${WORK_DIR}/api
 ADD persist ${WORK_DIR}/persist
 ADD service ${WORK_DIR}/service
 ADD pom.xml ${WORK_DIR}/pom.xml
-ADD build.sh ${WORK_DIR}/
-
-# Expose the container ports to the host
-EXPOSE 8090
-
-# Build the software
-RUN mvn -T 2C install
-RUN mvn -T 2C package
+ADD scripts ${WORK_DIR}
+ADD m2 /root/.m2/
 
 # Set a default command to execute
-CMD java -jar /c4c-backend/service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar
+CMD /c4c-backend/deploy.sh
