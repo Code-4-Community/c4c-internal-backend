@@ -14,10 +14,15 @@ import com.codeforcommunity.api.IProcessor;
 
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.dto.ApplicantReturn;
 import com.codeforcommunity.dto.NewsReturn;
 
 import com.codeforcommunity.util.UpdatableBCrypt;
+import com.codeforcommunity.util.JWTUtils;
+
+import com.codeforcommunity.rest.subrouter.CommonRouter;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.vertx.core.MultiMap;
@@ -68,15 +73,11 @@ public class ApiRouter {
 
   private static final UpdatableBCrypt bcrypt = new UpdatableBCrypt(12);
 
-  // should really be saved as somewhere safer so that the secret isnt just laying
-  // around on github
-  private static final String JWT_KEY = "SECRET_KEY";
+  private final JWTUtils auth;
 
-  // token duration is 60 minutes in milliseconds
-  private static final long TOKEN_DURATION = 3600000;
-
-  public ApiRouter(IProcessor processor) {
+  public ApiRouter(IProcessor processor, JWTUtils auth) {
     this.processor = processor;
+    this.auth = auth;
   }
 
   /**
@@ -89,14 +90,14 @@ public class ApiRouter {
     router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
     router.route().handler(CorsHandler.create("*"));
+
+    router.mountSubRouter("/", new CommonRouter(processor, auth).initializeRouter(vertx));
+
     Route homeRoute = router.route("/");
     homeRoute.handler(this::handleHome);
 
     // allows handling of POST and DELETE routes.
-    router.route("/*").handler(BodyHandler.create());
-
-    router.route("/protected/*").handler(this::checkAuthentication);
-    router.route("/admin/*").handler(this::checkAdmin);
+    // router.route("/*").handler(BodyHandler.create());
 
     // Users
 
@@ -118,7 +119,7 @@ public class ApiRouter {
     Route deleteUserRoute = router.delete("/protected/users");
     deleteUserRoute.handler(this::handleDeleteUser);
 
-    Route logoutRoute = router.route("/logout");
+    Route logoutRoute = router.route("/protected/logout");
     logoutRoute.handler(this::handleLogout);
 
     // Route sessionRoute = router.route("/session");
@@ -215,11 +216,7 @@ public class ApiRouter {
 
   private void handleLogin(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
-    HttpServerRequest request = ctx.request();
 
-    if (isAuthorizedUser(request)) {
-      response.putHeader("location", "/").setStatusCode(302).end();
-    }
     JsonObject body = ctx.getBodyAsJson();
     String email = "";
     String password = "";
@@ -233,30 +230,13 @@ public class ApiRouter {
     }
 
     if (!flag && processor.validate(email, password)) {
-
-      // JWTAuthOptions config = new JWTAuthOptions()
-      // .setKeyStore(new KeyStoreOptions()
-      // .setPath("C:\\Program Files\\Java\\jdk1.8.0_181\\bin\\keystore1.jks")
-      // .setPassword("password"));
-      //
-      // JWTAuth provider = JWTAuth.create(v, config);
-
-      // on the verify endpoint once you verify the identity of the user by its
-      // username/password
-      // String token = provider.generateToken(new JsonObject().put("User", username),
-      // new JWTOptions());
-      // now for any request to protected resources you should pass this string in the
-      // HTTP header Authorization as:
-      // Authorization: Bearer <token>
-
-      // This optional will never be non-present because validate() called above
-      // ensures that such a record exists
       UserReturn user = processor.getUserByEmail(email).get();
 
-      String token = createJWT("c4c", "auth-token", TOKEN_DURATION, user.getId(), user.getPrivilegeLevel() > 0);
+      String token = auth.createJWT("c4c", "auth-token", user.getId(), user.getPrivilegeLevel() > 0);
       response.putHeader("Authorization", "Bearer " + token);
       response.setStatusCode(200).end();
     }
+
     /*
      * Need to fix, because this will cause a timeout if login failure occurs 5
      * times in any period of time which could be with 1 minute or 2 weeks
@@ -290,7 +270,6 @@ public class ApiRouter {
   private void handleSignUp(RoutingContext ctx) {
 
     HttpServerResponse response = ctx.response();
-    HttpServerRequest request = ctx.request();
 
     JsonObject body = ctx.getBodyAsJson();
 
@@ -314,10 +293,13 @@ public class ApiRouter {
     }
 
     Optional<UserReturn> ret = Optional.empty();
+
     if (email != null && firstName != null && lastName != null && encryptedPassword != null && currentYear != -1
         && major != null)
       ret = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major);
+
     String json = "";
+
     try {
       if (ret.isPresent())
         json = JacksonMapper.getMapper().writeValueAsString(ret.get());
@@ -341,7 +323,7 @@ public class ApiRouter {
       id = Integer.parseInt(request.params().get("id"));
     } catch (NumberFormatException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      throw new MalformedParameterException("id");
     }
 
     Optional<UserReturn> ret = processor.getUser(id);
@@ -362,55 +344,55 @@ public class ApiRouter {
 
   private void handleUpdateUser(RoutingContext ctx) {
 
-      HttpServerResponse response = ctx.response();
-      HttpServerRequest request = ctx.request();
+    HttpServerResponse response = ctx.response();
+    HttpServerRequest request = ctx.request();
 
-      JsonObject body = ctx.getBodyAsJson();
+    JsonObject body = ctx.getBodyAsJson();
 
-      int id = -1;
-      String email = "";
-      String password = "";
-      String encryptedPassword = "";
+    int id = -1;
+    String email = "";
+    String password = "";
+    String encryptedPassword = "";
 
-      String firstName = "";
-      String lastName = "";
+    String firstName = "";
+    String lastName = "";
 
-      int currentYear = -1;
-      String major = "";
-      try {
-        id = getUserId(request);
-        email = body.getString("email");
-        firstName = body.getString("firstName");
-        lastName = body.getString("lastName");
-        password = body.getString("password");
+    int currentYear = -1;
+    String major = "";
+    try {
+      id = auth.getUserId(request);
+      email = body.getString("email");
+      firstName = body.getString("firstName");
+      lastName = body.getString("lastName");
+      password = body.getString("password");
 
-        currentYear = body.getInteger("currentYear");
-        major = body.getString("major");
-        if (!password.isEmpty())
-          encryptedPassword = bcrypt.hash(password);
-      } catch (Exception e) {
-        e.printStackTrace();
-        response.setStatusCode(400).end();
-      }
+      currentYear = body.getInteger("currentYear");
+      major = body.getString("major");
+      if (!password.isEmpty())
+        encryptedPassword = bcrypt.hash(password);
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.setStatusCode(400).end();
+    }
 
-      Optional<UserReturn> ret = Optional.empty();
-      if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null 
-          && currentYear != -1 && major != null)
-        ret = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major);
-    
-     String json = "";
-      try {
-        if (ret.isPresent())
-          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
-      } catch (JsonProcessingException e) {
-        e.printStackTrace();
-      }
+    Optional<UserReturn> ret = Optional.empty();
+    if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null
+        && currentYear != -1 && major != null)
+      ret = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major);
 
-      if (!json.isEmpty()) {
-        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
-      } else {
-        response.setStatusCode(400).end();
-      }
+    String json = "";
+    try {
+      if (ret.isPresent())
+        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    if (!json.isEmpty()) {
+      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+    } else {
+      response.setStatusCode(400).end();
+    }
   }
 
   private void handleDeleteUser(RoutingContext ctx) {
@@ -418,7 +400,7 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     int id = -1;
     try {
-      id = getUserId(request);
+      id = auth.getUserId(request);
       Optional<UserReturn> ret = processor.deleteUser(id);
       String json = "";
       try {
@@ -444,22 +426,17 @@ public class ApiRouter {
   private void handleLogout(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
-    if (isAuthorizedUser(request)) {
-      // onLogout clear expired tokens to periodically "trim" the blacklsited tokens
-      // (should probably instead daily)
-      boolean cleared = processor.clearBlacklistedTokens(TOKEN_DURATION);
-      boolean success = processor.addBlacklistedToken(getClaims(request).getId());
+    // onLogout clear expired tokens to periodically "trim" the blacklsited tokens
+    // (should probably instead daily)
+    boolean cleared = processor.clearBlacklistedTokens(auth.getDuration());
+    boolean success = processor.addBlacklistedToken(auth.getClaims(request).getId());
 
-      if (success) {
-        // ctx.reroute(ctx.request().path());
-        response.setStatusCode(201).end();
-      } else {
-        // what do we do when logout fails? (secuirty risk)
-        response.setStatusCode(500).end();
-      }
-
+    if (success) {
+      // ctx.reroute(ctx.request().path());
+      response.setStatusCode(201).end();
     } else {
-      response.setStatusCode(400).end();
+      // what do we do when logout fails? (secuirty risk)
+      response.setStatusCode(500).end();
     }
   }
 
@@ -504,13 +481,14 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    //-----------------------DUPLICATE FOR OTHER TYPES------------------
+    // -----------------------DUPLICATE FOR OTHER TYPES------------------
 
     Optional<EventReturn> result = Optional.empty();
-    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null && eventCode != null)
+    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null
+        && eventCode != null)
       result = processor.createEvent(name, subtitle, description, imageUrl, date, open, eventCode);
 
-    if (result.isPresent()){
+    if (result.isPresent()) {
 
       String json = "";
       try {
@@ -520,13 +498,12 @@ public class ApiRouter {
         response.setStatusCode(400).end();
       }
       response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
-    }
-    else {
+    } else {
       response.setStatusCode(400).end();
     }
 
     response.setStatusCode(201);
-    //----------------------------------END------------------------------
+    // ----------------------------------END------------------------------
 
   }
 
@@ -586,13 +563,13 @@ public class ApiRouter {
       response.setStatusCode(400).end();
     }
 
-    //-----------------------DUPLICATE FOR OTHER TYPES------------------
+    // -----------------------DUPLICATE FOR OTHER TYPES------------------
 
     Optional<EventReturn> ret = Optional.empty();
-    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null && eventCode != null)
+    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null
+        && eventCode != null)
       ret = processor.updateEvent(id, name, subtitle, description, imageUrl, date, open, eventCode);
 
-       
     String json = "";
     try {
       if (ret.isPresent())
@@ -604,16 +581,16 @@ public class ApiRouter {
     if (!json.isEmpty()) {
       response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
     } else {
-       response.setStatusCode(400).end();
+      response.setStatusCode(400).end();
     }
-    //----------------------------------END------------------------------
+    // ----------------------------------END------------------------------
   }
 
   private void handleDeleteEvent(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     HttpServerRequest request = ctx.request();
 
-    //-----------------------DUPLICATE FOR OTHER TYPES------------------
+    // -----------------------DUPLICATE FOR OTHER TYPES------------------
     int id = -1;
     try {
       id = Integer.parseInt(request.params().get("id"));
@@ -632,7 +609,7 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    //----------------------------------END------------------------------
+    // ----------------------------------END------------------------------
   }
 
   private void handleAttendEvent(RoutingContext ctx) {
@@ -644,7 +621,7 @@ public class ApiRouter {
     boolean success = false;
 
     try {
-      userId = getUserId(request);
+      userId = auth.getUserId(request);
       eventCode = request.params().get("code");
     } catch (Exception e) {
       e.printStackTrace();
@@ -717,7 +694,7 @@ public class ApiRouter {
     String whyJoin = "";
 
     try {
-      userId = getUserId(request);
+      userId = auth.getUserId(request);
       fileBLOB = body.getBinary("fileBLOB");
       fileType = body.getString("fileType");
 
@@ -739,8 +716,7 @@ public class ApiRouter {
     if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
         && whyJoin != null)
       ret = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
-    
-      
+
     String json = "";
     try {
       if (ret.isPresent())
@@ -752,7 +728,7 @@ public class ApiRouter {
     if (!json.isEmpty()) {
       response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
     } else {
-       response.setStatusCode(400).end();
+      response.setStatusCode(400).end();
     }
   }
 
@@ -800,7 +776,7 @@ public class ApiRouter {
       String whyJoin = "";
 
       try {
-        userId = getUserId(request);
+        userId = auth.getUserId(request);
         fileBLOB = body.getBinary("fileBLOB");
         fileType = body.getString("fileType");
 
@@ -822,7 +798,7 @@ public class ApiRouter {
       if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
           && whyJoin != null)
         ret = processor.updateApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
-      
+
       String json = "";
       try {
         if (ret.isPresent())
@@ -846,7 +822,7 @@ public class ApiRouter {
     HttpServerRequest request = ctx.request();
     int userId = -1;
     try {
-      //userId = getUserId(request);
+      // userId = getUserId(request);
       userId = Integer.parseInt(request.params().get("userid"));
       String json = "";
 
@@ -907,7 +883,6 @@ public class ApiRouter {
     if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
       ret = processor.createNews(title, description, imageUrl, author, date, content);
 
-        
     String json = "";
     try {
       if (ret.isPresent())
@@ -919,7 +894,7 @@ public class ApiRouter {
     if (!json.isEmpty()) {
       response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
     } else {
-       response.setStatusCode(400).end();
+      response.setStatusCode(400).end();
     }
   }
 
@@ -977,12 +952,11 @@ public class ApiRouter {
       e.printStackTrace();
       response.setStatusCode(400).end();
     }
-    
+
     Optional<NewsReturn> ret = Optional.empty();
     if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
       ret = processor.updateNews(id, title, description, imageUrl, author, date, content);
 
-        
     String json = "";
     try {
       if (ret.isPresent())
@@ -994,7 +968,7 @@ public class ApiRouter {
     if (!json.isEmpty()) {
       response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
     } else {
-       response.setStatusCode(400).end();
+      response.setStatusCode(400).end();
     }
   }
 
@@ -1025,105 +999,4 @@ public class ApiRouter {
     }
   }
 
-  public static String createJWT(String issuer, String subject, long ttlMillis, int userId, boolean isAdmin) {
-    // The JWT signature algorithm we will be using to sign the token
-    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
-    long nowMillis = System.currentTimeMillis();
-    Date now = new Date(nowMillis);
-
-    // We will sign our JWT with our ApiKey secret
-    byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(JWT_KEY);
-    Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
-
-    // Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(now).setSubject(subject)
-        .setIssuer(issuer).claim("userId", userId).claim("isAdmin", isAdmin).signWith(signatureAlgorithm, signingKey);
-
-    // if it has been specified, let's add the expiration
-    if (ttlMillis > 0) {
-      long expMillis = nowMillis + ttlMillis;
-      Date exp = new Date(expMillis);
-      builder.setExpiration(exp);
-    }
-    // Builds the JWT and serializes it to a compact, URL-safe string
-    return builder.compact();
-  }
-
-  private void checkAdmin(RoutingContext ctx) {
-    HttpServerRequest request = ctx.request();
-    HttpServerResponse response = ctx.response();
-    if (!isAdmin(request)) {
-      response.putHeader("location", "/").setStatusCode(401).end();
-    }
-    ctx.next();
-  }
-
-  public boolean isAdmin(HttpServerRequest request) {
-    try {
-      return (boolean) getClaims(request).get("isAdmin");
-    } catch (Exception e) {
-      e.printStackTrace();
-      return false;
-    }
-  }
-
-  private void checkAuthentication(RoutingContext ctx) {
-    HttpServerRequest request = ctx.request();
-    HttpServerResponse response = ctx.response();
-    if (!isAuthorizedUser(request)) {
-      response.putHeader("location", "/").setStatusCode(401).end();
-    }
-    ctx.next();
-  }
-
-  public boolean isAuthorizedUser(HttpServerRequest request) {
-    try {
-      Claims c = getClaims(request);
-      if (c == null)
-        return false;
-
-      return c.getExpiration().getTime() > System.currentTimeMillis();
-    } catch (Exception e) {
-      return false;
-    }
-  }
-
-  public int getUserId(HttpServerRequest request) {
-    try {
-      return (int) getClaims(request).get("userId");
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw e;
-    }
-  }
-
-  public Claims getClaims(HttpServerRequest request) {
-    String jwt = request.headers().get("Authorization");
-    boolean isNullOrEmpty = jwt == null || jwt.isEmpty();
-
-    if (isNullOrEmpty)
-      return null;
-
-    Claims c = decodeJWT(jwt.split(" ")[1]);
-
-    boolean isBlacklisted = isBlacklistedToken(c.getId());
-
-    if (isBlacklisted)
-      return null;
-
-    return c;
-  }
-
-  public boolean isBlacklistedToken(String jti) {
-    return processor.isBlacklistedToken(jti);
-  }
-
-  public Claims decodeJWT(String jwt) {
-    try {
-      return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(JWT_KEY)).parseClaimsJws(jwt).getBody();
-    } catch (Exception e) {
-      return null;
-    }
-  }
 }
