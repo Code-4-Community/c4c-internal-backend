@@ -7,9 +7,6 @@ import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
 
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 import io.vertx.ext.web.RoutingContext;
 

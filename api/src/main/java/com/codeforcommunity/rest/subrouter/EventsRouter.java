@@ -2,68 +2,26 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IProcessor;
 
-import java.sql.Date;
-import java.util.HashMap;
 import java.util.List;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.login.LoginContext;
-import javax.xml.bind.DatatypeConverter;
-
 import com.codeforcommunity.JacksonMapper;
-import com.codeforcommunity.api.IProcessor;
 
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
-import com.codeforcommunity.exceptions.MalformedParameterException;
-import com.codeforcommunity.dto.ApplicantReturn;
-import com.codeforcommunity.dto.NewsReturn;
-
-import com.codeforcommunity.util.UpdatableBCrypt;
 import com.codeforcommunity.util.JWTUtils;
-
-import com.codeforcommunity.rest.subrouter.CommonRouter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
-import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.Session;
-import io.vertx.ext.web.handler.CookieHandler;
-import io.vertx.ext.web.handler.SessionHandler;
-import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.handler.CorsHandler;
-
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
-
-import io.jsonwebtoken.*;
-
-//import java.util.Date;
-
-import io.jsonwebtoken.Jwts;
-import io.netty.handler.codec.http.HttpResponse;
-import io.jsonwebtoken.Claims;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.core.json.Json;
-import java.util.UUID;
-import io.vertx.core.json.JsonObject;
-import java.util.List;
 import java.util.Optional;
 
 public class EventsRouter {
@@ -124,7 +82,6 @@ public class EventsRouter {
 
   private void handleCreateEvent(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
-    HttpServerRequest request = ctx.request();
     JsonObject body = ctx.getBodyAsJson();
     String name = "";
     String subtitle = "";
