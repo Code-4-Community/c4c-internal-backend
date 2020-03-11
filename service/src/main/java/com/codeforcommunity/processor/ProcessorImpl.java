@@ -6,28 +6,20 @@ import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.dto.ApplicantReturn;
 import com.codeforcommunity.dto.NewsReturn;
 import org.jooq.Result;
-import org.jooq.Table;
 import org.jooq.exception.NoDataFoundException;
-import org.jooq.generated.tables.pojos.Users;
+import org.jooq.generated.tables.records.ApplicantsRecord;
+import org.jooq.generated.tables.records.EventCheckInsRecord;
+import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.generated.tables.records.NewsRecord;
+import org.jooq.generated.tables.records.UsersRecord;
 
-import antlr.debug.Event;
-import io.vertx.core.cli.Option;
-
-import org.jooq.generated.tables.pojos.Events;
-import org.jooq.generated.tables.pojos.Applicants;
-import org.jooq.generated.tables.pojos.News;
-
-import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.generated.Tables;
 
 import java.util.List;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.Optional;
-import java.io.Console;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import com.codeforcommunity.util.UpdatableBCrypt;
 import java.sql.Timestamp;
 
@@ -39,6 +31,8 @@ public class ProcessorImpl implements IProcessor {
     this.db = db;
   }
 
+  // News
+
   @Override
   public List<NewsReturn> getAllNews() {
     List<NewsReturn> news = db.selectFrom(Tables.NEWS).fetchInto(NewsReturn.class);
@@ -46,13 +40,22 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public Optional<NewsReturn> createNews(String title, String description, String imageUrl, String author, LocalDateTime date, String content) {
+  public Optional<NewsReturn> createNews(String title, String description, String imageUrl, String author,
+      LocalDateTime date, String content) {
     try {
-      Result result = db.insertInto(Tables.NEWS, Tables.NEWS.TITLE, Tables.NEWS.DESCRIPTION, Tables.NEWS.IMAGE_URL, Tables.NEWS.AUTHOR, Tables.NEWS.DATE,
-              Tables.NEWS.CONTENT).values(title, description, imageUrl, author, Timestamp.valueOf(date), content)
-              .returning(Tables.NEWS.ID)
-              .fetch();
-      return getNews((int) result.getValue(0,0));
+
+      NewsRecord newsToCreate = db.newRecord(Tables.NEWS);
+
+      newsToCreate.setTitle(title);
+      newsToCreate.setDescription(description);
+      newsToCreate.setImageUrl(imageUrl);
+      newsToCreate.setAuthor(author);
+      newsToCreate.setDate(Timestamp.valueOf(date));
+      newsToCreate.setContent(content);
+
+      newsToCreate.store();
+
+      return Optional.of(newsToCreate.into(NewsReturn.class));
     } catch (Exception e) {
       return Optional.empty();
     }
@@ -69,16 +72,22 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public Optional<NewsReturn> updateNews(int id, String title, String description, String imageUrl, String author, LocalDateTime date,
-      String content) {
+  public Optional<NewsReturn> updateNews(int id, String title, String description, String imageUrl, String author,
+      LocalDateTime date, String content) {
     try {
-      Result result = db.update(Tables.NEWS).set(Tables.NEWS.TITLE, title).set(Tables.NEWS.DESCRIPTION, description)
-              .set(Tables.NEWS.IMAGE_URL, imageUrl)
-              .set(Tables.NEWS.AUTHOR, author).set(Tables.NEWS.DATE, Timestamp.valueOf(date))
-              .set(Tables.NEWS.CONTENT, content).where(Tables.NEWS.ID.eq(id))
-              .returning(Tables.NEWS.ID)
-              .fetch();
-      return getNews((int) result.getValue(0, 0));
+
+      NewsRecord newsToUpdate = db.fetchOne(Tables.NEWS, Tables.NEWS.ID.eq(id));
+      newsToUpdate.setTitle(title);
+      newsToUpdate.setDescription(description);
+      newsToUpdate.setImageUrl(imageUrl);
+      newsToUpdate.setAuthor(author);
+      newsToUpdate.setDate(Timestamp.valueOf(date));
+      newsToUpdate.setContent(content);
+
+      newsToUpdate.store();
+
+      return Optional.of(newsToUpdate.into(NewsReturn.class));
+
     } catch (Exception e) {
       return Optional.empty();
     }
@@ -87,7 +96,6 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public Optional<NewsReturn> deleteNews(int id) {
     try {
-      // db.execute("delete from events \n" + "where id = ?;", id);
       Optional<NewsReturn> ret = getNews(id);
       db.delete(Tables.NEWS).where(Tables.NEWS.ID.eq(id)).execute();
       return ret;
@@ -96,23 +104,29 @@ public class ProcessorImpl implements IProcessor {
     }
   }
 
+  // Applicants
+
   public List<ApplicantReturn> getAllApplicants() {
-    List<Applicants> applicants = db.selectFrom(Tables.APPLICANTS).fetchInto(Applicants.class);
-    return applicants.stream()
-        .map(applicant -> new ApplicantReturn(applicant.getUserId(), applicant.getResume(), applicant.getFileType(),
-            Arrays.copyOf(applicant.getInterests(), applicant.getInterests().length, String[].class),
-            applicant.getPriorInvolvement(), applicant.getWhyJoin()))
-        .collect(Collectors.toList());
+    List<ApplicantReturn> applicants = db.selectFrom(Tables.APPLICANTS).fetchInto(ApplicantReturn.class);
+    return applicants;
   }
 
   public Optional<ApplicantReturn> createApplicant(int userId, byte[] fileBLOB, String fileType, String[] interests,
       String priorInvolvement, String whyJoin) {
     try {
-      db.insertInto(Tables.APPLICANTS, Tables.APPLICANTS.USER_ID, Tables.APPLICANTS.RESUME, Tables.APPLICANTS.FILE_TYPE,
-              Tables.APPLICANTS.INTERESTS, Tables.APPLICANTS.PRIOR_INVOLVEMENT, Tables.APPLICANTS.WHY_JOIN)
-              .values(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin)
-              .execute();
-      return getApplicant(userId);
+
+      ApplicantsRecord applicantToCreate = db.newRecord(Tables.APPLICANTS);
+
+      applicantToCreate.setUserId(userId);
+      applicantToCreate.setResume(fileBLOB);
+      applicantToCreate.setFileType(fileType);
+      applicantToCreate.setInterests((Object[]) interests);
+      applicantToCreate.setPriorInvolvement(priorInvolvement);
+      applicantToCreate.setWhyJoin(whyJoin);
+
+      applicantToCreate.store();
+
+      return Optional.of(applicantToCreate.into(ApplicantReturn.class));
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -121,14 +135,9 @@ public class ProcessorImpl implements IProcessor {
 
   public Optional<ApplicantReturn> getApplicant(int userId) {
     try {
-      Applicants result = db.select().from(Tables.APPLICANTS).where(Tables.APPLICANTS.USER_ID.eq(userId))
-          .fetchSingleInto(Applicants.class);
-
-      ApplicantReturn ret = new ApplicantReturn(result.getUserId(), result.getResume(), result.getFileType(),
-          Arrays.copyOf(result.getInterests(), result.getInterests().length, String[].class),
-          result.getPriorInvolvement(), result.getWhyJoin());
-
-      return Optional.of(ret);
+      ApplicantReturn result = db.select().from(Tables.APPLICANTS).where(Tables.APPLICANTS.USER_ID.eq(userId))
+          .fetchSingleInto(ApplicantReturn.class);
+      return Optional.of(result);
     } catch (NoDataFoundException e) {
       return Optional.empty();
     }
@@ -138,11 +147,18 @@ public class ProcessorImpl implements IProcessor {
       String priorInvolvement, String whyJoin) {
 
     try {
-      db.update(Tables.APPLICANTS).set(Tables.APPLICANTS.RESUME, fileBLOB).set(Tables.APPLICANTS.FILE_TYPE, fileType)
-              .set(Tables.APPLICANTS.INTERESTS, interests).set(Tables.APPLICANTS.PRIOR_INVOLVEMENT, priorInvolvement)
-              .set(Tables.APPLICANTS.WHY_JOIN, whyJoin).where(Tables.APPLICANTS.USER_ID.eq(userId))
-              .execute();
-      return getApplicant(userId);
+      ApplicantsRecord applicantToUpdate = db.fetchOne(Tables.APPLICANTS, Tables.APPLICANTS.USER_ID.eq(userId));
+
+      applicantToUpdate.setUserId(userId);
+      applicantToUpdate.setResume(fileBLOB);
+      applicantToUpdate.setFileType(fileType);
+      applicantToUpdate.setInterests((Object[]) interests);
+      applicantToUpdate.setPriorInvolvement(priorInvolvement);
+      applicantToUpdate.setWhyJoin(whyJoin);
+
+      applicantToUpdate.store();
+
+      return Optional.of(applicantToUpdate.into(ApplicantReturn.class));
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -159,50 +175,41 @@ public class ProcessorImpl implements IProcessor {
     }
   }
 
-  @Override
-  public List<UserReturn> getAllUsers() {
-    List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
-    return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
-        user.getLastName(), user.getCurrentYear(), user.getMajor(), user.getPrivilegeLevel()))
-        .collect(Collectors.toList());
-  }
+  // Event Check-ins
 
   @Override
   public List<UserReturn> getEventUsers(int eventId) {
-    // List<Users> users = db.selectFrom(Tables.USERS).fetchInto(Users.class);
+    List<UserReturn> users = db
+        .select().from(Tables.USERS).where(Tables.USERS.ID.in(db.select(Tables.EVENT_CHECK_INS.USER_ID)
+            .from(Tables.EVENT_CHECK_INS).where(Tables.EVENT_CHECK_INS.EVENT_ID.eq(eventId))))
+        .fetchInto(UserReturn.class);
 
-    // I dont know how to turn this SQL statement into JOOQ
-    // db.fetch(
-    // "SELECT * FROM USERS INNER JOIN (SELECT user_id FROM event_check_ins where
-    // event_id = ?) as Z ON USERS.id = Z.user_id;",
-    // eventId).into(Users.class);
-    List<Users> users = db.select().from(Tables.USERS)
-        .where(Tables.USERS.ID.in(db.select(Tables.EVENT_CHECK_INS.USER_ID).from(Tables.EVENT_CHECK_INS)
-            .where(Tables.EVENT_CHECK_INS.EVENT_ID.eq(eventId))))
-        .fetchInto(Users.class);
-
-    return users.stream().map(user -> new UserReturn(user.getId(), user.getEmail(), user.getFirstName(),
-        user.getLastName(), user.getCurrentYear(), user.getMajor(), user.getPrivilegeLevel()))
-        .collect(Collectors.toList());
+    return users;
   }
 
   @Override
-  public boolean attendEvent(String eventCode, int userid) {
-    EventReturn result;
+  public boolean attendEvent(String eventCode, int userId) {
+    EventReturn event;
     try {
-      result = db.select().from(Tables.EVENTS).where(Tables.EVENTS.CODE.eq(eventCode))
+      event = db.select().from(Tables.EVENTS).where(Tables.EVENTS.CODE.eq(eventCode))
           .fetchSingleInto(EventReturn.class);
     } catch (NoDataFoundException e) {
       e.printStackTrace();
       return false;
     }
 
-    if (result == null || !result.getOpen() || LocalDateTime.now().compareTo(LocalDateTime.parse(result.getDate())) >= 0)
+    if (!event.getOpen() || LocalDateTime.now().compareTo(LocalDateTime.parse(event.getDate())) >= 0) {
       return false;
-    try {
+    }
 
-      db.insertInto(Tables.EVENT_CHECK_INS, Tables.EVENT_CHECK_INS.USER_ID, Tables.EVENT_CHECK_INS.EVENT_ID)
-          .values(userid, result.getId()).execute();
+    try {
+      EventCheckInsRecord checkinToCreate = db.fetchOne(Tables.EVENT_CHECK_INS,
+          Tables.EVENT_CHECK_INS.USER_ID.eq(userId));
+
+      checkinToCreate.setUserId(userId);
+      checkinToCreate.setEventId(event.getId());
+      checkinToCreate.store();
+
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -211,23 +218,32 @@ public class ProcessorImpl implements IProcessor {
     return true;
   }
 
+  // Events
+
   @Override
   public List<EventReturn> getAllEvents() {
-    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
-    // HH:mm:ss.S");
     List<EventReturn> events = db.selectFrom(Tables.EVENTS).fetchInto(EventReturn.class);
     return events;
   }
 
   @Override
-  public Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String eventCode) {
-    try{
-    Result result = db.insertInto(Tables.EVENTS, Tables.EVENTS.NAME, Tables.EVENTS.SUBTITLE, Tables.EVENTS.DESCRIPTION, Tables.EVENTS.IMAGE_URL, Tables.EVENTS.DATE, Tables.EVENTS.OPEN, Tables.EVENTS.CODE)
-          .values(name, subtitle, description, imageUrl, Timestamp.valueOf(date), open, eventCode)
-          .returning(Tables.EVENTS.ID)
-          .fetch();
+  public Optional<EventReturn> createEvent(String name, String subtitle, String description, String imageUrl,
+      LocalDateTime date, boolean open, String eventCode) {
+    try {
 
-        return getEvent((int)result.getValue(0,0));
+      EventsRecord eventToCreate = db.newRecord(Tables.EVENTS);
+
+      eventToCreate.setName(name);
+      eventToCreate.setSubtitle(subtitle);
+      eventToCreate.setDescription(description);
+      eventToCreate.setImageUrl(imageUrl);
+      eventToCreate.setDate(Timestamp.valueOf(date));
+      eventToCreate.setOpen(open);
+      eventToCreate.setCode(eventCode);
+
+      eventToCreate.store();
+
+      return Optional.of(eventToCreate.into(EventReturn.class));
     } catch (NoDataFoundException e) {
       e.printStackTrace();
       return Optional.empty();
@@ -247,13 +263,23 @@ public class ProcessorImpl implements IProcessor {
   }
 
   @Override
-  public Optional<EventReturn> updateEvent(int id, String name, String subtitle, String description, String imageUrl, LocalDateTime date, boolean open, String code) {
+  public Optional<EventReturn> updateEvent(int id, String name, String subtitle, String description, String imageUrl,
+      LocalDateTime date, boolean open, String code) {
     try {
-      Result result = db.update(Tables.EVENTS).set(Tables.EVENTS.NAME, name).set(Tables.EVENTS.SUBTITLE, subtitle).set(Tables.EVENTS.DESCRIPTION, description)
-          .set(Tables.EVENTS.IMAGE_URL, imageUrl).set(Tables.EVENTS.DATE, Timestamp.valueOf(date))
-          .set(Tables.EVENTS.OPEN, open).set(Tables.EVENTS.CODE, code).where(Tables.EVENTS.ID.eq(id)).returning(Tables.EVENTS.ID)
-          .fetch();
-        return getEvent((int)result.getValue(0,0));
+
+      EventsRecord eventToUpdate = db.fetchOne(Tables.EVENTS, Tables.EVENTS.ID.eq(id));
+
+      eventToUpdate.setName(name);
+      eventToUpdate.setSubtitle(subtitle);
+      eventToUpdate.setDescription(description);
+      eventToUpdate.setImageUrl(imageUrl);
+      eventToUpdate.setDate(Timestamp.valueOf(date));
+      eventToUpdate.setOpen(open);
+      eventToUpdate.setCode(code);
+
+      eventToUpdate.store();
+
+      return Optional.of(eventToUpdate.into(EventReturn.class));
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -272,16 +298,31 @@ public class ProcessorImpl implements IProcessor {
     }
   }
 
+  // Users/Authorization
+
+  @Override
+  public List<UserReturn> getAllUsers() {
+    List<UserReturn> users = db.selectFrom(Tables.USERS).fetchInto(UserReturn.class);
+    return users;
+  }
+
   @Override
   public Optional<UserReturn> addUser(String email, String first, String last, String hashedPassword, int currentYear,
       String major) {
     try {
-      Result result = db.insertInto(Tables.USERS, Tables.USERS.EMAIL, Tables.USERS.FIRST_NAME, Tables.USERS.LAST_NAME,
-              Tables.USERS.HASHED_PASSWORD, Tables.USERS.CURRENT_YEAR, Tables.USERS.MAJOR, Tables.USERS.PRIVILEGE_LEVEL)
-              .values(email, first, last, hashedPassword, currentYear, major, 0)
-              .returning(Tables.USERS.ID)
-              .fetch();
-      return getUser((int)result.getValue(0,0));
+      UsersRecord userToCreate = db.newRecord(Tables.USERS);
+
+      userToCreate.setEmail(email);
+      userToCreate.setFirstName(first);
+      userToCreate.setLastName(last);
+      userToCreate.setHashedPassword(hashedPassword);
+      userToCreate.setCurrentYear(currentYear);
+      userToCreate.setMajor(major);
+
+      userToCreate.store();
+
+      return Optional.of(userToCreate.into(UserReturn.class));
+
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -291,10 +332,10 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public Optional<UserReturn> getUserByEmail(String email) {
     try {
-      Users result = db.select().from(Tables.USERS).where(Tables.USERS.EMAIL.eq(email)).fetchSingleInto(Users.class);
-      UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          result.getCurrentYear(), result.getMajor(), result.getPrivilegeLevel());
-      return Optional.of(ret);
+      UserReturn result = db.selectFrom(Tables.USERS).where(Tables.USERS.EMAIL.eq(email))
+          .fetchSingleInto(UserReturn.class);
+
+      return Optional.of(result);
     } catch (NoDataFoundException e) {
       return Optional.empty();
     }
@@ -303,24 +344,30 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public Optional<UserReturn> getUser(int id) {
     try {
-      Users result = db.select().from(Tables.USERS).where(Tables.USERS.ID.eq(id)).fetchSingleInto(Users.class);
-      UserReturn ret = new UserReturn(result.getId(), result.getEmail(), result.getFirstName(), result.getLastName(),
-          result.getCurrentYear(), result.getMajor(), result.getPrivilegeLevel());
-      return Optional.of(ret);
+      UserReturn result = db.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(id)).fetchSingleInto(UserReturn.class);
+
+      return Optional.of(result);
     } catch (NoDataFoundException e) {
       return Optional.empty();
     }
   }
 
   @Override
-  public Optional<UserReturn> updateUser(int id, String email, String first, String last, String hashedPassword, int currentYear,
-      String major) {
+  public Optional<UserReturn> updateUser(int id, String email, String first, String last, String hashedPassword,
+      int currentYear, String major) {
     try {
-      db.update(Tables.USERS).set(Tables.USERS.EMAIL, email).set(Tables.USERS.FIRST_NAME, first)
-              .set(Tables.USERS.LAST_NAME, last).set(Tables.USERS.HASHED_PASSWORD, hashedPassword)
-              .set(Tables.USERS.CURRENT_YEAR, currentYear).set(Tables.USERS.MAJOR, major).where(Tables.USERS.ID.eq(id))
-              .execute();
-      return getUser(id);
+      UsersRecord userToUpdate = db.fetchOne(Tables.USERS, Tables.USERS.ID.eq(id));
+
+      userToUpdate.setEmail(email);
+      userToUpdate.setFirstName(first);
+      userToUpdate.setLastName(last);
+      userToUpdate.setHashedPassword(hashedPassword);
+      userToUpdate.setCurrentYear(currentYear);
+      userToUpdate.setMajor(major);
+
+      userToUpdate.store();
+
+      return Optional.of(userToUpdate.into(UserReturn.class));
     } catch (Exception e) {
       e.printStackTrace();
       return Optional.empty();
@@ -344,20 +391,21 @@ public class ProcessorImpl implements IProcessor {
     try {
       String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
           .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
-      //if(storedPassword == null) return false;
+
       return UpdatableBCrypt.verifyHash(password, storedPassword);
-    } catch (Exception e) {
+    } catch (NoDataFoundException e) {
       e.printStackTrace();
       return false;
     }
   }
 
+  // JWT Blacklisting
+
   @Override
   public boolean isBlacklistedToken(String jti) {
-    Result result = db.select().from(Tables.BLACKLISTED_TOKENS).where(Tables.BLACKLISTED_TOKENS.ID.eq(jti)).fetch();
-    if (result.isEmpty())
-      return false;
-    return true;
+    Result<Record> result = db.select().from(Tables.BLACKLISTED_TOKENS).where(Tables.BLACKLISTED_TOKENS.ID.eq(jti))
+        .fetch();
+    return !result.isEmpty();
   }
 
   @Override
@@ -377,10 +425,6 @@ public class ProcessorImpl implements IProcessor {
   @Override
   public boolean clearBlacklistedTokens(long tokenDuration) {
     try {
-      /*
-       * db.execute("delete from blacklisted_tokens\n" +
-       * " where time_millisecond < ?;", System.currentTimeMillis() - tokenDuration);
-       */
       db.delete(Tables.BLACKLISTED_TOKENS)
           .where(Tables.BLACKLISTED_TOKENS.TIME_MILLISECONDS.le(System.currentTimeMillis() - tokenDuration)).execute();
     } catch (Exception e) {

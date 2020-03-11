@@ -1,10 +1,9 @@
 package com.codeforcommunity.dto;
 
-import java.time.LocalDateTime;
-
 public class ApplicantReturn {
   // doesnt make sense that we would ever set these values after construction.
   // favor immutibility.
+  private final int id;
   private final int userId;
   private final byte[] fileBLOB;
   private final String fileType;
@@ -12,8 +11,9 @@ public class ApplicantReturn {
   private final String priorInvolvement;
   private final String whyJoin;
 
-  public ApplicantReturn(int userId, byte[] fileBLOB, String fileType, String[] interests, String priorInvolvement,
-      String whyJoin) {
+  public ApplicantReturn(int id, int userId, byte[] fileBLOB, String fileType, String[] interests,
+      String priorInvolvement, String whyJoin) {
+    this.id = id;
     this.userId = userId;
     this.fileBLOB = fileBLOB;
     this.fileType = fileType;
@@ -21,6 +21,10 @@ public class ApplicantReturn {
     this.priorInvolvement = priorInvolvement;
     this.whyJoin = whyJoin;
 
+  }
+
+  public int getId() {
+    return this.id;
   }
 
   public int getUserId() {
