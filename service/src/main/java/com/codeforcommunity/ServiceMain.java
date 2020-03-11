@@ -3,6 +3,8 @@ package com.codeforcommunity;
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.processor.ProcessorImpl;
 import com.codeforcommunity.rest.ApiRouter;
+import com.codeforcommunity.util.JWTUtils;
+
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
@@ -51,8 +53,7 @@ public class ServiceMain {
       e.printStackTrace();
     }
 
-    DSLContext db = DSL.using(dbProperties.getProperty("database.url"),
-        dbProperties.getProperty("database.username"),
+    DSLContext db = DSL.using(dbProperties.getProperty("database.url"), dbProperties.getProperty("database.username"),
         dbProperties.getProperty("database.password"));
     this.db = db;
   }
@@ -62,7 +63,9 @@ public class ServiceMain {
    */
   private void initializeServer() {
     IProcessor processor = new ProcessorImpl(this.db);
-    ApiRouter router = new ApiRouter(processor);
+    JWTUtils auth = new JWTUtils(dbProperties.getProperty("jwt.secret"),
+        Integer.parseInt(dbProperties.getProperty("jwt.duration")));
+    ApiRouter router = new ApiRouter(processor, auth);
 
     startApiServer(router);
   }
