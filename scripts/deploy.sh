@@ -17,7 +17,7 @@ if [[ -z "${CFC_DB_PASSWORD}" ]]; then
 fi
 
 # Check for updated database url
-if [[ -z "${$CFC_DB_URL}" ]]; then
+if [[ -z "${CFC_DB_URL}" ]]; then
     echo "ERROR: environment variable not set for database url"
     exit 1
 fi
