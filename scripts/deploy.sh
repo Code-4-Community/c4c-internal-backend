@@ -16,6 +16,12 @@ if [[ -z "${CFC_DB_PASSWORD}" ]]; then
     exit 1
 fi
 
+# Check for updated database url
+if [[ -z "${CFC_DB_URL}" ]]; then
+    echo "ERROR: environment variable not set for database url"
+    exit 1
+fi
+
 # Check for existing db.properties file
 if [[ ! -f "${DIR_PERSIST}/db.properties" ]]; then
     echo "ERROR: \"db.properties\" file not found"
