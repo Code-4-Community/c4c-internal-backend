@@ -11,7 +11,7 @@ public class UserReturn {
   private final String major;
   private final int privilegeLevel;
 
-  public UserReturn(int id, String email, String firstName, String lastName, int year, String major,
+  public UserReturn(int id, String email, String firstName, String lastName, String _password, int year, String major,
       int privilegeLevel) {
     this.id = id;
     this.email = email;
@@ -21,7 +21,6 @@ public class UserReturn {
     this.major = major;
     this.privilegeLevel = privilegeLevel;
   }
-
 
   public int getId() {
     return this.id;
@@ -53,6 +52,7 @@ public class UserReturn {
 
   @Override
   public String toString() {
-    return this.id + " " + this.email + " " + this.firstName + " " + this.lastName + " " + this.year + " " + this.major + " " + this.privilegeLevel;
+    return this.id + " " + this.email + " " + this.firstName + " " + this.lastName + " " + this.year + " " + this.major
+        + " " + this.privilegeLevel;
   }
 }
