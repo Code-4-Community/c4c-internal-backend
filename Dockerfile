@@ -7,7 +7,7 @@ ENV WORK_DIR /c4c-backend
 # Expose container port to host
 EXPOSE 80
 
-# Set default working director
+# Set default working directory
 WORKDIR ${WORK_DIR}
 
 # Run necessary tasks
