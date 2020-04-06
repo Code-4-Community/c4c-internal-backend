@@ -42,7 +42,23 @@ $ CREATE DATABASE c4cneu-db;
 
 Update the properties file in `/persist/src/main/resources/db.properties` to contain your database connection information
 
-Update the properties file in `/persist/src/main/resources/server.properties` to contain the paths to keystores for the API and HTTP servers. Depending on your OS, the path may either be `classes/keystore.jks` or `service/target/keystore.jks`
+```
+database.driver = org.postgresql.Driver
+database.url = jdbc:postgresql://localhost:5432/c4cneu-db?autoreconnect=true
+database.username = postgres
+database.password = root
+jwt.secret = SUPER_SECRET_KEY
+jwt.duration = 3600000
+
+```
+
+Update the properties file in `/persist/src/main/resources/server.properties` to contain the port the server should run on
+
+```
+server.port = 8090
+```
+
+To compile and run:
 
 ```sh
 $ cd c4c-internal-backend

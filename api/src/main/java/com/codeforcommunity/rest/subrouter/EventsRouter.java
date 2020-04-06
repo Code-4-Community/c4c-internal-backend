@@ -24,6 +24,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 public class EventsRouter {
 
   private final IProcessor processor;
@@ -77,7 +79,7 @@ public class EventsRouter {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    response.end(eventsJson);
+    end(ctx.response(), 200, eventsJson);
   }
 
   private void handleCreateEvent(RoutingContext ctx) {
@@ -103,7 +105,7 @@ public class EventsRouter {
       eventCode = body.getString("code");
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<EventReturn> result = Optional.empty();
@@ -118,11 +120,11 @@ public class EventsRouter {
         if (result.isPresent())
           json = JacksonMapper.getMapper().writeValueAsString(result.get());
       } catch (JsonProcessingException e) {
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
-      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 201, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     response.setStatusCode(201);
@@ -137,7 +139,7 @@ public class EventsRouter {
       id = Integer.parseInt(request.params().get("id"));
     } catch (NumberFormatException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<EventReturn> ret = processor.getEvent(id);
@@ -149,9 +151,9 @@ public class EventsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -181,7 +183,7 @@ public class EventsRouter {
       eventCode = body.getString("code");
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<EventReturn> ret = Optional.empty();
@@ -198,9 +200,9 @@ public class EventsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -218,13 +220,13 @@ public class EventsRouter {
         json = JacksonMapper.getMapper().writeValueAsString(ret.get());
 
       if (!json.isEmpty()) {
-        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+        end(ctx.response(), 200, json);
       } else {
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -241,16 +243,16 @@ public class EventsRouter {
       eventCode = request.params().get("code");
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     if (!eventCode.isEmpty() && userId != -1)
       success = processor.attendEvent(eventCode, userId);
 
     if (success) {
-      response.setStatusCode(201).end();
+      end(ctx.response(), 200);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -268,15 +270,15 @@ public class EventsRouter {
       users = processor.getEventUsers(eventId);
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
     String userJson = null;
     try {
       userJson = JacksonMapper.getMapper().writeValueAsString(users);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
-    response.end(userJson);
+    end(ctx.response(), 200, userJson);
   }
 }
