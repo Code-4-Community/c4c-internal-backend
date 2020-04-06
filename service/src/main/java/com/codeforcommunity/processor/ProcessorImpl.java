@@ -392,7 +392,7 @@ public class ProcessorImpl implements IProcessor {
       String storedPassword = db.select(Tables.USERS.HASHED_PASSWORD).from(Tables.USERS)
           .where(Tables.USERS.EMAIL.eq(email)).fetchOneInto(String.class);
 
-      return UpdatableBCrypt.verifyHash(password, storedPassword);
+      return storedPassword != null && UpdatableBCrypt.verifyHash(password, storedPassword);
     } catch (NoDataFoundException e) {
       e.printStackTrace();
       return false;
