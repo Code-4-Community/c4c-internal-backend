@@ -19,6 +19,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 public class ApplicantsRouter {
 
   private final IProcessor processor;
@@ -62,9 +64,9 @@ public class ApplicantsRouter {
       applicantJson = JacksonMapper.getMapper().writeValueAsString(applicants);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
-    response.end(applicantJson);
+    end(ctx.response(), 200, applicantJson);
   }
 
   private void handleCreateApplicant(RoutingContext ctx) {
@@ -97,7 +99,7 @@ public class ApplicantsRouter {
 
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<ApplicantReturn> ret = Optional.empty();
@@ -114,9 +116,9 @@ public class ApplicantsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 201, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -129,7 +131,7 @@ public class ApplicantsRouter {
       id = Integer.parseInt(request.params().get("id"));
     } catch (NumberFormatException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<ApplicantReturn> ret = processor.getApplicant(id);
@@ -142,9 +144,9 @@ public class ApplicantsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -179,7 +181,7 @@ public class ApplicantsRouter {
 
       } catch (Exception e) {
         e.printStackTrace();
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
 
       Optional<ApplicantReturn> ret = Optional.empty();
@@ -196,9 +198,9 @@ public class ApplicantsRouter {
       }
 
       if (!json.isEmpty()) {
-        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+        end(ctx.response(), 200, json);
       } else {
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -219,13 +221,13 @@ public class ApplicantsRouter {
         json = JacksonMapper.getMapper().writeValueAsString(ret.get());
 
       if (!json.isEmpty()) {
-        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+        end(ctx.response(), 200, json);
       } else {
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 }

@@ -24,6 +24,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 public class UsersAuthRouter {
 
   private HashMap<String, Integer> loginmap = new HashMap<String, Integer>();
@@ -79,9 +81,9 @@ public class UsersAuthRouter {
       userJson = JacksonMapper.getMapper().writeValueAsString(users);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
-    response.end(userJson);
+    end(ctx.response(), 200, userJson);
   }
 
   /**
@@ -100,7 +102,7 @@ public class UsersAuthRouter {
       password = body.getString("password");
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     if (!flag && processor.validate(email, password)) {
@@ -108,7 +110,7 @@ public class UsersAuthRouter {
 
       String token = auth.createJWT("c4c", "auth-token", user.getId(), user.getPrivilegeLevel() > 0);
       response.putHeader("Authorization", "Bearer " + token);
-      response.setStatusCode(200).end();
+      end(ctx.response(), 200);
     }
 
     /*
@@ -136,8 +138,7 @@ public class UsersAuthRouter {
           }
         }.start();
       }
-
-      response.putHeader("content-type", "text/json").setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -163,7 +164,7 @@ public class UsersAuthRouter {
 
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<UserReturn> ret = Optional.empty();
@@ -182,9 +183,9 @@ public class UsersAuthRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 201, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -210,9 +211,9 @@ public class UsersAuthRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -246,7 +247,7 @@ public class UsersAuthRouter {
         encryptedPassword = bcrypt.hash(password);
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<UserReturn> ret = Optional.empty();
@@ -263,9 +264,9 @@ public class UsersAuthRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -285,13 +286,13 @@ public class UsersAuthRouter {
       }
 
       if (!json.isEmpty()) {
-        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+        end(ctx.response(), 200, json);
       } else {
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -307,10 +308,10 @@ public class UsersAuthRouter {
 
     if (success) {
       // ctx.reroute(ctx.request().path());
-      response.setStatusCode(201).end();
+      end(ctx.response(), 201);
     } else {
       // what do we do when logout fails? (secuirty risk)
-      response.setStatusCode(500).end();
+      end(ctx.response(), 500);
     }
   }
 }

@@ -63,4 +63,21 @@ public class ApiRouter {
         .end("<a href=\"https://github.com/Code-4-Community/c4c-internal-backend/blob/master/api.md\">API Docs</a>");
   }
 
+  public static void end(HttpServerResponse response, int statusCode) {
+    end(response, statusCode, null);
+  }
+
+  public static void end(HttpServerResponse response, int statusCode, String jsonBody) {
+    response.setStatusCode(statusCode).putHeader("Content-Type", "application/json")
+        .putHeader("Access-Control-Allow-Origin", "*")
+        .putHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
+        .putHeader("Access-Control-Allow-Headers",
+            "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+    if (jsonBody == null || jsonBody.equals("")) {
+      response.end();
+    } else {
+      response.end(jsonBody);
+    }
+  }
+
 }

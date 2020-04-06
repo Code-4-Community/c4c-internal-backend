@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 public class NewsRouter {
 
   private final IProcessor processor;
@@ -63,7 +65,7 @@ public class NewsRouter {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    response.end(newsJson);
+    end(ctx.response(), 200, newsJson);
   }
 
   private void handleCreateNews(RoutingContext ctx) {
@@ -87,7 +89,7 @@ public class NewsRouter {
       content = body.getString("content");
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
     Optional<NewsReturn> ret = Optional.empty();
     if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
@@ -102,9 +104,9 @@ public class NewsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(201).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 201, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -117,7 +119,7 @@ public class NewsRouter {
       id = Integer.parseInt(request.params().get("id"));
     } catch (NumberFormatException e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<NewsReturn> ret = processor.getNews(id);
@@ -130,9 +132,9 @@ public class NewsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -160,7 +162,7 @@ public class NewsRouter {
       content = body.getString("content");
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
 
     Optional<NewsReturn> ret = Optional.empty();
@@ -176,9 +178,9 @@ public class NewsRouter {
     }
 
     if (!json.isEmpty()) {
-      response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+      end(ctx.response(), 200, json);
     } else {
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 
@@ -198,14 +200,14 @@ public class NewsRouter {
       }
 
       if (!json.isEmpty()) {
-        response.setStatusCode(200).putHeader("content-type", "text/json").end(json);
+        end(ctx.response(), 200, json);
       } else {
-        response.setStatusCode(400).end();
+        end(ctx.response(), 400);
       }
 
     } catch (Exception e) {
       e.printStackTrace();
-      response.setStatusCode(400).end();
+      end(ctx.response(), 400);
     }
   }
 }
