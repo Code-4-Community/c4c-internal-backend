@@ -66,7 +66,7 @@ $ mvn clean install
 $ sh build.sh
 ```
 
-The application should be running on https://localhost:8090
+The application should be running on https://localhost:5000
 
 ### Testing
 
