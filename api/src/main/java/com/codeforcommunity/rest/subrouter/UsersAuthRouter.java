@@ -144,8 +144,6 @@ public class UsersAuthRouter {
 
   private void handleSignUp(RoutingContext ctx) {
 
-    HttpServerResponse response = ctx.response();
-
     JsonObject body = ctx.getBodyAsJson();
 
     String email = "";
@@ -154,6 +152,10 @@ public class UsersAuthRouter {
     String lastName = "";
     int currentYear = -1;
     String major = "";
+    int yearOfGraduation = -1;
+    String college = "";
+    String gender = "";
+
     try {
       email = body.getString("email");
       firstName = body.getString("firstName");
@@ -161,6 +163,9 @@ public class UsersAuthRouter {
       encryptedPassword = bcrypt.hash(body.getString("password"));
       currentYear = body.getInteger("currentYear");
       major = body.getString("major");
+      yearOfGraduation = body.getInteger("yog");
+      college = body.getString("college");
+      gender = body.getString("gender");
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -170,8 +175,9 @@ public class UsersAuthRouter {
     Optional<UserReturn> ret = Optional.empty();
 
     if (email != null && firstName != null && lastName != null && encryptedPassword != null && currentYear != -1
-        && major != null)
-      ret = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major);
+        && major != null && yearOfGraduation != -1 && college != null && gender != null)
+      ret = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major, yearOfGraduation,
+          college, gender);
 
     String json = "";
 
@@ -228,21 +234,26 @@ public class UsersAuthRouter {
     String email = "";
     String password = "";
     String encryptedPassword = "";
-
     String firstName = "";
     String lastName = "";
-
     int currentYear = -1;
     String major = "";
+    int yearOfGraduation = -1;
+    String college = "";
+    String gender = "";
+
     try {
       id = auth.getUserId(request);
       email = body.getString("email");
       firstName = body.getString("firstName");
       lastName = body.getString("lastName");
       password = body.getString("password");
-
       currentYear = body.getInteger("currentYear");
       major = body.getString("major");
+      yearOfGraduation = body.getInteger("yog");
+      college = body.getString("college");
+      gender = body.getString("gender");
+
       if (!password.isEmpty())
         encryptedPassword = bcrypt.hash(password);
     } catch (Exception e) {
@@ -253,7 +264,8 @@ public class UsersAuthRouter {
     Optional<UserReturn> ret = Optional.empty();
     if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null
         && currentYear != -1 && major != null)
-      ret = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major);
+      ret = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major, 
+          yearOfGraduation, college, gender);
 
     String json = "";
     try {
