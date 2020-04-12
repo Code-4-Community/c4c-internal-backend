@@ -55,15 +55,14 @@ jwt.duration = 3600000
 Update the properties file in `/persist/src/main/resources/server.properties` to contain the port the server should run on
 
 ```
-server.port = 8090
+server.port = 5000
 ```
 
 To compile and run:
 
 ```sh
 $ cd c4c-internal-backend
-$ mvn clean install
-$ sh build.sh
+$ sh scripts/build.sh
 ```
 
 The application should be running on https://localhost:5000
@@ -75,15 +74,17 @@ API testing is done with newman, the cli for Postman. The collection JSON (inclu
 ```sh
 $ psql -U postgres
 $ \c c4cneu-db;
-$ insert into users (email, first_name, last_name, hashed_password, current_year, major, privilege_level) values ('admin@husky.neu.edu', 'admin', 'admin',  '$2a$12$TsV9egpd1IXx013lVLpo5.OPbxI0w3EuObh8..gD4mR7YqCV7Md1W', 5, 'Computer Science', 1);
+$ insert into users (email, first_name, last_name, hashed_password, current_year, major, privilege_level, year_of_graduation, college, gender) values ('admin@husky.neu.edu', 'admin', 'admin',  '$2a$12$TsV9egpd1IXx013lVLpo5.OPbxI0w3EuObh8..gD4mR7YqCV7Md1W', 5, 'Computer Science', 1, 2023, "Khoury", "Male");
 ```
 
 This will create a user with admin privileges with the password expected in the test collection.
 
-Now navigate to the `/apitest` folder and run
+Now start the server using the instructions above, and concurrently start the tests by running
 
 ```sh
-$ newman "Local Testing.postman_collection.json"
+$ newman run apitest/"Local Testing.postman_collection.json"
 ```
 
-If you need to add more tests, simply go to the Postman website or download their desktop app and import `Local Testing.postman_collection.json`, then add your new tests and replace the test.json in `/newman`.
+The tests should pass, but if any fail then the database must be reset to a clean state.
+
+If you need to add more tests, simply go to the Postman website or download their desktop app and import `Local Testing.postman_collection.json`, then add your new tests and replace the test.json in `/apitest`.

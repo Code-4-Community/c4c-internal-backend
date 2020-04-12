@@ -13,7 +13,7 @@ For any request to protected resources (/protected/_ or /admin/_) you should pas
 
 - [Signup](apidocs/users.md#post-signup)
 - [Login](apidocs/users.md#post-login)
-- [Logout](apidocs/users.md#get-logout)
+- [Logout](apidocs/users.md#post-protectedlogout)
 
 - [Get all users](apidocs/users.md#get-protectedusers)
 - [Get a user by ID](apidocs/users.md#get-protecteduserid)

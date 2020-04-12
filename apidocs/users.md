@@ -32,7 +32,10 @@ None.
 "lastName": STRING,
 "password": STRING,
 "currentYear": INTEGER,
-"major": STRING
+"major": STRING,
+"yog": INTEGER,
+"college": STRING,
+"gender": STRING
 }
 ```
 
@@ -79,8 +82,8 @@ None.
 
 ```json
 {
-"email": "john.doe@email.com",
-"password": "password123"
+"email": STRING,
+"password": STRING
 }
 ```
 
@@ -105,7 +108,7 @@ The request body was malformed according to the specification.
 
 
 
-## `GET /logout`
+## `POST protected/logout`
 
   
 
@@ -172,21 +175,29 @@ Every thing is okay.
 ```json
 [
 {
+"id": INTEGER,
 "email": STRING,
 "firstName": STRING,
 "lastName": STRING,
 "currentYear": INTEGER,
-"major": STRING
+"major": STRING,
+"yog": INTEGER,
+"college": STRING,
+"gender": STRING
 },
 
 ...
 
 {
+"id": INTEGER,
 "email": STRING,
 "firstName": STRING,
 "lastName": STRING,
 "currentYear": INTEGER,
-"major": STRING
+"major": STRING,
+"yog": INTEGER,
+"college": STRING,
+"gender": STRING
 }
 ]
 ```
@@ -237,11 +248,15 @@ Every thing is okay.
 
 ```json
 {
+"id": INTEGER,
 "email": STRING,
 "firstName": STRING,
 "lastName": STRING,
 "currentYear": INTEGER,
-"major": STRING
+"major": STRING,
+"yog": INTEGER,
+"college": STRING,
+"gender": STRING
 }
 ```
 
@@ -280,7 +295,11 @@ Requires a valid JWT
 "lastName": STRING,
 "password": STRING,
 "currentYear": INTEGER,
-"major": STRING
+"major": STRING,
+"yog": INTEGER,
+"college": STRING,
+"gender": STRING
+
 }
 ```
 

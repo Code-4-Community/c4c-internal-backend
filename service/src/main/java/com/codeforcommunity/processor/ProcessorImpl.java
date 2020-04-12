@@ -308,7 +308,7 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public Optional<UserReturn> addUser(String email, String first, String last, String hashedPassword, int currentYear,
-      String major) {
+      String major, int yearOfGraduation, String college, String gender) {
     try {
       UsersRecord userToCreate = db.newRecord(Tables.USERS);
 
@@ -318,6 +318,9 @@ public class ProcessorImpl implements IProcessor {
       userToCreate.setHashedPassword(hashedPassword);
       userToCreate.setCurrentYear(currentYear);
       userToCreate.setMajor(major);
+      userToCreate.setYearOfGraduation(yearOfGraduation);
+      userToCreate.setCollege(college);
+      userToCreate.setGender(gender);
 
       userToCreate.store();
 
@@ -354,7 +357,7 @@ public class ProcessorImpl implements IProcessor {
 
   @Override
   public Optional<UserReturn> updateUser(int id, String email, String first, String last, String hashedPassword,
-      int currentYear, String major) {
+      int currentYear, String major, int yearOfGraduation, String college, String gender) {
     try {
       UsersRecord userToUpdate = db.fetchOne(Tables.USERS, Tables.USERS.ID.eq(id));
 
@@ -364,6 +367,9 @@ public class ProcessorImpl implements IProcessor {
       userToUpdate.setHashedPassword(hashedPassword);
       userToUpdate.setCurrentYear(currentYear);
       userToUpdate.setMajor(major);
+      userToUpdate.setYearOfGraduation(yearOfGraduation);
+      userToUpdate.setCollege(college);
+      userToUpdate.setGender(gender);
 
       userToUpdate.store();
 

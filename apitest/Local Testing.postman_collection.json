@@ -29,14 +29,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}",
 					"host": [
-						"localhost"
-					],
-					"port": "8090",
-					"path": [
-						""
+						"{{host}}{{port}}"
 					]
 				}
 			},
@@ -74,7 +69,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"test.user@husky.neu.edu\",\n    \"firstName\": \"test\",\n    \"lastName\": \"user\",\n    \"password\": \"password123\",\n    \"currentYear\": 1,\n    \"major\": \"Computer Science\"\n}",
+					"raw": "{\n    \"email\": \"test.user@husky.neu.edu\",\n    \"firstName\": \"test\",\n    \"lastName\": \"user\",\n    \"password\": \"password123\",\n    \"currentYear\": 1,\n    \"major\": \"Computer Science\",\n    \"yog\": 2023,\n    \"college\": \"Khoury\",\n    \"gender\": \"Male\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -82,12 +77,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/signup",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/signup",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"signup"
 					]
@@ -138,12 +131,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/login",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/login",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"login"
 					]
@@ -157,10 +148,9 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "c12e67cc-76fa-4b49-ac15-15c460def75c",
+						"id": "4df1f377-99b9-467b-83f2-c1575015e1c6",
 						"exec": [
 							"let token = pm.response.headers.get(\"Authorization\").split(\" \")[1];",
-							"",
 							"",
 							"pm.collectionVariables.set(\"token1\", token);",
 							"",
@@ -186,7 +176,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"email\":\"admin@husky.neu.edu\",\n\t\"password\":\"password123\"\n}",
+					"raw": "{\n    \"email\": \"admin@husky.neu.edu\",\n    \"password\": \"password123\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -194,12 +184,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/login",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/login",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"login"
 					]
@@ -237,12 +225,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/protected/users",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/protected/users",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"protected",
 						"users"
@@ -281,12 +267,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/protected/users/{{userId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/protected/users/{{userId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"protected",
 						"users",
@@ -334,7 +318,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n\t\"email\": \"test.user@husky.neu.edu\",\r\n    \"firstName\": \"test\",\r\n    \"lastName\": \"user\",\r\n    \"password\": \"password123\",\r\n    \"currentYear\": 1,\r\n    \"major\": \"Computer Science\"\r\n}",
+					"raw": "{\r\n\t\"email\": \"test.user@husky.neu.edu\",\r\n    \"firstName\": \"test\",\r\n    \"lastName\": \"user\",\r\n    \"password\": \"password123\",\r\n    \"currentYear\": 2,\r\n    \"major\": \"Computer Science\",\r\n     \"yog\": 2024,\r\n    \"college\": \"COE\",\r\n    \"gender\": \"Female\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -342,12 +326,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/protected/users",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/protected/users",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"protected",
 						"users"
@@ -400,7 +382,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"test event\",\n    \"subtitle\": \"this is a test event subtitle\",\n    \"description\": \"this is the description of a test event\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\",\n    \"date\": \"2020-11-27 23:05\",\n    \"open\": true,\n    \"code\": \"1234\"\n}",
+					"raw": "{\n    \"name\": \"test event\",\n    \"subtitle\": \"this is a test event subtitle\",\n    \"description\": \"this is the description of a test event\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\",\n    \"date\": \"2020-11-27T23:05:00\",\n    \"open\": true,\n    \"code\": \"1234\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -408,12 +390,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/admin/events",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/events",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"events"
@@ -445,12 +425,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/events",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/events",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"events"
 					]
@@ -481,12 +459,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/events/{{eventId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/events/{{eventId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"events",
 						"{{eventId}}"
@@ -533,7 +509,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"test event\",\n    \"subtitle\": \"this is a test event subtitle\",\n    \"description\": \"this is the description of a test event\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\",\n    \"date\": \"2020-02-28 12:00\",\n    \"open\": true,\n    \"code\": \"1234\"\n}",
+					"raw": "{\n    \"name\": \"test event\",\n    \"subtitle\": \"this is a test event subtitle\",\n    \"description\": \"this is the description of a test event\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\",\n    \"date\": \"2020-02-28T12:00\",\n    \"open\": true,\n    \"code\": \"1234\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -541,12 +517,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/admin/events/{{eventId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/events/{{eventId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"events",
@@ -586,12 +560,104 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/admin/events/{{eventId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/events/{{eventId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
+					"path": [
+						"admin",
+						"events",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/events/:id fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01a39e74-d5d7-42e3-b78d-2b7ff02cf612",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}{{port}}/events/{{eventId}}",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"events",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/admin/events/:id fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01a39e74-d5d7-42e3-b78d-2b7ff02cf612",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"test event\",\n    \"subtitle\": \"this is a test event subtitle\",\n    \"description\": \"this is the description of a test event\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\",\n    \"date\": \"2020-02-28T12:00\",\n    \"open\": true,\n    \"code\": \"1234\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/admin/events/{{eventId}}",
+					"host": [
+						"{{host}}{{port}}"
+					],
 					"path": [
 						"admin",
 						"events",
@@ -652,12 +718,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/admin/news",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/news",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"news"
@@ -689,12 +753,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/news",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/news",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"news"
 					]
@@ -725,12 +787,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/news/{{newsId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/news/{{newsId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"news",
 						"{{newsId}}"
@@ -777,7 +837,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"Another article about how to do Things\",\n\t\"description\": \"An article about doing things\",\n\t\"author\": \"John Doe\",\n\t\"date\": \"2020-01-01 12:00\",\n\t\"content\": \"j jbd  bdsjb db jdsb jkdsbf jdsbf jdsbf dsbj db dsbj bdsjb dsjbfjdsb kjdsbf jkdsb dsk.\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\"\n}",
+					"raw": "{\n    \"title\": \"Yet another article about how to do Things\",\n\t\"description\": \"An article about doing things\",\n\t\"author\": \"John Doe\",\n\t\"date\": \"2020-01-01T12:00\",\n\t\"content\": \"j jbd  bdsjb db jdsb jkdsbf jdsbf jdsbf dsbj db dsbj bdsjb dsjbfjdsb kjdsbf jkdsb dsk.\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -785,12 +845,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/admin/news/{{newsId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/news/{{newsId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"news",
@@ -830,12 +888,104 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/admin/news/{{newsId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/news/{{newsId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
+					"path": [
+						"admin",
+						"news",
+						"{{newsId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/news/:id fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01a39e74-d5d7-42e3-b78d-2b7ff02cf612",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}{{port}}/news/{{newsId}}",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"news",
+						"{{newsId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/admin/news/:id fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01a39e74-d5d7-42e3-b78d-2b7ff02cf612",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Another article about how to do Things\",\n\t\"description\": \"An article about doing things\",\n\t\"author\": \"John Doe\",\n\t\"date\": \"2020-01-01T12:00\",\n\t\"content\": \"j jbd  bdsjb db jdsb jkdsbf jdsbf jdsbf dsbj db dsbj bdsjb dsjbfjdsb kjdsbf jkdsb dsk.\",\n    \"imageUrl\":\"https://www.thisisatestimage.com/dfnudsinfi\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/admin/news/{{newsId}}",
+					"host": [
+						"{{host}}{{port}}"
+					],
 					"path": [
 						"admin",
 						"news",
@@ -896,12 +1046,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/protected/applicants",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/protected/applicants",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"protected",
 						"applicants"
@@ -911,7 +1059,7 @@
 			"response": []
 		},
 		{
-			"name": "/applicants",
+			"name": "/admin/applicants",
 			"event": [
 				{
 					"listen": "test",
@@ -940,12 +1088,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/admin/applicants",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/applicants",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"applicants"
@@ -984,12 +1130,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/admin/applicants/{{userId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/applicants/{{userId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"applicants",
@@ -1037,7 +1181,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n\t\"fileBLOB\": \"aaaaaaaaaaaaaaaaaaa\",\r\n\t\"fileType\": \"resume.pdf\",\r\n\t\"interests\": [\"design\", \"outreach\"],\r\n\t\"priorInvolvement\": \"Msibdds bdu budsb udisbf iudsb ufbdsuifdsb dsa fdsf.\",\r\n\t\"whyJoin\": \"dsoi nfio disnio isn foisdnf id nioenion noew ifninf weion  sdf.\"\r\n}",
+					"raw": "{\r\n\t\"fileBLOB\": \"aaaaaaaaaaaaaaaaaaa\",\r\n\t\"fileType\": \"resume.pdf\",\r\n\t\"interests\": [\"design\", \"outreach\"],\r\n\t\"priorInvolvement\": \"Updated prior involvement.\",\r\n\t\"whyJoin\": \"Updated why join.\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1045,12 +1189,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8090/protected/applicants",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/protected/applicants",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"protected",
 						"applicants"
@@ -1089,16 +1231,290 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/admin/applicants/{{userId}}",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/admin/applicants/{{userId}}",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"admin",
 						"applicants",
 						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/admin/applicants/:id fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01a39e74-d5d7-42e3-b78d-2b7ff02cf612",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}{{port}}/admin/applicants/{{userId}}",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"admin",
+						"applicants",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/protected/applicants/ fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01a39e74-d5d7-42e3-b78d-2b7ff02cf612",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token0}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"fileBLOB\": \"aaaaaaaaaaaaaaaaaaa\",\r\n\t\"fileType\": \"resume.pdf\",\r\n\t\"interests\": [\"design\", \"outreach\"],\r\n\t\"priorInvolvement\": \"Msibdds bdu budsb udisbf iudsb ufbdsuifdsb dsa fdsf.\",\r\n\t\"whyJoin\": \"dsoi nfio disnio isn foisdnf id nioenion noew ifninf weion  sdf.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/protected/applicants",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"protected",
+						"applicants"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/protected/logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c12e67cc-76fa-4b49-ac15-15c460def75c",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token0}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/protected/logout",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"protected",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/protected/logout fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c12e67cc-76fa-4b49-ac15-15c460def75c",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token0}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/protected/logout",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"protected",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/login regular user Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c12e67cc-76fa-4b49-ac15-15c460def75c",
+						"exec": [
+							"let token = pm.response.headers.get(\"Authorization\").split(\" \")[1];",
+							"",
+							"",
+							"pm.collectionVariables.set(\"token0\", token);",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"test.user@husky.neu.edu\",\n    \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/login",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"login"
 					]
 				}
 			},
@@ -1134,12 +1550,10 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8090/protected/users",
-					"protocol": "http",
+					"raw": "{{host}}{{port}}/protected/users",
 					"host": [
-						"localhost"
+						"{{host}}{{port}}"
 					],
-					"port": "8090",
 					"path": [
 						"protected",
 						"users"
@@ -1147,68 +1561,140 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "/login regular user fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c12e67cc-76fa-4b49-ac15-15c460def75c",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"test.user@husky.neu.edu\",\n    \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}{{port}}/login",
+					"host": [
+						"{{host}}{{port}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "002e2664-27fa-4dad-a0e9-0c156682ee6b",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "66a8b9a6-dbfe-41fa-9371-9b303e71678f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"variable": [
 		{
-			"id": "a97136e6-1496-4bbb-afcf-2e2b6ad05607",
+			"id": "ccbffd89-bda8-4608-84f3-985dd8b98672",
 			"key": "host",
-			"value": "https://localhost:",
+			"value": "http://localhost:",
 			"type": "string"
 		},
 		{
-			"id": "eae62d8b-9858-4c8d-a5f2-04b740c4cdce",
+			"id": "4a56db59-8975-4034-b51c-128749b96238",
 			"key": "port",
-			"value": "8443",
+			"value": "5000",
 			"type": "string"
 		},
 		{
-			"id": "c59780cf-a561-4a8e-8e55-86f08d7f0c27",
+			"id": "fecfa90c-ae24-429f-91c1-d0bdbbc39d5a",
 			"key": "token",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhNGY5ZjgzOC0xZTFiLTQxZDEtOTc5ZC1iNGRmMzdmNzk4ZDgiLCJpYXQiOjE1Nzk4ODkwMDUsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjIsImlzQWRtaW4iOnRydWUsImV4cCI6MTU3OTg5MjYwNX0.DJFTQ9E6cJcNEpBZSEdvVnJCS0r0XJv1QNvAzBrQtJA",
 			"type": "string"
 		},
 		{
-			"id": "094fdd20-2a47-4cee-98ef-dd2bc60428ad",
+			"id": "db94e5aa-faf6-4283-a9c0-0081640f7c1e",
 			"key": "token0",
-			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwY2I2Njc3NC0xNmU2LTQ3MzQtYWYyNy1mZDFhMWU4OGQ2YzgiLCJpYXQiOjE1ODIwNDc2NzAsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjY3LCJpc0FkbWluIjpmYWxzZSwiZXhwIjoxNTgyMDUxMjcwfQ.HyMa4FIcYXNvt3bGwDET2goyKgzvWjUio3XQScNpygA",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1YmMwNzk3My05MTJiLTRiMGUtOGNkZS1kNmEzNTliMDNkOGEiLCJpYXQiOjE1ODYzMTQzNDMsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjQwLCJpc0FkbWluIjpmYWxzZSwiZXhwIjoxNTg2MzE3OTQzfQ.UbUV4lhefw5ol6xPlHOznbKT_GAjgYoNep7ee37iUjk",
 			"type": "string"
 		},
 		{
-			"id": "9189021d-9462-4bc1-917f-72f538244bf5",
+			"id": "adbc0d30-9882-4a9b-b488-4e0739afda39",
 			"key": "token1",
-			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiMjViMjUxMi0yMmI4LTRhZGMtYjI4My04ODZhYzdjNzg2N2QiLCJpYXQiOjE1ODIwNDc2NzEsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjM1LCJpc0FkbWluIjp0cnVlLCJleHAiOjE1ODIwNTEyNzF9.EZUhsycMOQ3sPV1p73sY9npqQFkqYw5lsi5dxoYpyF8",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiZGRlNWU5ZS00M2ZhLTQ5NDgtYTlhZC1kYjcxNmVmM2VkODUiLCJpYXQiOjE1ODYzMTQzNDAsInN1YiI6ImF1dGgtdG9rZW4iLCJpc3MiOiJjNGMiLCJ1c2VySWQiOjEsImlzQWRtaW4iOnRydWUsImV4cCI6MTU4NjMxNzk0MH0.UReQVxj_BO3Yiv-SyaUM4XqB_LifDvbv9vf6xdJ99Ug",
 			"type": "string"
 		},
 		{
-			"id": "a88fb307-c551-451b-9e1f-2d6f8cc34fbf",
+			"id": "6a6837db-dc67-4101-9087-82922adec656",
 			"key": "eventId",
-			"value": 52,
+			"value": 35,
 			"type": "number"
 		},
 		{
-			"id": "2f42cae1-6a63-4a83-b9a6-0237245a1e53",
+			"id": "068f19e4-f333-4d8e-b725-76e24cb5056a",
 			"key": "userId",
-			"value": 67,
+			"value": 40,
 			"type": "number"
 		},
 		{
-			"id": "2982aa17-f5f4-49b4-b5c1-0e34c32d23d0",
+			"id": "7cae6f19-fc75-4068-a97f-00327a4b6ecc",
 			"key": "newsId",
-			"value": 17,
+			"value": 28,
 			"type": "number"
 		},
 		{
-			"id": "0e441aaa-4671-467f-aac7-df013cc9dfeb",
+			"id": "6d94db30-52f4-49dd-8e5a-a6c0b0b8ebdc",
 			"key": "eventCode",
 			"value": "1234",
 			"type": "string"
 		},
 		{
-			"id": "92176341-e537-4da1-957b-e215dbc2ea87",
+			"id": "ab6b5b92-5273-426d-9b1e-0f3faffdf473",
 			"key": "applicantId",
-			"value": null,
-			"type": "any"
+			"value": 41,
+			"type": "number"
 		}
 	],
 	"protocolProfileBehavior": {}
