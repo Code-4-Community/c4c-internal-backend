@@ -15,24 +15,9 @@ import java.util.Properties;
  */
 public class ApiMain {
   private final ApiRouter apiRouter;
-  private final Properties serverProperties = new Properties();
 
   public ApiMain(ApiRouter apiRouter) {
     this.apiRouter = apiRouter;
-    loadProperties();
-
-  }
-
-  /**
-   * Load properties from a server.properties file into a Properties field.
-   */
-  private void loadProperties() {
-    InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream("server.properties");
-    try {
-      serverProperties.load(propertiesStream);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   /**
