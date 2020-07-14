@@ -1,10 +1,9 @@
 package com.codeforcommunity.exceptions;
 
 import com.codeforcommunity.rest.subrouter.FailureHandler;
-
 import io.vertx.ext.web.RoutingContext;
 
-public class MissingHeaderException extends RuntimeException implements HandledException  {
+public class MissingHeaderException extends RuntimeException implements HandledException {
 
   private final String missingHeaderName;
 
@@ -20,7 +19,4 @@ public class MissingHeaderException extends RuntimeException implements HandledE
   public String getMissingHeaderName() {
     return missingHeaderName;
   }
-
-
 }
-

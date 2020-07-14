@@ -14,8 +14,15 @@ public class EventReturn {
   private final boolean open;
   private final String code;
 
-
-  public EventReturn(int id, String name, LocalDateTime date, boolean open, String code, String subtitle, String description, String imageUrl) {
+  public EventReturn(
+      int id,
+      String name,
+      LocalDateTime date,
+      boolean open,
+      String code,
+      String subtitle,
+      String description,
+      String imageUrl) {
     this.id = id;
     this.name = name;
     this.subtitle = subtitle;
@@ -60,6 +67,14 @@ public class EventReturn {
 
   @Override
   public String toString() {
-    return this.id + " " + this.name + " " + this.date.toString() + " " + this.open + " " + this.code;
+    return this.id
+        + " "
+        + this.name
+        + " "
+        + this.date.toString()
+        + " "
+        + this.open
+        + " "
+        + this.code;
   }
 }

@@ -1,20 +1,14 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.api.IProcessor;
-
-import java.util.HashMap;
-import java.util.List;
+import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.JacksonMapper;
-
+import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.exceptions.MalformedParameterException;
-
-import com.codeforcommunity.util.UpdatableBCrypt;
 import com.codeforcommunity.util.JWTUtils;
-
+import com.codeforcommunity.util.UpdatableBCrypt;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -22,9 +16,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class UsersAuthRouter {
 
@@ -68,9 +62,7 @@ public class UsersAuthRouter {
     return router;
   }
 
-  /**
-   * Add a handler for getting all users.
-   */
+  /** Add a handler for getting all users. */
   private void handleGetAllUsers(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     response.putHeader("content-type", "application/json");
@@ -86,10 +78,7 @@ public class UsersAuthRouter {
     end(ctx.response(), 200, userJson);
   }
 
-  /**
-   * login handler
-   */
-
+  /** login handler */
   private void handleLogin(RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
 
@@ -108,7 +97,8 @@ public class UsersAuthRouter {
     if (!flag && processor.validate(email, password)) {
       UserReturn user = processor.getUserByEmail(email).get();
 
-      String token = auth.createJWT("c4c", "auth-token", user.getId(), user.getPrivilegeLevel() > 0);
+      String token =
+          auth.createJWT("c4c", "auth-token", user.getId(), user.getPrivilegeLevel() > 0);
       response.putHeader("Authorization", "Bearer " + token);
       end(ctx.response(), 200);
     }
@@ -120,8 +110,7 @@ public class UsersAuthRouter {
     else { // if user fails to input correct password
       if (loginmap.get(email) == null) { // first failure creates entry in cache
         loginmap.put(email, 0); // initializes to 0th failure
-      } else
-        loginmap.put(email, loginmap.get(email) + 1); // increments failure counter by 1
+      } else loginmap.put(email, loginmap.get(email) + 1); // increments failure counter by 1
       if (loginmap.get(email) > 4) { // if they have failed 5 times
         // Block the user from logging in for 5 minutes
         flag = true;
@@ -134,7 +123,8 @@ public class UsersAuthRouter {
               e.printStackTrace();
             }
             flag = false;
-            loginmap.put(username1, null); // initializes to 0th failure again after the 5 minutes is over
+            loginmap.put(
+                username1, null); // initializes to 0th failure again after the 5 minutes is over
           }
         }.start();
       }
@@ -174,16 +164,31 @@ public class UsersAuthRouter {
 
     Optional<UserReturn> ret = Optional.empty();
 
-    if (email != null && firstName != null && lastName != null && encryptedPassword != null && currentYear != -1
-        && major != null && yearOfGraduation != -1 && college != null && gender != null)
-      ret = processor.addUser(email, firstName, lastName, encryptedPassword, currentYear, major, yearOfGraduation,
-          college, gender);
+    if (email != null
+        && firstName != null
+        && lastName != null
+        && encryptedPassword != null
+        && currentYear != -1
+        && major != null
+        && yearOfGraduation != -1
+        && college != null
+        && gender != null)
+      ret =
+          processor.addUser(
+              email,
+              firstName,
+              lastName,
+              encryptedPassword,
+              currentYear,
+              major,
+              yearOfGraduation,
+              college,
+              gender);
 
     String json = "";
 
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -210,8 +215,7 @@ public class UsersAuthRouter {
     Optional<UserReturn> ret = processor.getUser(id);
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -254,23 +258,36 @@ public class UsersAuthRouter {
       college = body.getString("college");
       gender = body.getString("gender");
 
-      if (!password.isEmpty())
-        encryptedPassword = bcrypt.hash(password);
+      if (!password.isEmpty()) encryptedPassword = bcrypt.hash(password);
     } catch (Exception e) {
       e.printStackTrace();
       end(ctx.response(), 400);
     }
 
     Optional<UserReturn> ret = Optional.empty();
-    if (id != 0 && email != null && firstName != null && lastName != null && encryptedPassword != null
-        && currentYear != -1 && major != null)
-      ret = processor.updateUser(id, email, firstName, lastName, encryptedPassword, currentYear, major, 
-          yearOfGraduation, college, gender);
+    if (id != 0
+        && email != null
+        && firstName != null
+        && lastName != null
+        && encryptedPassword != null
+        && currentYear != -1
+        && major != null)
+      ret =
+          processor.updateUser(
+              id,
+              email,
+              firstName,
+              lastName,
+              encryptedPassword,
+              currentYear,
+              major,
+              yearOfGraduation,
+              college,
+              gender);
 
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -291,8 +308,7 @@ public class UsersAuthRouter {
       Optional<UserReturn> ret = processor.deleteUser(id);
       String json = "";
       try {
-        if (ret.isPresent())
-          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+        if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
       } catch (JsonProcessingException e) {
         e.printStackTrace();
       }

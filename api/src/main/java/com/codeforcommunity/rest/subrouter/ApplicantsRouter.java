@@ -1,25 +1,22 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.api.IProcessor;
-
-import java.util.List;
+import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.JacksonMapper;
+import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.ApplicantReturn;
 import com.codeforcommunity.util.JWTUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class ApplicantsRouter {
 
@@ -103,14 +100,19 @@ public class ApplicantsRouter {
     }
 
     Optional<ApplicantReturn> ret = Optional.empty();
-    if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
+    if (userId != -1
+        && fileBLOB != null
+        && fileType != null
+        && interests != null
+        && priorInvolvement != null
         && whyJoin != null)
-      ret = processor.createApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+      ret =
+          processor.createApplicant(
+              userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
 
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -137,8 +139,7 @@ public class ApplicantsRouter {
     Optional<ApplicantReturn> ret = processor.getApplicant(id);
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -185,14 +186,19 @@ public class ApplicantsRouter {
       }
 
       Optional<ApplicantReturn> ret = Optional.empty();
-      if (userId != -1 && fileBLOB != null && fileType != null && interests != null && priorInvolvement != null
+      if (userId != -1
+          && fileBLOB != null
+          && fileType != null
+          && interests != null
+          && priorInvolvement != null
           && whyJoin != null)
-        ret = processor.updateApplicant(userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
+        ret =
+            processor.updateApplicant(
+                userId, fileBLOB, fileType, interests, priorInvolvement, whyJoin);
 
       String json = "";
       try {
-        if (ret.isPresent())
-          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+        if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
       } catch (JsonProcessingException e) {
         e.printStackTrace();
       }
@@ -217,8 +223,7 @@ public class ApplicantsRouter {
       String json = "";
 
       Optional<ApplicantReturn> ret = processor.deleteApplicant(userId);
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
 
       if (!json.isEmpty()) {
         end(ctx.response(), 200, json);

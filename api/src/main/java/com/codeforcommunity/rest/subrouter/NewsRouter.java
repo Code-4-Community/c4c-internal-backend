@@ -1,14 +1,11 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.api.IProcessor;
-
-import java.util.List;
+import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.JacksonMapper;
+import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.NewsReturn;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -16,12 +13,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class NewsRouter {
 
@@ -92,13 +87,17 @@ public class NewsRouter {
       end(ctx.response(), 400);
     }
     Optional<NewsReturn> ret = Optional.empty();
-    if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
+    if (title != null
+        && description != null
+        && imageUrl != null
+        && author != null
+        && date != null
+        && content != null)
       ret = processor.createNews(title, description, imageUrl, author, date, content);
 
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -125,8 +124,7 @@ public class NewsRouter {
     Optional<NewsReturn> ret = processor.getNews(id);
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -166,13 +164,17 @@ public class NewsRouter {
     }
 
     Optional<NewsReturn> ret = Optional.empty();
-    if (title != null && description != null && imageUrl != null && author != null && date != null && content != null)
+    if (title != null
+        && description != null
+        && imageUrl != null
+        && author != null
+        && date != null
+        && content != null)
       ret = processor.updateNews(id, title, description, imageUrl, author, date, content);
 
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -193,8 +195,7 @@ public class NewsRouter {
       Optional<NewsReturn> ret = processor.deleteNews(id);
       String json = "";
       try {
-        if (ret.isPresent())
-          json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+        if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
       } catch (JsonProcessingException e) {
         e.printStackTrace();
       }

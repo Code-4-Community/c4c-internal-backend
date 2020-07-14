@@ -1,17 +1,13 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.api.IProcessor;
-
-import java.util.List;
+import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.JacksonMapper;
-
+import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.dto.EventReturn;
 import com.codeforcommunity.dto.UserReturn;
 import com.codeforcommunity.util.JWTUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -19,12 +15,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class EventsRouter {
 
@@ -109,7 +103,12 @@ public class EventsRouter {
     }
 
     Optional<EventReturn> result = Optional.empty();
-    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null
+    if (name != null
+        && date != null
+        && subtitle != null
+        && description != null
+        && imageUrl != null
+        && open != null
         && eventCode != null)
       result = processor.createEvent(name, subtitle, description, imageUrl, date, open, eventCode);
 
@@ -117,8 +116,7 @@ public class EventsRouter {
 
       String json = "";
       try {
-        if (result.isPresent())
-          json = JacksonMapper.getMapper().writeValueAsString(result.get());
+        if (result.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(result.get());
       } catch (JsonProcessingException e) {
         end(ctx.response(), 400);
       }
@@ -145,8 +143,7 @@ public class EventsRouter {
     Optional<EventReturn> ret = processor.getEvent(id);
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
     }
 
@@ -187,14 +184,18 @@ public class EventsRouter {
     }
 
     Optional<EventReturn> ret = Optional.empty();
-    if (name != null && date != null && subtitle != null && description != null && imageUrl != null && open != null
+    if (name != null
+        && date != null
+        && subtitle != null
+        && description != null
+        && imageUrl != null
+        && open != null
         && eventCode != null)
       ret = processor.updateEvent(id, name, subtitle, description, imageUrl, date, open, eventCode);
 
     String json = "";
     try {
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
@@ -216,8 +217,7 @@ public class EventsRouter {
       String json = "";
 
       Optional<EventReturn> ret = processor.deleteEvent(id);
-      if (ret.isPresent())
-        json = JacksonMapper.getMapper().writeValueAsString(ret.get());
+      if (ret.isPresent()) json = JacksonMapper.getMapper().writeValueAsString(ret.get());
 
       if (!json.isEmpty()) {
         end(ctx.response(), 200, json);
@@ -246,8 +246,7 @@ public class EventsRouter {
       end(ctx.response(), 400);
     }
 
-    if (!eventCode.isEmpty() && userId != -1)
-      success = processor.attendEvent(eventCode, userId);
+    if (!eventCode.isEmpty() && userId != -1) success = processor.attendEvent(eventCode, userId);
 
     if (success) {
       end(ctx.response(), 200);

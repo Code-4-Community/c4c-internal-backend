@@ -13,7 +13,14 @@ public class NewsReturn {
   private final String date;
   private final String content;
 
-  public NewsReturn(int id, String title, String description, String author, LocalDateTime date, String content, String imageUrl) {
+  public NewsReturn(
+      int id,
+      String title,
+      String description,
+      String author,
+      LocalDateTime date,
+      String content,
+      String imageUrl) {
     this.id = id;
     this.title = title;
     this.description = description;
@@ -35,7 +42,7 @@ public class NewsReturn {
     return this.description;
   }
 
-  public String getImageUrl(){
+  public String getImageUrl() {
     return this.imageUrl;
   }
 
@@ -53,7 +60,16 @@ public class NewsReturn {
 
   @Override
   public String toString() {
-    return this.id + " " + this.title + " " + this.description + " " + this.author + " " + this.date.toString() + " "
+    return this.id
+        + " "
+        + this.title
+        + " "
+        + this.description
+        + " "
+        + this.author
+        + " "
+        + this.date.toString()
+        + " "
         + this.content;
   }
 }
