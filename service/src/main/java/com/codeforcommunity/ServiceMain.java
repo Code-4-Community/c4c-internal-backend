@@ -2,6 +2,7 @@ package com.codeforcommunity;
 
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.processor.ProcessorImpl;
+import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.rest.ApiRouter;
 import com.codeforcommunity.util.JWTUtils;
 
@@ -14,7 +15,7 @@ import java.util.Properties;
 
 public class ServiceMain {
   private DSLContext db;
-  private final Properties dbProperties = new Properties();
+  private final Properties dbProperties = PropertiesLoader.getDbProperties();
 
   public static void main(String[] args) {
     ServiceMain serviceMain = new ServiceMain();
@@ -25,21 +26,8 @@ public class ServiceMain {
    * Start the server, get everything going.
    */
   public void initialize() {
-    loadProperties();
     connectDb();
     initializeServer();
-  }
-
-  /**
-   * Load properties from a db.properties file into a Properties field.
-   */
-  private void loadProperties() {
-    InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream("db.properties");
-    try {
-      dbProperties.load(propertiesStream);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   /**
@@ -63,8 +51,8 @@ public class ServiceMain {
    */
   private void initializeServer() {
     IProcessor processor = new ProcessorImpl(this.db);
-    JWTUtils auth = new JWTUtils(dbProperties.getProperty("jwt.secret"),
-        Integer.parseInt(dbProperties.getProperty("jwt.duration")));
+    JWTUtils auth = new JWTUtils(PropertiesLoader.getJwtProperties().getProperty("secret_key"),
+        Integer.parseInt(PropertiesLoader.getExpirationProperties().getProperty("ms_access_expiration")));
     ApiRouter router = new ApiRouter(processor, auth);
 
     startApiServer(router);
