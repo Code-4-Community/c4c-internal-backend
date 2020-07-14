@@ -14,6 +14,7 @@ import java.util.Properties;
  * The main point for the API.
  */
 public class ApiMain {
+  private static final int SERVER_PORT = 8081;
   private final ApiRouter apiRouter;
 
   public ApiMain(ApiRouter apiRouter) {
@@ -30,9 +31,8 @@ public class ApiMain {
 
     HttpServer server = vertx.createHttpServer(serverOptions);
     Router router = apiRouter.initializeRouter(vertx);
-    int port = 5000;
 
-    System.out.println("Server listening on port " + port);
-    server.requestHandler(router).listen(port);
+    System.out.println("Server listening on port " + SERVER_PORT);
+    server.requestHandler(router).listen(SERVER_PORT);
   }
 }
