@@ -40,32 +40,15 @@ $ CREATE DATABASE c4cneu-db;
 
 ### Compiling & Running
 
-Update the properties file in `/persist/src/main/resources/db.properties` to contain your database connection information
-
-```
-database.driver = org.postgresql.Driver
-database.url = jdbc:postgresql://localhost:5432/c4cneu-db?autoreconnect=true
-database.username = postgres
-database.password = root
-jwt.secret = SUPER_SECRET_KEY
-jwt.duration = 3600000
-
-```
-
-Update the properties file in `/persist/src/main/resources/server.properties` to contain the port the server should run on
-
-```
-server.port = 5000
-```
+Update the `database.username` and `database.password` properties in the file in `./common/src/main/resources/db.properties` to contain your database connection information.
 
 To compile and run:
 
-```sh
-$ cd c4c-internal-backend
-$ sh scripts/build.sh
+```bash
+./scripts/build.sh
 ```
 
-The application should be running on https://localhost:5000
+The application should be running on https://localhost:8081
 
 ### Testing
 
