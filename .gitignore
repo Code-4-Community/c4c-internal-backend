@@ -3,26 +3,10 @@
 *.iml
 *.class
 *.lst
-pom.properties
+*.properties
 *.html
 *.jar
-.project
-.settings
-
-# Persist Files
-persist/.settings
-persist/.project
-persist/.classpath
-persist/.gitignore
-
-# Api Files
-api/.settings
-api/.project
-api/.classpath
-api/.gitignore
-.DS_Store
-
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+*.project
+*.settings
+*.classpath
+*.DS_Store

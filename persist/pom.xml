@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>backend-scaffold</artifactId>
     <groupId>com.codeforcommunity</groupId>
@@ -28,7 +30,7 @@
             </goals>
             <configuration>
               <files>
-                <file>src\main\resources\db.properties</file>
+                <file>../common/src/main/resources/properties/db.properties</file>
               </files>
             </configuration>
           </execution>
@@ -67,7 +69,7 @@
                      - ? matches a single character in a directory / file name -->
                 <property>
                   <key>scripts</key>
-                  <value>**/main/resources/db/migration/*.sql</value>
+                  <value>persist/src/main/resources/db/migration/*.sql</value>
                 </property>
 
                 <!-- The sort order of the scripts within a directory, where:
@@ -118,11 +120,11 @@
           <user>${database.username}</user>
           <password>${database.password}</password>
 
-          <!--   <schemas>
-            <schema>scaffold</schema>
-          </schemas> -->
+          <schemas>
+            <schema>public</schema>
+          </schemas>
           <encoding>ISO-8859-1</encoding>
-          <cleanOnValidationError>true</cleanOnValidationError>
+          <cleanDisabled>true</cleanDisabled>
         </configuration>
         <executions>
           <execution>
@@ -140,6 +142,12 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>com.codeforcommunity</groupId>
+      <artifactId>common</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
     <dependency>
       <groupId>org.jooq</groupId>
       <artifactId>jooq-meta-extensions</artifactId>

@@ -2,5 +2,3 @@ database.driver = org.postgresql.Driver
 database.url = jdbc:postgresql://localhost:5432/c4cneu-db?autoreconnect=true
 database.username = postgres
 database.password = root
-jwt.secret = SECRET_KEY
-jwt.duration = 3600000

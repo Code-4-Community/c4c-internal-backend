@@ -14,25 +14,11 @@ import java.util.Properties;
  * The main point for the API.
  */
 public class ApiMain {
+  private static final int SERVER_PORT = 8081;
   private final ApiRouter apiRouter;
-  private final Properties serverProperties = new Properties();
 
   public ApiMain(ApiRouter apiRouter) {
     this.apiRouter = apiRouter;
-    loadProperties();
-
-  }
-
-  /**
-   * Load properties from a server.properties file into a Properties field.
-   */
-  private void loadProperties() {
-    InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream("server.properties");
-    try {
-      serverProperties.load(propertiesStream);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   /**
@@ -45,9 +31,8 @@ public class ApiMain {
 
     HttpServer server = vertx.createHttpServer(serverOptions);
     Router router = apiRouter.initializeRouter(vertx);
-    int port = Integer.parseInt(serverProperties.getProperty("server.port"));
 
-    System.out.println("Server listening on port " + port);
-    server.requestHandler(router).listen(port);
+    System.out.println("Server listening on port " + SERVER_PORT);
+    server.requestHandler(router).listen(SERVER_PORT);
   }
 }
