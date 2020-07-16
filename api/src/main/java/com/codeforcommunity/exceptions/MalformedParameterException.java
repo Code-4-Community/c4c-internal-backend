@@ -1,13 +1,11 @@
 package com.codeforcommunity.exceptions;
 
 import com.codeforcommunity.rest.subrouter.FailureHandler;
-
 import io.vertx.ext.web.RoutingContext;
 
 public class MalformedParameterException extends RuntimeException implements HandledException {
 
   private final String parameterName;
-
 
   public MalformedParameterException(String parameterName) {
     this.parameterName = parameterName;

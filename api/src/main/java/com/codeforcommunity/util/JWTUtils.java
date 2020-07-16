@@ -1,18 +1,14 @@
 package com.codeforcommunity.util;
 
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.vertx.core.http.HttpServerRequest;
-
+import java.security.Key;
+import java.util.Date;
+import java.util.UUID;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
-
-import io.jsonwebtoken.*;
-
-import java.util.Date;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Claims;
-import java.util.UUID;
 
 public class JWTUtils {
 
@@ -44,8 +40,15 @@ public class JWTUtils {
     Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
     // Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(now).setSubject(subject)
-        .setIssuer(issuer).claim("userId", userId).claim("isAdmin", isAdmin).signWith(signatureAlgorithm, signingKey);
+    JwtBuilder builder =
+        Jwts.builder()
+            .setId(UUID.randomUUID().toString())
+            .setIssuedAt(now)
+            .setSubject(subject)
+            .setIssuer(issuer)
+            .claim("userId", userId)
+            .claim("isAdmin", isAdmin)
+            .signWith(signatureAlgorithm, signingKey);
 
     // if it has been specified, let's add the expiration
     long expMillis = nowMillis + TOKEN_DURATION;
@@ -69,8 +72,7 @@ public class JWTUtils {
     String jwt = request.headers().get("Authorization");
     boolean isNullOrEmpty = jwt == null || jwt.isEmpty();
 
-    if (isNullOrEmpty)
-      return null;
+    if (isNullOrEmpty) return null;
 
     Claims c = decodeJWT(jwt.split(" ")[1]);
 
@@ -79,7 +81,10 @@ public class JWTUtils {
 
   public Claims decodeJWT(String jwt) {
     try {
-      return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(JWT_KEY)).parseClaimsJws(jwt).getBody();
+      return Jwts.parser()
+          .setSigningKey(DatatypeConverter.parseBase64Binary(JWT_KEY))
+          .parseClaimsJws(jwt)
+          .getBody();
     } catch (Exception e) {
       return null;
     }

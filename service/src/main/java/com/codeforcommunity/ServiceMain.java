@@ -5,13 +5,9 @@ import com.codeforcommunity.processor.ProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.rest.ApiRouter;
 import com.codeforcommunity.util.JWTUtils;
-
+import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 public class ServiceMain {
   private DSLContext db;
@@ -22,17 +18,13 @@ public class ServiceMain {
     serviceMain.initialize();
   }
 
-  /**
-   * Start the server, get everything going.
-   */
+  /** Start the server, get everything going. */
   public void initialize() {
     connectDb();
     initializeServer();
   }
 
-  /**
-   * Connect to the database and create a DSLContext so jOOQ can interact with it.
-   */
+  /** Connect to the database and create a DSLContext so jOOQ can interact with it. */
   private void connectDb() {
     // This block ensures that the MySQL driver is loaded in the classpath
     try {
@@ -41,26 +33,28 @@ public class ServiceMain {
       e.printStackTrace();
     }
 
-    DSLContext db = DSL.using(dbProperties.getProperty("database.url"), dbProperties.getProperty("database.username"),
-        dbProperties.getProperty("database.password"));
+    DSLContext db =
+        DSL.using(
+            dbProperties.getProperty("database.url"),
+            dbProperties.getProperty("database.username"),
+            dbProperties.getProperty("database.password"));
     this.db = db;
   }
 
-  /**
-   * Initialize the server and get all the supporting classes going.
-   */
+  /** Initialize the server and get all the supporting classes going. */
   private void initializeServer() {
     IProcessor processor = new ProcessorImpl(this.db);
-    JWTUtils auth = new JWTUtils(PropertiesLoader.getJwtProperties().getProperty("secret_key"),
-        Integer.parseInt(PropertiesLoader.getExpirationProperties().getProperty("ms_access_expiration")));
+    JWTUtils auth =
+        new JWTUtils(
+            PropertiesLoader.getJwtProperties().getProperty("secret_key"),
+            Integer.parseInt(
+                PropertiesLoader.getExpirationProperties().getProperty("ms_access_expiration")));
     ApiRouter router = new ApiRouter(processor, auth);
 
     startApiServer(router);
   }
 
-  /**
-   * Start up the actual API server that will listen for requests.
-   */
+  /** Start up the actual API server that will listen for requests. */
   private void startApiServer(ApiRouter router) {
     ApiMain apiMain = new ApiMain(router);
     apiMain.startHttpsServerApi();

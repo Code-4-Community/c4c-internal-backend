@@ -2,13 +2,12 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IProcessor;
 import com.codeforcommunity.util.JWTUtils;
+import io.jsonwebtoken.Claims;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.jsonwebtoken.Claims;
-
 import io.vertx.ext.web.handler.BodyHandler;
 
 public class CommonRouter {
@@ -64,8 +63,7 @@ public class CommonRouter {
   public boolean isAuthorizedUser(HttpServerRequest request) {
     try {
       Claims c = auth.getClaims(request);
-      if (c == null || isBlacklistedToken(c.getId()))
-        return false;
+      if (c == null || isBlacklistedToken(c.getId())) return false;
 
       return c.getExpiration().getTime() > System.currentTimeMillis();
     } catch (Exception e) {

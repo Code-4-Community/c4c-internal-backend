@@ -14,8 +14,18 @@ public class UserReturn {
   private final String college;
   private final String gender;
 
-  public UserReturn(int id, String email, String firstName, String lastName, String _password, int year, String major,
-      int privilegeLevel, int yearOfGraduation, String college, String gender) {
+  public UserReturn(
+      int id,
+      String email,
+      String firstName,
+      String lastName,
+      String _password,
+      int year,
+      String major,
+      int privilegeLevel,
+      int yearOfGraduation,
+      String college,
+      String gender) {
     this.id = id;
     this.email = email;
     this.firstName = firstName;
@@ -70,7 +80,24 @@ public class UserReturn {
 
   @Override
   public String toString() {
-    return this.id + " " + this.email + " " + this.firstName + " " + this.lastName + " " + this.year + " "
-        + this.yearOfGraduation  + " " + this.major + " " + this.college + " " + this.gender + " " + this.privilegeLevel;
+    return this.id
+        + " "
+        + this.email
+        + " "
+        + this.firstName
+        + " "
+        + this.lastName
+        + " "
+        + this.year
+        + " "
+        + this.yearOfGraduation
+        + " "
+        + this.major
+        + " "
+        + this.college
+        + " "
+        + this.gender
+        + " "
+        + this.privilegeLevel;
   }
 }

@@ -11,8 +11,14 @@ public class ApplicantReturn {
   private final String priorInvolvement;
   private final String whyJoin;
 
-  public ApplicantReturn(int id, int userId, byte[] fileBLOB, String fileType, String[] interests,
-      String priorInvolvement, String whyJoin) {
+  public ApplicantReturn(
+      int id,
+      int userId,
+      byte[] fileBLOB,
+      String fileType,
+      String[] interests,
+      String priorInvolvement,
+      String whyJoin) {
     this.id = id;
     this.userId = userId;
     this.fileBLOB = fileBLOB;
@@ -20,7 +26,6 @@ public class ApplicantReturn {
     this.interests = interests;
     this.priorInvolvement = priorInvolvement;
     this.whyJoin = whyJoin;
-
   }
 
   public int getId() {
@@ -53,6 +58,14 @@ public class ApplicantReturn {
 
   @Override
   public String toString() {
-    return this.userId + " " + this.fileType + " " + this.interests + " " + this.priorInvolvement + " " + this.whyJoin;
+    return this.userId
+        + " "
+        + this.fileType
+        + " "
+        + this.interests
+        + " "
+        + this.priorInvolvement
+        + " "
+        + this.whyJoin;
   }
 }

@@ -5,9 +5,7 @@ import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
-
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
-
 import io.vertx.ext.web.RoutingContext;
 
 public class FailureHandler {
@@ -27,7 +25,8 @@ public class FailureHandler {
   }
 
   public void handleMissingParameter(RoutingContext ctx, MissingParameterException e) {
-    String message = String.format("Missing required path parameter: %s", e.getMissingParameterName());
+    String message =
+        String.format("Missing required path parameter: %s", e.getMissingParameterName());
     end(ctx, message, 400);
   }
 
@@ -49,8 +48,10 @@ public class FailureHandler {
   public void handleCreateUser(RoutingContext ctx, CreateUserException exception) {
     CreateUserException.UsedField reason = exception.getUsedField();
 
-    String reasonMessage = reason.equals(CreateUserException.UsedField.BOTH) ? "email and user name"
-        : reason.toString();
+    String reasonMessage =
+        reason.equals(CreateUserException.UsedField.BOTH)
+            ? "email and user name"
+            : reason.toString();
 
     String message = String.format("Error creating new user, given %s already used", reasonMessage);
 
@@ -85,5 +86,4 @@ public class FailureHandler {
   private void end(RoutingContext ctx, String message, int statusCode) {
     ctx.response().setStatusCode(statusCode).end(message);
   }
-
 }
